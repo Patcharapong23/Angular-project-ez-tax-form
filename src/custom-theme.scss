@@ -1,0 +1,85 @@
+@use "@angular/material" as mat;
+
+// 1) สร้าง config ของฟอนต์ (API เดิมที่เสถียร)
+$my-typography: mat.define-typography-config(
+  $font-family:
+    'Noto Sans Thai, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif',
+);
+
+// 2) ส่งฟอนต์เข้า core (สำคัญ)
+@include mat.core($my-typography);
+
+// 3) พาเลตสี (ตัวอย่าง: indigo/pink/warn)
+$material-tic-tac-toe-primary: mat.define-palette(mat.$indigo-palette);
+$material-tic-tac-toe-accent: mat.define-palette(
+  mat.$pink-palette,
+  A200,
+  A100,
+  A400
+);
+$material-tic-tac-toe-warn: mat.define-palette(mat.$red-palette);
+
+// 4) ธีมหลัก (ไม่ต้องใส่ typography ตรงนี้)
+$material-tic-tac-toe-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $material-tic-tac-toe-primary,
+      accent: $material-tic-tac-toe-accent,
+      warn: $material-tic-tac-toe-warn,
+    ),
+  )
+);
+
+// 5) ใช้ธีมกับทุกคอมโพเนนต์
+@include mat.all-component-themes($material-tic-tac-toe-theme);
+
+/* ช่องกรอกแบบ outlined ให้เป็น 'ดำ' ทั้งปกติ/โฮเวอร์/โฟกัส */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: #000;
+  --mdc-outlined-text-field-hover-outline-color: #000;
+  --mdc-outlined-text-field-focus-outline-color: #000;
+
+  --mdc-outlined-text-field-label-text-color: #000;
+  --mdc-outlined-text-field-focus-label-text-color: #000;
+
+  --mdc-outlined-text-field-caret-color: #000;
+}
+
+/* กันกรณีธีมยังเซ็ต border ด้วย border-color เดิม */
+.mat-mdc-form-field .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-color: #000 !important;
+}
+
+/* ทั้งรุ่นที่ใช้ span และรุ่นที่เติม ::after */
+.mat-mdc-form-field-required-marker {
+  display: none !important;
+}
+.mdc-text-field--required .mdc-floating-label::after {
+  content: "" !important;
+}
+/* ไม่ให้ notch ตัดหัววรรณยุกต์ */
+.mdc-notched-outline__notch {
+  overflow: visible !important;
+}
+
+/* เพิ่มระยะ label ภาษาไทย */
+.mat-mdc-floating-label,
+.mdc-floating-label {
+  line-height: 1.8 !important; /* สูงขึ้นกว่าปกติ */
+  transform: translateY(1px); /* ดันลงนิดหน่อยกันชนขอบบน */
+  font-family: "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, sans-serif !important;
+}
+
+/* เว้นพื้นที่ด้านในของช่อง */
+.mat-mdc-form-field-infix {
+  padding-top: 20px !important;
+  padding-bottom: 8px !important;
+}
+
+/* มุมโค้งช่องกรอก (ถ้าต้องการ) */
+.mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}

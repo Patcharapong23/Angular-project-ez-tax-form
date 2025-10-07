@@ -1,0 +1,64 @@
+html,
+body {
+  font-family: "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, sans-serif;
+}
+
+/* ฟอนต์กับวรรณยุกต์ */
+.mdc-notched-outline__notch {
+  overflow: visible !important;
+}
+.mdc-floating-label,
+.mat-mdc-floating-label {
+  line-height: 1.6 !important;
+  font-family: "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", Roboto,
+    Arial, sans-serif !important;
+}
+
+/* ขนาดช่องมาตรฐานและกันยุบ */
+.mat-mdc-form-field-infix {
+  min-height: 56px !important;
+  padding-top: 16px !important;
+  padding-bottom: 8px !important;
+}
+
+/* สีเส้นกรอบ/ตัวอักษรสำหรับ outlined text field */
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-container-color: #fff;
+  --mdc-outlined-text-field-input-text-color: #111;
+
+  --mdc-outlined-text-field-outline-color: #d7d7d7; /* idle */
+  --mdc-outlined-text-field-hover-outline-color: #bdbdbd;
+  --mdc-outlined-text-field-focus-outline-color: #000; /* focus */
+
+  --mdc-outlined-text-field-label-text-color: rgba(0, 0, 0, 0.6);
+  --mdc-outlined-text-field-focus-label-text-color: #000;
+  --mdc-outlined-text-field-caret-color: #000;
+}
+
+/* บังคับให้ใช้สีด้านบนจริง ๆ */
+.mat-mdc-form-field .mdc-notched-outline__leading,
+.mat-mdc-form-field .mdc-notched-outline__notch,
+.mat-mdc-form-field .mdc-notched-outline__trailing {
+  border-color: var(--mdc-outlined-text-field-outline-color) !important;
+}
+.mat-mdc-form-field:hover .mdc-notched-outline__leading,
+.mat-mdc-form-field:hover .mdc-notched-outline__notch,
+.mat-mdc-form-field:hover .mdc-notched-outline__trailing {
+  border-color: var(--mdc-outlined-text-field-hover-outline-color) !important;
+}
+.mat-mdc-form-field.mdc-text-field--focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mdc-text-field--focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: var(--mdc-outlined-text-field-focus-outline-color) !important;
+}
+
+/* มุมโค้ง */
+.mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+
+/* ซ่อนดอกจันทร์ทั้งแอป (ถ้าต้องการ) */
+.mat-mdc-form-field-required-marker {
+  display: none !important;
+}

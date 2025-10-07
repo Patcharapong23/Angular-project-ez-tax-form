@@ -1,0 +1,51 @@
+<div class="auth-shell">
+  <div class="auth-card">
+    <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
+
+    <h1 class="title">ล็อกอินเข้าสู่ระบบ</h1>
+    <p class="subtitle">กรุณาใส่ชื่อข้อมูลสำหรับการเข้าสู่ระบบ</p>
+
+    <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
+      <mat-form-field
+        appearance="outline"
+        class="full-width"
+        [hideRequiredMarker]="true"
+      >
+        <mat-label>ชื่อผู้ใช้</mat-label>
+        <input matInput name="username" [(ngModel)]="username" required />
+      </mat-form-field>
+
+      <mat-form-field
+        appearance="outline"
+        class="full-width"
+        [hideRequiredMarker]="true"
+      >
+        <mat-label>รหัสผ่าน</mat-label>
+        <input
+          matInput
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          required
+        />
+      </mat-form-field>
+
+      <div class="forgot-wrapper">
+        <a class="link forgot" routerLink="/forgot-password">ลืมรหัสผ่าน?</a>
+      </div>
+      <button
+        mat-raised-button
+        class="full-width button"
+        type="submit"
+        [disabled]="!loginForm.form.valid"
+      >
+        เข้าสู่ระบบ
+      </button>
+    </form>
+
+    <p class="foot-note">
+      มีบัญชีใช้งานแล้วหรือยัง?
+      <a class="link" routerLink="/register">สมัครบัญชีใหม่</a>
+    </p>
+  </div>
+</div>
