@@ -1,19 +1,9 @@
-<<<<<<< HEAD
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
-{
-  "compileOnSave": false,
-  "compilerOptions": {
-    "baseUrl": "./",
-    "ignoreDeprecations": "6.0",
-
-=======
 {
   "compileOnSave": false,
   "compilerOptions": {
     "target": "es2017",
     "module": "es2020",
     "moduleResolution": "node",
->>>>>>> c77c0a8 (Day 1)
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -25,14 +15,7 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-<<<<<<< HEAD
-    "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2017",
-    "module": "es2020",
-=======
-    "importHelpers": true,
->>>>>>> c77c0a8 (Day 1)
     "lib": ["es2020", "dom"]
   },
   "angularCompilerOptions": {
