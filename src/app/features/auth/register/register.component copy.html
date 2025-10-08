@@ -1,0 +1,343 @@
+<div class="auth-shell">
+  <div class="auth-card">
+    <!-- โลโก้ -->
+    <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
+
+    <h1 class="title">สมัครสมาชิก</h1>
+    <p class="subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีใหม่</p>
+
+    <form class="reg-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- ===================== STEP 1 : บัญชีผู้ใช้ ===================== -->
+      <div
+        class="step"
+        [class.active]="step === 1"
+        [attr.aria-hidden]="step !== 1"
+      >
+        <!-- ชื่อ-นามสกุล -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          floatLabel="auto"
+          subscriptSizing="dynamic"
+          [hideRequiredMarker]="true"
+        >
+          <mat-label>ชื่อ-นามสกุล</mat-label>
+          <input
+            matInput
+            formControlName="fullName"
+            autocomplete="name"
+            spellcheck="false"
+          />
+          <mat-error *ngIf="fullName?.hasError('required') && fullName?.touched"
+            >กรุณากรอกชื่อ-นามสกุล</mat-error
+          >
+          <mat-error
+            *ngIf="fullName?.hasError('minlength') && fullName?.touched"
+            >อย่างน้อย 2 ตัวอักษร</mat-error
+          >
+        </mat-form-field>
+
+        <!-- อีเมล -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          floatLabel="auto"
+          subscriptSizing="dynamic"
+          [hideRequiredMarker]="true"
+        >
+          <mat-label>อีเมล</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            inputmode="email"
+            spellcheck="false"
+          />
+          <mat-error *ngIf="email?.hasError('required') && email?.touched"
+            >กรุณากรอกอีเมล</mat-error
+          >
+          <mat-error *ngIf="email?.hasError('email') && email?.touched"
+            >รูปแบบอีเมลไม่ถูกต้อง</mat-error
+          >
+        </mat-form-field>
+
+        <!-- กลุ่มรหัสผ่าน -->
+        <div formGroupName="passwordGroup" class="pw-grid">
+          <mat-form-field
+            appearance="outline"
+            class="full-width"
+            floatLabel="auto"
+            subscriptSizing="dynamic"
+            [hideRequiredMarker]="true"
+          >
+            <mat-label>รหัสผ่าน</mat-label>
+            <input
+              matInput
+              [type]="hidePass ? 'password' : 'text'"
+              formControlName="password"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hidePass = !hidePass"
+              aria-label="แสดง/ซ่อนรหัสผ่าน"
+            >
+              <mat-icon
+                >{{ hidePass ? 'visibility_off' : 'visibility' }}</mat-icon
+              >
+            </button>
+            <mat-hint>อย่างน้อย 6 ตัวอักษร</mat-hint>
+            <mat-error
+              *ngIf="password?.hasError('required') && password?.touched"
+              >กรุณากรอกรหัสผ่าน</mat-error
+            >
+            <mat-error
+              *ngIf="password?.hasError('minlength') && password?.touched"
+              >อย่างน้อย 6 ตัวอักษร</mat-error
+            >
+          </mat-form-field>
+
+          <!-- แถบความแข็งแรง (ออปชัน) -->
+          <div class="pw-meter">
+            <div class="bar" [style.width.%]="passwordScore * 100"></div>
+          </div>
+
+          <ul class="pw-req">
+            <li [class.ok]="rules.minLen">
+              <mat-icon class="ic"
+                >{{ rules.minLen ? 'check_circle' : 'radio_button_unchecked'
+                }}</mat-icon
+              >
+              ตัวอักษรภาษาอังกฤษอย่างน้อย 14 ตัวอักษร
+            </li>
+            <li [class.ok]="rules.hasDigit">
+              <mat-icon class="ic"
+                >{{ rules.hasDigit ? 'check_circle' : 'radio_button_unchecked'
+                }}</mat-icon
+              >
+              ตัวเลข อย่างน้อย 1 ตัวอักษร เช่น 0-9
+            </li>
+            <li [class.ok]="rules.hasSpecial">
+              <mat-icon class="ic"
+                >{{ rules.hasSpecial ? 'check_circle' : 'radio_button_unchecked'
+                }}</mat-icon
+              >
+              อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น !@#$
+            </li>
+          </ul>
+
+          <mat-form-field
+            appearance="outline"
+            class="full-width"
+            floatLabel="auto"
+            subscriptSizing="dynamic"
+            [hideRequiredMarker]="true"
+          >
+            <mat-label>ยืนยันรหัสผ่าน</mat-label>
+            <input
+              matInput
+              [type]="hideConfirm ? 'password' : 'text'"
+              formControlName="confirmPassword"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideConfirm = !hideConfirm"
+              aria-label="แสดง/ซ่อนยืนยันรหัสผ่าน"
+            >
+              <mat-icon
+                >{{ hideConfirm ? 'visibility_off' : 'visibility' }}</mat-icon
+              >
+            </button>
+            <mat-error
+              *ngIf="confirmPassword?.hasError('required') && confirmPassword?.touched"
+              >กรุณายืนยันรหัสผ่าน</mat-error
+            >
+            <mat-error
+              *ngIf="passwordGroup?.hasError('passwordsNotMatch') && (confirmPassword?.dirty || confirmPassword?.touched)"
+            >
+              รหัสผ่านไม่ตรงกัน
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- ปุ่มไป STEP 2 -->
+        <button
+          class="button"
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="onContinue()"
+        >
+          ดำเนินการต่อ
+        </button>
+
+        <!-- ปุ่มเดิมของคุณ (เก็บไว้ ไม่ให้หาย) -->
+        <!--
+        <button
+          class="button"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="form.invalid">
+          สมัครสมาชิก
+        </button>
+        -->
+      </div>
+
+      <!-- ===================== STEP 2 : ข้อมูลบริษัท ===================== -->
+      <div
+        class="step"
+        [class.active]="step === 2"
+        [attr.aria-hidden]="step !== 2"
+        formGroupName="company"
+      >
+        <!-- อัปโหลดโลโก้ -->
+        <div class="logo-uploader">
+          <div class="logo-box">
+            <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="logo" />
+            <div *ngIf="!logoPreviewUrl" class="placeholder">300 × 300</div>
+          </div>
+          <label class="logo-choose">
+            <input
+              type="file"
+              accept="image/*"
+              (change)="onLogoSelected($event)"
+              hidden
+            />
+            Choose Logo File
+          </label>
+          <div class="logo-note">ขนาดแนะนำ 300×300 px และไม่เกิน 10 MB</div>
+        </div>
+
+        <h3 class="section">ข้อมูลบริษัท <span class="req">*</span></h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ชื่อบริษัท</mat-label>
+          <input matInput formControlName="companyName" />
+          <mat-error *ngIf="company.get('companyName')?.hasError('required')"
+            >กรุณากรอกชื่อบริษัท</mat-error
+          >
+        </mat-form-field>
+
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>รหัสสาขา 5 หลัก</mat-label>
+            <input matInput formControlName="branchCode" maxlength="5" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>ชื่อสาขา</mat-label>
+            <input matInput formControlName="branchName" />
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>เลขประจำตัวผู้เสียภาษีอากร 13 หลัก</mat-label>
+          <input matInput formControlName="taxId" maxlength="13" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>เบอร์ติดต่อธุรกิจ</mat-label>
+          <input matInput formControlName="businessPhone" />
+        </mat-form-field>
+
+        <h3 class="section">ที่อยู่ (ภาษาไทย) <span class="req">*</span></h3>
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          formGroupName="addressTh"
+        >
+          <mat-label>เลขที่อาคาร</mat-label>
+          <input matInput formControlName="buildingNo" />
+        </mat-form-field>
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          formGroupName="addressTh"
+        >
+          <mat-label>ซอย/ถนน</mat-label>
+          <input matInput formControlName="street" />
+        </mat-form-field>
+
+        <div class="grid-3" formGroupName="addressTh">
+          <mat-form-field appearance="outline">
+            <mat-label>จังหวัด</mat-label>
+            <mat-select formControlName="province">
+              <mat-option *ngFor="let p of provinces" [value]="p"
+                >{{ p }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>เขต/อำเภอ</mat-label>
+            <mat-select formControlName="district">
+              <mat-option *ngFor="let d of districts" [value]="d"
+                >{{ d }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>แขวง/ตำบล</mat-label>
+            <mat-select formControlName="subdistrict">
+              <mat-option *ngFor="let s of subdistricts" [value]="s"
+                >{{ s }}</mat-option
+              >
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          formGroupName="addressTh"
+        >
+          <mat-label>รหัสไปรษณีย์</mat-label>
+          <input matInput formControlName="postalCode" maxlength="5" />
+        </mat-form-field>
+
+        <h3 class="section">ที่อยู่ (ภาษาอังกฤษ) <span class="req">*</span></h3>
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          formGroupName="addressEn"
+        >
+          <mat-label>เลขที่อาคาร, ซอย/ถนน...</mat-label>
+          <input matInput formControlName="line1" />
+        </mat-form-field>
+
+        <mat-checkbox formControlName="acceptTos">
+          ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ
+        </mat-checkbox>
+
+        <div class="grid-2" style="margin-top: 12px">
+          <button mat-stroked-button type="button" (click)="onBack()">
+            ย้อนกลับ
+          </button>
+          <button
+            class="button"
+            mat-raised-button
+            color="primary"
+            type="submit"
+          >
+            ลงทะเบียน
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <p class="foot-note">
+      มีบัญชีใช้งานแล้วหรือยัง?
+      <a class="link" routerLink="/login">เข้าสู่ระบบ</a>
+    </p>
+  </div>
+</div>

@@ -42,13 +42,7 @@ h1 {
 .title {
   margin: 0 0 4px;
   font-size: clamp(22px, 3vw, 32px);
-  font-weight: 700;
-}
-
-.subtitle {
-  margin: 0 0 20px;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 18px;
+  font-weight: 400;
 }
 
 /* ------- Form Fields ------- */
@@ -123,13 +117,31 @@ mat-form-field.full-width {
   border-radius: 4px;
   background: #e9ecef;
   overflow: hidden;
-  margin: 8px 0 6px;
+  margin-top: -8px; /* ลดช่องว่างด้านบน */
+  margin-bottom: 8px; /* ระยะห่างด้านล่าง */
+  position: relative;
 }
-.pw-meter .bar {
+/* .pw-meter .bar {
   height: 100%;
   width: 0%;
   transition: width 0.25s ease;
   background: #198754; /* เขียว */
+/* } */
+.pw-meter .bar {
+  height: 100%;
+  width: 0%;
+  background: #ef4444; /* เริ่มแดง */
+  transition: width 200ms ease, background-color 200ms ease;
+}
+
+/* ครึ่งหนึ่งขึ้นไป ให้เหลือง */
+.pw-meter.warn .bar {
+  background: #f59e0b;
+}
+
+/* ผ่านครบ ให้เขียวล้วน */
+.pw-meter.done .bar {
+  background: #2e7d32;
 }
 
 /* เช็คลิสต์ */
@@ -157,3 +169,274 @@ mat-form-field.full-width {
 .pw-req li.ok .ic {
   color: #198754;
 } /* เขียวเมื่อผ่าน */
+
+/* ซ่อน/โชว์แบบคง DOM */
+.step {
+  display: none;
+}
+.step.active {
+  display: block;
+}
+
+/* ตัวอย่างเครือบบางส่วน ให้เข้ากับงานเดิมของคุณ */
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #fff;
+}
+.auth-card {
+  width: min(800px, 92vw);
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+}
+.brand {
+  width: 180px;
+  margin: 0 auto 16px;
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 18px;
+}
+.full-width {
+  width: 100%;
+}
+.button {
+  height: 44px;
+  width: 100%;
+  border-radius: 10px;
+  background: #ffcc00;
+  color: #111;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-top: 12px;
+}
+
+/* ช่อง Material ให้มุมโค้ง/สี */
+.mdc-notched-outline__notch {
+  overflow: visible !important;
+}
+.mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+.mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: #d7d7d7;
+  --mdc-outlined-text-field-hover-outline-color: #bdbdbd;
+  --mdc-outlined-text-field-focus-outline-color: #000;
+  --mdc-outlined-text-field-label-text-color: rgba(0, 0, 0, 0.6);
+  --mdc-outlined-text-field-focus-label-text-color: #000;
+  --mdc-outlined-text-field-caret-color: #000;
+}
+/* ------- Layout ------- */
+:host {
+  display: block;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 32px);
+}
+
+.auth-card {
+  width: min(720px, 96vw);
+  background: #fff;
+  border-radius: 20px;
+  padding: clamp(24px, 4vw, 40px);
+  text-align: left;
+  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
+}
+
+/* ------- Header ------- */
+.brand {
+  width: 200px;
+  margin: 0 auto 16px;
+  display: block;
+}
+
+.subtitle {
+  margin: 0 0 24px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 18px;
+  text-align: center;
+}
+
+/* ------- Section Headings ------- */
+.section-title {
+  margin: 24px 0 12px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #5e5873;
+}
+
+.section-title.required::after {
+  content: " *";
+  color: #d32f2f;
+}
+
+/* ------- Form Fields ------- */
+mat-form-field.full-width {
+  width: 100%;
+  display: block;
+  margin-bottom: 16px;
+}
+
+mat-form-field.half {
+  width: calc(50% - 8px);
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* input มุมโค้งและ hover */
+:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__leading,
+:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__trailing,
+:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__notch {
+  border-radius: 8px;
+  border-color: #ddd;
+}
+
+:host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__leading,
+:host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__trailing,
+:host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__notch {
+  border-color: #111;
+}
+
+/* ------- Upload Box ------- */
+/* ===== Upload box ===== */
+.upload-box {
+  width: 300px;
+  height: 300px;
+  background: #f0f0f0; /* พื้นเทา */
+  border: 2px dashed #bbb; /* เส้นปะ */
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.upload-box:hover {
+  border-color: #a7a7a7;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+/* มีรูปแล้ว -> เอาพื้นหลัง/เส้นปะออก */
+.upload-box.has-image {
+  background: transparent;
+  border: none;
+}
+
+/* ซ่อน input file */
+.upload-box input[type="file"] {
+  display: none;
+}
+
+/* Preview รูป (scale ให้พอดีกล่อง) */
+.logo-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* ไม่ครอปภาพ */
+  pointer-events: none; /* ให้คลิกทะลุรูปไปที่กล่องได้ */
+}
+
+/* ปุ่ม overlay ด้านล่างกลาง */
+.upload-trigger {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #ffcc00;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  pointer-events: none; /* ไม่บังคลิก */
+}
+
+/* คำอธิบายใต้กล่อง */
+.upload-note {
+  margin: 4px 0 16px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+.upload-trigger {
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+.upload-box.has-image .upload-trigger {
+  opacity: 0;
+}
+.upload-box:hover .upload-trigger {
+  opacity: 0.95;
+}
+
+/* ------- Checkbox ------- */
+mat-checkbox {
+  margin: 16px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+/* ------- Buttons ------- */
+.button {
+  height: 48px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: #ffcc00;
+  color: #111;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  font-size: 16px;
+  margin-top: 16px;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background: #f5c000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ------- Foot note ------- */
+.foot-note {
+  margin-top: 24px;
+  padding: 16px 0 0;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.link {
+  color: #0b57d0;
+  text-decoration: none;
+  font-weight: 500;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+upload-label {
+  padding: 5.495px 10.989px;
+  align-items: center;
+  gap: 6.593px;
+  border-radius: 4.396px;
+  background: #fff;
+}

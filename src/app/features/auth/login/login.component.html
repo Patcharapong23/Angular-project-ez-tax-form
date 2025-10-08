@@ -12,9 +12,17 @@
         [hideRequiredMarker]="true"
       >
         <mat-label>ชื่อผู้ใช้</mat-label>
-        <input matInput name="username" [(ngModel)]="username" required />
+        <input
+          matInput
+          name="username"
+          [(ngModel)]="username"
+          required
+          #usernameInput="ngModel"
+        />
+        <mat-error *ngIf="!username && !loginValid">
+          กรุณากรอกชื่อผู้ใช้
+        </mat-error>
       </mat-form-field>
-
       <mat-form-field
         appearance="outline"
         class="full-width"
@@ -27,18 +35,17 @@
           name="password"
           [(ngModel)]="password"
           required
+          #passwordInput="ngModel"
         />
+        <mat-error *ngIf="!password && !loginValid">
+          กรุณากรอกรหัสผ่าน
+        </mat-error>
       </mat-form-field>
 
       <div class="forgot-wrapper">
         <a class="link forgot" routerLink="/forgot-password">ลืมรหัสผ่าน?</a>
       </div>
-      <button
-        mat-raised-button
-        class="full-width button"
-        type="submit"
-        [disabled]="!loginForm.form.valid"
-      >
+      <button mat-raised-button class="full-width button" type="submit">
         เข้าสู่ระบบ
       </button>
     </form>

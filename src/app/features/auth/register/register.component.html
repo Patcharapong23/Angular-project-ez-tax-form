@@ -1,176 +1,444 @@
 <div class="auth-shell">
   <div class="auth-card">
     <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
-    <h1 class="title">สมัครสมาชิก</h1>
-    <p class="subtitle">กรุณากรอกข้อมูลเพื่อสร้างบัญชีใหม่</p>
-    <form class="reg-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-      <!-- ชื่อ-นามสกุล -->
-      <mat-form-field
-        appearance="outline"
-        class="full-width"
-        floatLabel="auto"
-        subscriptSizing="dynamic"
-        [hideRequiredMarker]="true"
-      >
-        <mat-label>ชื่อ-นามสกุล</mat-label>
-        <input
-          matInput
-          formControlName="fullName"
-          autocomplete="name"
-          spellcheck="false"
-        />
-        <mat-error *ngIf="fullName?.hasError('required') && fullName?.touched"
-          >กรุณากรอกชื่อ-นามสกุล</mat-error
-        >
-        <mat-error *ngIf="fullName?.hasError('minlength') && fullName?.touched"
-          >อย่างน้อย 2 ตัวอักษร</mat-error
-        >
-      </mat-form-field>
 
-      <!-- อีเมล -->
-      <mat-form-field
-        appearance="outline"
-        class="full-width"
-        floatLabel="auto"
-        subscriptSizing="dynamic"
-        [hideRequiredMarker]="true"
-      >
-        <mat-label>อีเมล</mat-label>
-        <input
-          matInput
-          type="email"
-          formControlName="email"
-          autocomplete="email"
-          inputmode="email"
-          spellcheck="false"
-        />
-        <mat-error *ngIf="email?.hasError('required') && email?.touched"
-          >กรุณากรอกอีเมล</mat-error
-        >
-        <mat-error *ngIf="email?.hasError('email') && email?.touched"
-          >รูปแบบอีเมลไม่ถูกต้อง</mat-error
-        >
-      </mat-form-field>
+    <h1 class="title">ลงทะเบียนใช้งานฟรี สำหรับธุรกิจ</h1>
+    <p class="subtitle">
+      เพื่อการใช้งานที่ครบถ้วนสมบูรณ์
+      กรุณาให้ข้อมูลสำหรับสร้างบัญชีการใช้งานระบบ
+    </p>
 
-      <!-- กลุ่มรหัสผ่าน -->
-      <div formGroupName="passwordGroup" class="pw-grid">
-        <mat-form-field
-          appearance="outline"
-          class="full-width"
-          floatLabel="auto"
-          subscriptSizing="dynamic"
-          [hideRequiredMarker]="true"
-        >
-          <mat-label>รหัสผ่าน</mat-label>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- ===== STEP 1 ===== -->
+      <div *ngIf="step === 1" class="step-panel">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ชื่อ-นามสกุล</mat-label>
           <input
             matInput
-            [type]="hidePass ? 'password' : 'text'"
-            formControlName="password"
-            autocomplete="new-password"
+            formControlName="fullName"
+            autocomplete="name"
+            [attr.maxlength]="fullNameMaxLen"
           />
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="hidePass = !hidePass"
-            aria-label="แสดง/ซ่อนรหัสผ่าน"
-          >
-            <mat-icon>{{
-              hidePass ? "visibility_off" : "visibility"
-            }}</mat-icon>
-          </button>
-          <mat-hint>อย่างน้อย 6 ตัวอักษร</mat-hint>
-          <mat-error *ngIf="password?.hasError('required') && password?.touched"
-            >กรุณากรอกรหัสผ่าน</mat-error
-          >
-          <mat-error
-            *ngIf="password?.hasError('minlength') && password?.touched"
-            >อย่างน้อย 6 ตัวอักษร</mat-error
-          >
-        </mat-form-field>
-        <div class="pw-meter">
-          <div class="bar" [style.width.%]="passwordScore * 100"></div>
-        </div>
-
-        <!-- เช็คลิสต์เงื่อนไข -->
-        <ul class="pw-req">
-          <li [class.ok]="rules.minLen">
-            <mat-icon class="ic">{{
-              rules.minLen ? "check_circle" : "radio_button_unchecked"
-            }}</mat-icon>
-            ตัวอักษรภาษาอังกฤษอย่างน้อย 14 ตัวอักษร
-          </li>
-          <li [class.ok]="rules.hasDigit">
-            <mat-icon class="ic">{{
-              rules.hasDigit ? "check_circle" : "radio_button_unchecked"
-            }}</mat-icon>
-            ตัวเลข อย่างน้อย 1 ตัวอักษร เช่น 0-9
-          </li>
-          <li [class.ok]="rules.hasSpecial">
-            <mat-icon class="ic">{{
-              rules.hasSpecial ? "check_circle" : "radio_button_unchecked"
-            }}</mat-icon>
-            อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น !@#$
-          </li>
-        </ul>
-
-        <mat-form-field
-          appearance="outline"
-          class="full-width"
-          floatLabel="auto"
-          subscriptSizing="dynamic"
-          [hideRequiredMarker]="true"
-        >
-          <mat-label>ยืนยันรหัสผ่าน</mat-label>
-          <input
-            matInput
-            [type]="hideConfirm ? 'password' : 'text'"
-            formControlName="confirmPassword"
-            autocomplete="new-password"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            (click)="hideConfirm = !hideConfirm"
-            aria-label="แสดง/ซ่อนยืนยันรหัสผ่าน"
-          >
-            <mat-icon>{{
-              hideConfirm ? "visibility_off" : "visibility"
-            }}</mat-icon>
-          </button>
           <mat-error
             *ngIf="
-              confirmPassword?.hasError('required') && confirmPassword?.touched
+              fullName?.hasError('required') &&
+              (fullName?.touched || step1Submitted)
             "
-            >กรุณายืนยันรหัสผ่าน</mat-error
           >
+            กรุณากรอกชื่อ-นามสกุล
+          </mat-error>
           <mat-error
             *ngIf="
-              passwordGroup?.hasError('passwordsNotMatch') &&
-              (confirmPassword?.dirty || confirmPassword?.touched)
+              fullName?.hasError('minlength') &&
+              (fullName?.touched || step1Submitted)
             "
           >
-            รหัสผ่านไม่ตรงกัน
+            อย่างน้อย 2 ตัวอักษร
           </mat-error>
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>อีเมล</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            [attr.maxlength]="emailMaxLen"
+            autocomplete="email"
+            inputmode="email"
+            spellcheck="false"
+            (keydown)="blockThai($event)"
+          />
+          <!-- <mat-hint align="end">
+            {{ email?.value?.length || 0 }}/{{ emailMaxLen }}
+          </mat-hint> -->
+          <!-- ข้อความผิดพลาด -->
+          <mat-error *ngIf="email?.hasError('required') && email?.touched">
+            กรุณากรอกอีเมล
+          </mat-error>
+          <mat-error *ngIf="email?.hasError('maxlength') && email?.touched">
+            อีเมลยาวเกิน {{ emailMaxLen }} ตัวอักษร
+          </mat-error>
+          <mat-error *ngIf="email?.hasError('pattern') && email?.touched">
+            รูปแบบอีเมลไม่ถูกต้อง (ตัวอย่าง: name@example.com)
+          </mat-error>
+          <mat-error *ngIf="email?.hasError('nonAscii') && email?.touched">
+            ห้ามใช้อักขระภาษาไทยหรืออักขระที่อยู่นอก ASCII ในอีเมล
+          </mat-error>
+        </mat-form-field>
+
+        <div formGroupName="passwordGroup" class="pw-grid">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>รหัสผ่าน</mat-label>
+            <input
+              matInput
+              [type]="hidePass ? 'password' : 'text'"
+              formControlName="password"
+              [attr.minlength]="passwordMinLen"
+              [attr.maxlength]="passwordMaxLen"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hidePass = !hidePass"
+            >
+              <mat-icon>{{
+                hidePass ? "visibility_off" : "visibility"
+              }}</mat-icon>
+            </button>
+            <mat-error
+              *ngIf="
+                password?.hasError('required') &&
+                (password?.touched || step1Submitted)
+              "
+            >
+              กรุณากรอกรหัสผ่าน
+            </mat-error>
+            <mat-error
+              *ngIf="
+                password?.hasError('minlength') &&
+                (password?.touched || step1Submitted)
+              "
+            >
+              อย่างน้อย 6 ตัวอักษร
+            </mat-error>
+          </mat-form-field>
+
+          <!-- meter + checklist -->
+          <div
+            class="pw-meter"
+            [class.done]="allOk"
+            [class.warn]="!allOk && passwordScore >= 0.5"
+          >
+            <div class="bar" [style.width.%]="passwordScore * 100"></div>
+          </div>
+
+          <ul class="pw-req">
+            <li [class.ok]="rules.minLen">
+              <mat-icon class="ic">{{
+                rules.minLen ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              ตัวอักษรภาษาอังกฤษอย่างน้อย 14 ตัวอักษร
+            </li>
+            <li [class.ok]="rules.hasDigit">
+              <mat-icon class="ic">{{
+                rules.hasDigit ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              ตัวเลข อย่างน้อย 1 ตัวอักษร เช่น 0-9
+            </li>
+            <li [class.ok]="rules.hasSpecial">
+              <mat-icon class="ic">{{
+                rules.hasSpecial ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น !@#$
+            </li>
+            <li [class.ok]="rules.match">
+              <mat-icon class="ic">{{
+                rules.match ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              รหัสผ่านตรงกัน
+            </li>
+          </ul>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>ยืนยันรหัสผ่าน</mat-label>
+            <input
+              matInput
+              [type]="hideConfirm ? 'password' : 'text'"
+              formControlName="confirmPassword"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="hideConfirm = !hideConfirm"
+            >
+              <mat-icon>{{
+                hideConfirm ? "visibility_off" : "visibility"
+              }}</mat-icon>
+            </button>
+            <mat-error
+              *ngIf="
+                confirmPassword?.hasError('required') &&
+                (confirmPassword?.touched || step1Submitted)
+              "
+            >
+              กรุณายืนยันรหัสผ่าน
+            </mat-error>
+            <mat-error
+              *ngIf="
+                passwordGroup?.hasError('passwordsNotMatch') &&
+                (confirmPassword?.dirty ||
+                  confirmPassword?.touched ||
+                  step1Submitted)
+              "
+            >
+              รหัสผ่านไม่ตรงกัน
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="actions">
+          <button
+            class="button"
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="onContinue()"
+          >
+            ดำเนินการต่อ
+          </button>
+        </div>
       </div>
 
-      <button
-        class="button"
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="form.invalid"
-      >
-        สมัครสมาชิก
-      </button>
+      <!-- ===== STEP 2 ===== -->
+      <div *ngIf="step === 2" class="step-panel" formGroupName="company">
+        <div
+          class="upload-box"
+          [class.has-image]="logoPreview"
+          (click)="logoInput.click()"
+        >
+          <input
+            #logoInput
+            type="file"
+            accept="image/*"
+            formControlName="logo"
+            (change)="onLogoSelected($event)"
+          />
+          <img
+            *ngIf="logoPreview"
+            class="logo-preview"
+            [src]="logoPreview"
+            alt="Logo Preview"
+          />
+          <label class="upload-trigger">Choose Logo File</label>
+        </div>
+        <p class="upload-note">
+          ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB
+        </p>
+
+        <h3 class="section-title">ข้อมูลบริษัท <span class="req">*</span></h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ชื่อบริษัท</mat-label>
+          <input matInput formControlName="companyName" />
+          <mat-error
+            *ngIf="
+              company.get('companyName')?.hasError('required') &&
+              (company.get('companyName')?.touched || step2Submitted)
+            "
+          >
+            กรุณากรอกชื่อบริษัท
+          </mat-error>
+        </mat-form-field>
+
+        <div class="grid-2">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>รหัสสาขา 5 หลัก</mat-label>
+            <input matInput maxlength="5" formControlName="branchCode" />
+            <mat-error
+              *ngIf="
+                company.get('branchCode')?.hasError('required') &&
+                (company.get('branchCode')?.touched || step2Submitted)
+              "
+            >
+              กรุณากรอกรหัสสาขา
+            </mat-error>
+            <mat-error
+              *ngIf="
+                company.get('branchCode')?.hasError('minlength') ||
+                company.get('branchCode')?.hasError('maxlength')
+              "
+            >
+              ต้องเป็นตัวเลข 5 หลัก
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>ชื่อสาขา</mat-label>
+            <input matInput formControlName="branchName" />
+            <mat-error
+              *ngIf="
+                company.get('branchName')?.hasError('required') &&
+                (company.get('branchName')?.touched || step2Submitted)
+              "
+            >
+              กรุณากรอกชื่อสาขา
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>เลขประจำตัวผู้เสียภาษีอากร 13 หลัก</mat-label>
+          <input matInput maxlength="13" formControlName="taxId" />
+          <mat-error
+            *ngIf="
+              company.get('taxId')?.hasError('required') &&
+              (company.get('taxId')?.touched || step2Submitted)
+            "
+          >
+            กรุณากรอกเลขประจำตัวผู้เสียภาษีอากร
+          </mat-error>
+          <mat-error
+            *ngIf="
+              company.get('taxId')?.hasError('minlength') ||
+              company.get('taxId')?.hasError('maxlength')
+            "
+          >
+            ต้องเป็นตัวเลข 13 หลัก
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>เบอร์ติดต่อธุรกิจ</mat-label>
+          <input matInput formControlName="businessPhone" />
+        </mat-form-field>
+
+        <h3 class="section-title">
+          ที่อยู่ (ภาษาไทย) <span class="req">*</span>
+        </h3>
+        <div formGroupName="addressTh">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>เลขที่อาคาร</mat-label>
+            <input matInput formControlName="buildingNo" />
+            <mat-error
+              *ngIf="
+                addressTh.get('buildingNo')?.hasError('required') &&
+                (addressTh.get('buildingNo')?.touched || step2Submitted)
+              "
+            >
+              กรุณากรอกเลขที่อาคาร
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>ชื่ออาคาร/ซอย/ถนน</mat-label>
+            <input matInput formControlName="street" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>จังหวัด</mat-label>
+            <mat-select
+              formControlName="province"
+              (selectionChange)="onProvinceChange($event.value)"
+            >
+              <mat-option *ngFor="let p of provinces" [value]="p.code">{{
+                p.name_th
+              }}</mat-option>
+            </mat-select>
+            <mat-error
+              *ngIf="
+                addressTh.get('province')?.hasError('required') &&
+                (addressTh.get('province')?.touched || step2Submitted)
+              "
+            >
+              กรุณาเลือกจังหวัด
+            </mat-error>
+          </mat-form-field>
+
+          <div class="grid-2">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>เขต/อำเภอ</mat-label>
+              <mat-select
+                formControlName="district"
+                (selectionChange)="onDistrictChange($event.value)"
+              >
+                <mat-option *ngFor="let d of districts" [value]="d.code">{{
+                  d.name_th
+                }}</mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  addressTh.get('district')?.hasError('required') &&
+                  (addressTh.get('district')?.touched || step2Submitted)
+                "
+              >
+                กรุณาเลือกเขต/อำเภอ
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>แขวง/ตำบล</mat-label>
+              <mat-select
+                formControlName="subdistrict"
+                (selectionChange)="onSubdistrictChange($event.value)"
+              >
+                <mat-option *ngFor="let s of subdistricts" [value]="s.code">{{
+                  s.name_th
+                }}</mat-option>
+              </mat-select>
+              <mat-error
+                *ngIf="
+                  addressTh.get('subdistrict')?.hasError('required') &&
+                  (addressTh.get('subdistrict')?.touched || step2Submitted)
+                "
+              >
+                กรุณาเลือกแขวง/ตำบล
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>รหัสไปรษณีย์</mat-label>
+            <input matInput formControlName="postalCode" />
+            <mat-error
+              *ngIf="
+                addressTh.get('postalCode')?.hasError('required') &&
+                (addressTh.get('postalCode')?.touched || step2Submitted)
+              "
+            >
+              กรุณากรอกรหัสไปรษณีย์
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <h3 class="section-title">ที่อยู่ (ภาษาอังกฤษ)</h3>
+        <div formGroupName="addressEn">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>เลขที่อาคาร,ชื่ออาคาร… (English)</mat-label>
+            <input matInput formControlName="line1" />
+          </mat-form-field>
+        </div>
+
+        <mat-checkbox formControlName="acceptTos">
+          ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ
+        </mat-checkbox>
+        <div
+          class="tiny-error"
+          *ngIf="
+            company.get('acceptTos')?.hasError('required') &&
+            (company.get('acceptTos')?.touched || step2Submitted)
+          "
+        >
+          โปรดยอมรับเงื่อนไขการใช้งาน
+        </div>
+
+        <div class="form-error" *ngIf="formServerError">
+          {{ formServerError }}
+        </div>
+
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="onBack()">
+            ย้อนกลับ
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="button"
+            [disabled]="isSubmitting"
+          >
+            {{ isSubmitting ? "กำลังบันทึก..." : "ลงทะเบียน" }}
+          </button>
+        </div>
+      </div>
     </form>
 
     <p class="foot-note">
-      มีบัญชีใช้งานแล้วหรือยัง?
-      <a class="link" routerLink="/login">เข้าสู่ระบบ</a>
-      <!-- แก้ข้อความให้ถูก -->
+      มีบัญชีอยู่แล้ว? <a class="link" routerLink="/login">เข้าสู่ระบบ</a>
     </p>
   </div>
 </div>

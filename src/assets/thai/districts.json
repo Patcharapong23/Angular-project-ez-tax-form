@@ -1,0 +1,4647 @@
+[
+  {
+    "code": "1001",
+    "name_th": "เขตพระนคร",
+    "parent_code": "10"
+  },
+  {
+    "code": "1002",
+    "name_th": "เขตดุสิต",
+    "parent_code": "10"
+  },
+  {
+    "code": "1003",
+    "name_th": "เขตหนองจอก",
+    "parent_code": "10"
+  },
+  {
+    "code": "1004",
+    "name_th": "เขตบางรัก",
+    "parent_code": "10"
+  },
+  {
+    "code": "1005",
+    "name_th": "เขตบางเขน",
+    "parent_code": "10"
+  },
+  {
+    "code": "1006",
+    "name_th": "เขตบางกะปิ",
+    "parent_code": "10"
+  },
+  {
+    "code": "1007",
+    "name_th": "เขตปทุมวัน",
+    "parent_code": "10"
+  },
+  {
+    "code": "1008",
+    "name_th": "เขตป้อมปราบศัตรูพ่าย",
+    "parent_code": "10"
+  },
+  {
+    "code": "1009",
+    "name_th": "เขตพระโขนง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1010",
+    "name_th": "เขตมีนบุรี",
+    "parent_code": "10"
+  },
+  {
+    "code": "1011",
+    "name_th": "เขตลาดกระบัง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1012",
+    "name_th": "เขตยานนาวา",
+    "parent_code": "10"
+  },
+  {
+    "code": "1013",
+    "name_th": "เขตสัมพันธวงศ์",
+    "parent_code": "10"
+  },
+  {
+    "code": "1014",
+    "name_th": "เขตพญาไท",
+    "parent_code": "10"
+  },
+  {
+    "code": "1015",
+    "name_th": "เขตธนบุรี",
+    "parent_code": "10"
+  },
+  {
+    "code": "1016",
+    "name_th": "เขตบางกอกใหญ่",
+    "parent_code": "10"
+  },
+  {
+    "code": "1017",
+    "name_th": "เขตห้วยขวาง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1018",
+    "name_th": "เขตคลองสาน",
+    "parent_code": "10"
+  },
+  {
+    "code": "1019",
+    "name_th": "เขตตลิ่งชัน",
+    "parent_code": "10"
+  },
+  {
+    "code": "1020",
+    "name_th": "เขตบางกอกน้อย",
+    "parent_code": "10"
+  },
+  {
+    "code": "1021",
+    "name_th": "เขตบางขุนเทียน",
+    "parent_code": "10"
+  },
+  {
+    "code": "1022",
+    "name_th": "เขตภาษีเจริญ",
+    "parent_code": "10"
+  },
+  {
+    "code": "1023",
+    "name_th": "เขตหนองแขม",
+    "parent_code": "10"
+  },
+  {
+    "code": "1024",
+    "name_th": "เขตราษฎร์บูรณะ",
+    "parent_code": "10"
+  },
+  {
+    "code": "1025",
+    "name_th": "เขตบางพลัด",
+    "parent_code": "10"
+  },
+  {
+    "code": "1026",
+    "name_th": "เขตดินแดง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1027",
+    "name_th": "เขตบึงกุ่ม",
+    "parent_code": "10"
+  },
+  {
+    "code": "1028",
+    "name_th": "เขตสาทร",
+    "parent_code": "10"
+  },
+  {
+    "code": "1029",
+    "name_th": "เขตบางซื่อ",
+    "parent_code": "10"
+  },
+  {
+    "code": "1030",
+    "name_th": "เขตจตุจักร",
+    "parent_code": "10"
+  },
+  {
+    "code": "1031",
+    "name_th": "เขตบางคอแหลม",
+    "parent_code": "10"
+  },
+  {
+    "code": "1032",
+    "name_th": "เขตประเวศ",
+    "parent_code": "10"
+  },
+  {
+    "code": "1033",
+    "name_th": "เขตคลองเตย",
+    "parent_code": "10"
+  },
+  {
+    "code": "1034",
+    "name_th": "เขตสวนหลวง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1035",
+    "name_th": "เขตจอมทอง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1036",
+    "name_th": "เขตดอนเมือง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1037",
+    "name_th": "เขตราชเทวี",
+    "parent_code": "10"
+  },
+  {
+    "code": "1038",
+    "name_th": "เขตลาดพร้าว",
+    "parent_code": "10"
+  },
+  {
+    "code": "1039",
+    "name_th": "เขตวัฒนา",
+    "parent_code": "10"
+  },
+  {
+    "code": "1040",
+    "name_th": "เขตบางแค",
+    "parent_code": "10"
+  },
+  {
+    "code": "1041",
+    "name_th": "เขตหลักสี่",
+    "parent_code": "10"
+  },
+  {
+    "code": "1042",
+    "name_th": "เขตสายไหม",
+    "parent_code": "10"
+  },
+  {
+    "code": "1043",
+    "name_th": "เขตคันนายาว",
+    "parent_code": "10"
+  },
+  {
+    "code": "1044",
+    "name_th": "เขตสะพานสูง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1045",
+    "name_th": "เขตวังทองหลาง",
+    "parent_code": "10"
+  },
+  {
+    "code": "1046",
+    "name_th": "เขตคลองสามวา",
+    "parent_code": "10"
+  },
+  {
+    "code": "1047",
+    "name_th": "เขตบางนา",
+    "parent_code": "10"
+  },
+  {
+    "code": "1048",
+    "name_th": "เขตทวีวัฒนา",
+    "parent_code": "10"
+  },
+  {
+    "code": "1049",
+    "name_th": "เขตทุ่งครุ",
+    "parent_code": "10"
+  },
+  {
+    "code": "1050",
+    "name_th": "เขตบางบอน",
+    "parent_code": "10"
+  },
+  {
+    "code": "1101",
+    "name_th": "เมืองสมุทรปราการ",
+    "parent_code": "11"
+  },
+  {
+    "code": "1102",
+    "name_th": "บางบ่อ",
+    "parent_code": "11"
+  },
+  {
+    "code": "1103",
+    "name_th": "บางพลี",
+    "parent_code": "11"
+  },
+  {
+    "code": "1104",
+    "name_th": "พระประแดง",
+    "parent_code": "11"
+  },
+  {
+    "code": "1105",
+    "name_th": "พระสมุทรเจดีย์",
+    "parent_code": "11"
+  },
+  {
+    "code": "1106",
+    "name_th": "บางเสาธง",
+    "parent_code": "11"
+  },
+  {
+    "code": "1201",
+    "name_th": "เมืองนนทบุรี",
+    "parent_code": "12"
+  },
+  {
+    "code": "1202",
+    "name_th": "บางกรวย",
+    "parent_code": "12"
+  },
+  {
+    "code": "1203",
+    "name_th": "บางใหญ่",
+    "parent_code": "12"
+  },
+  {
+    "code": "1204",
+    "name_th": "บางบัวทอง",
+    "parent_code": "12"
+  },
+  {
+    "code": "1205",
+    "name_th": "ไทรน้อย",
+    "parent_code": "12"
+  },
+  {
+    "code": "1206",
+    "name_th": "ปากเกร็ด",
+    "parent_code": "12"
+  },
+  {
+    "code": "1301",
+    "name_th": "เมืองปทุมธานี",
+    "parent_code": "13"
+  },
+  {
+    "code": "1302",
+    "name_th": "คลองหลวง",
+    "parent_code": "13"
+  },
+  {
+    "code": "1303",
+    "name_th": "ธัญบุรี",
+    "parent_code": "13"
+  },
+  {
+    "code": "1304",
+    "name_th": "หนองเสือ",
+    "parent_code": "13"
+  },
+  {
+    "code": "1305",
+    "name_th": "ลาดหลุมแก้ว",
+    "parent_code": "13"
+  },
+  {
+    "code": "1306",
+    "name_th": "ลำลูกกา",
+    "parent_code": "13"
+  },
+  {
+    "code": "1307",
+    "name_th": "สามโคก",
+    "parent_code": "13"
+  },
+  {
+    "code": "1401",
+    "name_th": "พระนครศรีอยุธยา",
+    "parent_code": "14"
+  },
+  {
+    "code": "1402",
+    "name_th": "ท่าเรือ",
+    "parent_code": "14"
+  },
+  {
+    "code": "1403",
+    "name_th": "นครหลวง",
+    "parent_code": "14"
+  },
+  {
+    "code": "1404",
+    "name_th": "บางไทร",
+    "parent_code": "14"
+  },
+  {
+    "code": "1405",
+    "name_th": "บางบาล",
+    "parent_code": "14"
+  },
+  {
+    "code": "1406",
+    "name_th": "บางปะอิน",
+    "parent_code": "14"
+  },
+  {
+    "code": "1407",
+    "name_th": "บางปะหัน",
+    "parent_code": "14"
+  },
+  {
+    "code": "1408",
+    "name_th": "ผักไห่",
+    "parent_code": "14"
+  },
+  {
+    "code": "1409",
+    "name_th": "ภาชี",
+    "parent_code": "14"
+  },
+  {
+    "code": "1410",
+    "name_th": "ลาดบัวหลวง",
+    "parent_code": "14"
+  },
+  {
+    "code": "1411",
+    "name_th": "วังน้อย",
+    "parent_code": "14"
+  },
+  {
+    "code": "1412",
+    "name_th": "เสนา",
+    "parent_code": "14"
+  },
+  {
+    "code": "1413",
+    "name_th": "บางซ้าย",
+    "parent_code": "14"
+  },
+  {
+    "code": "1414",
+    "name_th": "อุทัย",
+    "parent_code": "14"
+  },
+  {
+    "code": "1415",
+    "name_th": "มหาราช",
+    "parent_code": "14"
+  },
+  {
+    "code": "1416",
+    "name_th": "บ้านแพรก",
+    "parent_code": "14"
+  },
+  {
+    "code": "1501",
+    "name_th": "เมืองอ่างทอง",
+    "parent_code": "15"
+  },
+  {
+    "code": "1502",
+    "name_th": "ไชโย",
+    "parent_code": "15"
+  },
+  {
+    "code": "1503",
+    "name_th": "ป่าโมก",
+    "parent_code": "15"
+  },
+  {
+    "code": "1504",
+    "name_th": "โพธิ์ทอง",
+    "parent_code": "15"
+  },
+  {
+    "code": "1505",
+    "name_th": "แสวงหา",
+    "parent_code": "15"
+  },
+  {
+    "code": "1506",
+    "name_th": "วิเศษชัยชาญ",
+    "parent_code": "15"
+  },
+  {
+    "code": "1507",
+    "name_th": "สามโก้",
+    "parent_code": "15"
+  },
+  {
+    "code": "1601",
+    "name_th": "เมืองลพบุรี",
+    "parent_code": "16"
+  },
+  {
+    "code": "1602",
+    "name_th": "พัฒนานิคม",
+    "parent_code": "16"
+  },
+  {
+    "code": "1603",
+    "name_th": "โคกสำโรง",
+    "parent_code": "16"
+  },
+  {
+    "code": "1604",
+    "name_th": "ชัยบาดาล",
+    "parent_code": "16"
+  },
+  {
+    "code": "1605",
+    "name_th": "ท่าวุ้ง",
+    "parent_code": "16"
+  },
+  {
+    "code": "1606",
+    "name_th": "บ้านหมี่",
+    "parent_code": "16"
+  },
+  {
+    "code": "1607",
+    "name_th": "ท่าหลวง",
+    "parent_code": "16"
+  },
+  {
+    "code": "1608",
+    "name_th": "สระโบสถ์",
+    "parent_code": "16"
+  },
+  {
+    "code": "1609",
+    "name_th": "โคกเจริญ",
+    "parent_code": "16"
+  },
+  {
+    "code": "1610",
+    "name_th": "ลำสนธิ",
+    "parent_code": "16"
+  },
+  {
+    "code": "1611",
+    "name_th": "หนองม่วง",
+    "parent_code": "16"
+  },
+  {
+    "code": "1701",
+    "name_th": "เมืองสิงห์บุรี",
+    "parent_code": "17"
+  },
+  {
+    "code": "1702",
+    "name_th": "บางระจัน",
+    "parent_code": "17"
+  },
+  {
+    "code": "1703",
+    "name_th": "ค่ายบางระจัน",
+    "parent_code": "17"
+  },
+  {
+    "code": "1704",
+    "name_th": "พรหมบุรี",
+    "parent_code": "17"
+  },
+  {
+    "code": "1705",
+    "name_th": "ท่าช้าง",
+    "parent_code": "17"
+  },
+  {
+    "code": "1706",
+    "name_th": "อินทร์บุรี",
+    "parent_code": "17"
+  },
+  {
+    "code": "1801",
+    "name_th": "เมืองชัยนาท",
+    "parent_code": "18"
+  },
+  {
+    "code": "1802",
+    "name_th": "มโนรมย์",
+    "parent_code": "18"
+  },
+  {
+    "code": "1803",
+    "name_th": "วัดสิงห์",
+    "parent_code": "18"
+  },
+  {
+    "code": "1804",
+    "name_th": "สรรพยา",
+    "parent_code": "18"
+  },
+  {
+    "code": "1805",
+    "name_th": "สรรคบุรี",
+    "parent_code": "18"
+  },
+  {
+    "code": "1806",
+    "name_th": "หันคา",
+    "parent_code": "18"
+  },
+  {
+    "code": "1807",
+    "name_th": "หนองมะโมง",
+    "parent_code": "18"
+  },
+  {
+    "code": "1808",
+    "name_th": "เนินขาม",
+    "parent_code": "18"
+  },
+  {
+    "code": "1901",
+    "name_th": "เมืองสระบุรี",
+    "parent_code": "19"
+  },
+  {
+    "code": "1902",
+    "name_th": "แก่งคอย",
+    "parent_code": "19"
+  },
+  {
+    "code": "1903",
+    "name_th": "หนองแค",
+    "parent_code": "19"
+  },
+  {
+    "code": "1904",
+    "name_th": "วิหารแดง",
+    "parent_code": "19"
+  },
+  {
+    "code": "1905",
+    "name_th": "หนองแซง",
+    "parent_code": "19"
+  },
+  {
+    "code": "1906",
+    "name_th": "บ้านหมอ",
+    "parent_code": "19"
+  },
+  {
+    "code": "1907",
+    "name_th": "ดอนพุด",
+    "parent_code": "19"
+  },
+  {
+    "code": "1908",
+    "name_th": "หนองโดน",
+    "parent_code": "19"
+  },
+  {
+    "code": "1909",
+    "name_th": "พระพุทธบาท",
+    "parent_code": "19"
+  },
+  {
+    "code": "1910",
+    "name_th": "เสาไห้",
+    "parent_code": "19"
+  },
+  {
+    "code": "1911",
+    "name_th": "มวกเหล็ก",
+    "parent_code": "19"
+  },
+  {
+    "code": "1912",
+    "name_th": "วังม่วง",
+    "parent_code": "19"
+  },
+  {
+    "code": "1913",
+    "name_th": "เฉลิมพระเกียรติ",
+    "parent_code": "19"
+  },
+  {
+    "code": "2001",
+    "name_th": "เมืองชลบุรี",
+    "parent_code": "20"
+  },
+  {
+    "code": "2002",
+    "name_th": "บ้านบึง",
+    "parent_code": "20"
+  },
+  {
+    "code": "2003",
+    "name_th": "หนองใหญ่",
+    "parent_code": "20"
+  },
+  {
+    "code": "2004",
+    "name_th": "บางละมุง",
+    "parent_code": "20"
+  },
+  {
+    "code": "2005",
+    "name_th": "พานทอง",
+    "parent_code": "20"
+  },
+  {
+    "code": "2006",
+    "name_th": "พนัสนิคม",
+    "parent_code": "20"
+  },
+  {
+    "code": "2007",
+    "name_th": "ศรีราชา",
+    "parent_code": "20"
+  },
+  {
+    "code": "2008",
+    "name_th": "เกาะสีชัง",
+    "parent_code": "20"
+  },
+  {
+    "code": "2009",
+    "name_th": "สัตหีบ",
+    "parent_code": "20"
+  },
+  {
+    "code": "2010",
+    "name_th": "บ่อทอง",
+    "parent_code": "20"
+  },
+  {
+    "code": "2011",
+    "name_th": "เกาะจันทร์",
+    "parent_code": "20"
+  },
+  {
+    "code": "2101",
+    "name_th": "เมืองระยอง",
+    "parent_code": "21"
+  },
+  {
+    "code": "2102",
+    "name_th": "บ้านฉาง",
+    "parent_code": "21"
+  },
+  {
+    "code": "2103",
+    "name_th": "แกลง",
+    "parent_code": "21"
+  },
+  {
+    "code": "2104",
+    "name_th": "วังจันทร์",
+    "parent_code": "21"
+  },
+  {
+    "code": "2105",
+    "name_th": "บ้านค่าย",
+    "parent_code": "21"
+  },
+  {
+    "code": "2106",
+    "name_th": "ปลวกแดง",
+    "parent_code": "21"
+  },
+  {
+    "code": "2107",
+    "name_th": "เขาชะเมา",
+    "parent_code": "21"
+  },
+  {
+    "code": "2108",
+    "name_th": "นิคมพัฒนา",
+    "parent_code": "21"
+  },
+  {
+    "code": "2201",
+    "name_th": "เมืองจันทบุรี",
+    "parent_code": "22"
+  },
+  {
+    "code": "2202",
+    "name_th": "ขลุง",
+    "parent_code": "22"
+  },
+  {
+    "code": "2203",
+    "name_th": "ท่าใหม่",
+    "parent_code": "22"
+  },
+  {
+    "code": "2204",
+    "name_th": "โป่งน้ำร้อน",
+    "parent_code": "22"
+  },
+  {
+    "code": "2205",
+    "name_th": "มะขาม",
+    "parent_code": "22"
+  },
+  {
+    "code": "2206",
+    "name_th": "แหลมสิงห์",
+    "parent_code": "22"
+  },
+  {
+    "code": "2207",
+    "name_th": "สอยดาว",
+    "parent_code": "22"
+  },
+  {
+    "code": "2208",
+    "name_th": "แก่งหางแมว",
+    "parent_code": "22"
+  },
+  {
+    "code": "2209",
+    "name_th": "นายายอาม",
+    "parent_code": "22"
+  },
+  {
+    "code": "2210",
+    "name_th": "เขาคิชฌกูฏ",
+    "parent_code": "22"
+  },
+  {
+    "code": "2301",
+    "name_th": "เมืองตราด",
+    "parent_code": "23"
+  },
+  {
+    "code": "2302",
+    "name_th": "คลองใหญ่",
+    "parent_code": "23"
+  },
+  {
+    "code": "2303",
+    "name_th": "เขาสมิง",
+    "parent_code": "23"
+  },
+  {
+    "code": "2304",
+    "name_th": "บ่อไร่",
+    "parent_code": "23"
+  },
+  {
+    "code": "2305",
+    "name_th": "แหลมงอบ",
+    "parent_code": "23"
+  },
+  {
+    "code": "2306",
+    "name_th": "เกาะกูด",
+    "parent_code": "23"
+  },
+  {
+    "code": "2307",
+    "name_th": "เกาะช้าง",
+    "parent_code": "23"
+  },
+  {
+    "code": "2401",
+    "name_th": "เมืองฉะเชิงเทรา",
+    "parent_code": "24"
+  },
+  {
+    "code": "2402",
+    "name_th": "บางคล้า",
+    "parent_code": "24"
+  },
+  {
+    "code": "2403",
+    "name_th": "บางน้ำเปรี้ยว",
+    "parent_code": "24"
+  },
+  {
+    "code": "2404",
+    "name_th": "บางปะกง",
+    "parent_code": "24"
+  },
+  {
+    "code": "2405",
+    "name_th": "บ้านโพธิ์",
+    "parent_code": "24"
+  },
+  {
+    "code": "2406",
+    "name_th": "พนมสารคาม",
+    "parent_code": "24"
+  },
+  {
+    "code": "2407",
+    "name_th": "ราชสาส์น",
+    "parent_code": "24"
+  },
+  {
+    "code": "2408",
+    "name_th": "สนามชัยเขต",
+    "parent_code": "24"
+  },
+  {
+    "code": "2409",
+    "name_th": "แปลงยาว",
+    "parent_code": "24"
+  },
+  {
+    "code": "2410",
+    "name_th": "ท่าตะเกียบ",
+    "parent_code": "24"
+  },
+  {
+    "code": "2411",
+    "name_th": "คลองเขื่อน",
+    "parent_code": "24"
+  },
+  {
+    "code": "2501",
+    "name_th": "เมืองปราจีนบุรี",
+    "parent_code": "25"
+  },
+  {
+    "code": "2502",
+    "name_th": "กบินทร์บุรี",
+    "parent_code": "25"
+  },
+  {
+    "code": "2503",
+    "name_th": "นาดี",
+    "parent_code": "25"
+  },
+  {
+    "code": "2506",
+    "name_th": "บ้านสร้าง",
+    "parent_code": "25"
+  },
+  {
+    "code": "2507",
+    "name_th": "ประจันตคาม",
+    "parent_code": "25"
+  },
+  {
+    "code": "2508",
+    "name_th": "ศรีมหาโพธิ",
+    "parent_code": "25"
+  },
+  {
+    "code": "2509",
+    "name_th": "ศรีมโหสถ",
+    "parent_code": "25"
+  },
+  {
+    "code": "2601",
+    "name_th": "เมืองนครนายก",
+    "parent_code": "26"
+  },
+  {
+    "code": "2602",
+    "name_th": "ปากพลี",
+    "parent_code": "26"
+  },
+  {
+    "code": "2603",
+    "name_th": "บ้านนา",
+    "parent_code": "26"
+  },
+  {
+    "code": "2604",
+    "name_th": "องครักษ์",
+    "parent_code": "26"
+  },
+  {
+    "code": "2701",
+    "name_th": "เมืองสระแก้ว",
+    "parent_code": "27"
+  },
+  {
+    "code": "2702",
+    "name_th": "คลองหาด",
+    "parent_code": "27"
+  },
+  {
+    "code": "2703",
+    "name_th": "ตาพระยา",
+    "parent_code": "27"
+  },
+  {
+    "code": "2704",
+    "name_th": "วังน้ำเย็น",
+    "parent_code": "27"
+  },
+  {
+    "code": "2705",
+    "name_th": "วัฒนานคร",
+    "parent_code": "27"
+  },
+  {
+    "code": "2706",
+    "name_th": "อรัญประเทศ",
+    "parent_code": "27"
+  },
+  {
+    "code": "2707",
+    "name_th": "เขาฉกรรจ์",
+    "parent_code": "27"
+  },
+  {
+    "code": "2708",
+    "name_th": "โคกสูง",
+    "parent_code": "27"
+  },
+  {
+    "code": "2709",
+    "name_th": "วังสมบูรณ์",
+    "parent_code": "27"
+  },
+  {
+    "code": "3001",
+    "name_th": "เมืองนครราชสีมา",
+    "parent_code": "30"
+  },
+  {
+    "code": "3002",
+    "name_th": "ครบุรี",
+    "parent_code": "30"
+  },
+  {
+    "code": "3003",
+    "name_th": "เสิงสาง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3004",
+    "name_th": "คง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3005",
+    "name_th": "บ้านเหลื่อม",
+    "parent_code": "30"
+  },
+  {
+    "code": "3006",
+    "name_th": "จักราช",
+    "parent_code": "30"
+  },
+  {
+    "code": "3007",
+    "name_th": "โชคชัย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3008",
+    "name_th": "ด่านขุนทด",
+    "parent_code": "30"
+  },
+  {
+    "code": "3009",
+    "name_th": "โนนไทย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3010",
+    "name_th": "โนนสูง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3011",
+    "name_th": "ขามสะแกแสง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3012",
+    "name_th": "บัวใหญ่",
+    "parent_code": "30"
+  },
+  {
+    "code": "3013",
+    "name_th": "ประทาย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3014",
+    "name_th": "ปักธงชัย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3015",
+    "name_th": "พิมาย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3016",
+    "name_th": "ห้วยแถลง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3017",
+    "name_th": "ชุมพวง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3018",
+    "name_th": "สูงเนิน",
+    "parent_code": "30"
+  },
+  {
+    "code": "3019",
+    "name_th": "ขามทะเลสอ",
+    "parent_code": "30"
+  },
+  {
+    "code": "3020",
+    "name_th": "สีคิ้ว",
+    "parent_code": "30"
+  },
+  {
+    "code": "3021",
+    "name_th": "ปากช่อง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3022",
+    "name_th": "หนองบุญมาก",
+    "parent_code": "30"
+  },
+  {
+    "code": "3023",
+    "name_th": "แก้งสนามนาง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3024",
+    "name_th": "โนนแดง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3025",
+    "name_th": "วังน้ำเขียว",
+    "parent_code": "30"
+  },
+  {
+    "code": "3026",
+    "name_th": "เทพารักษ์",
+    "parent_code": "30"
+  },
+  {
+    "code": "3027",
+    "name_th": "เมืองยาง",
+    "parent_code": "30"
+  },
+  {
+    "code": "3028",
+    "name_th": "พระทองคำ",
+    "parent_code": "30"
+  },
+  {
+    "code": "3029",
+    "name_th": "ลำทะเมนชัย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3030",
+    "name_th": "บัวลาย",
+    "parent_code": "30"
+  },
+  {
+    "code": "3031",
+    "name_th": "สีดา",
+    "parent_code": "30"
+  },
+  {
+    "code": "3032",
+    "name_th": "เฉลิมพระเกียรติ",
+    "parent_code": "30"
+  },
+  {
+    "code": "3101",
+    "name_th": "เมืองบุรีรัมย์",
+    "parent_code": "31"
+  },
+  {
+    "code": "3102",
+    "name_th": "คูเมือง",
+    "parent_code": "31"
+  },
+  {
+    "code": "3103",
+    "name_th": "กระสัง",
+    "parent_code": "31"
+  },
+  {
+    "code": "3104",
+    "name_th": "นางรอง",
+    "parent_code": "31"
+  },
+  {
+    "code": "3105",
+    "name_th": "หนองกี่",
+    "parent_code": "31"
+  },
+  {
+    "code": "3106",
+    "name_th": "ละหานทราย",
+    "parent_code": "31"
+  },
+  {
+    "code": "3107",
+    "name_th": "ประโคนชัย",
+    "parent_code": "31"
+  },
+  {
+    "code": "3108",
+    "name_th": "บ้านกรวด",
+    "parent_code": "31"
+  },
+  {
+    "code": "3109",
+    "name_th": "พุทไธสง",
+    "parent_code": "31"
+  },
+  {
+    "code": "3110",
+    "name_th": "ลำปลายมาศ",
+    "parent_code": "31"
+  },
+  {
+    "code": "3111",
+    "name_th": "สตึก",
+    "parent_code": "31"
+  },
+  {
+    "code": "3112",
+    "name_th": "ปะคำ",
+    "parent_code": "31"
+  },
+  {
+    "code": "3113",
+    "name_th": "นาโพธิ์",
+    "parent_code": "31"
+  },
+  {
+    "code": "3114",
+    "name_th": "หนองหงส์",
+    "parent_code": "31"
+  },
+  {
+    "code": "3115",
+    "name_th": "พลับพลาชัย",
+    "parent_code": "31"
+  },
+  {
+    "code": "3116",
+    "name_th": "ห้วยราช",
+    "parent_code": "31"
+  },
+  {
+    "code": "3117",
+    "name_th": "โนนสุวรรณ",
+    "parent_code": "31"
+  },
+  {
+    "code": "3118",
+    "name_th": "ชำนิ",
+    "parent_code": "31"
+  },
+  {
+    "code": "3119",
+    "name_th": "บ้านใหม่ไชยพจน์",
+    "parent_code": "31"
+  },
+  {
+    "code": "3120",
+    "name_th": "โนนดินแดง",
+    "parent_code": "31"
+  },
+  {
+    "code": "3121",
+    "name_th": "บ้านด่าน",
+    "parent_code": "31"
+  },
+  {
+    "code": "3122",
+    "name_th": "แคนดง",
+    "parent_code": "31"
+  },
+  {
+    "code": "3123",
+    "name_th": "เฉลิมพระเกียรติ",
+    "parent_code": "31"
+  },
+  {
+    "code": "3201",
+    "name_th": "เมืองสุรินทร์",
+    "parent_code": "32"
+  },
+  {
+    "code": "3202",
+    "name_th": "ชุมพลบุรี",
+    "parent_code": "32"
+  },
+  {
+    "code": "3203",
+    "name_th": "ท่าตูม",
+    "parent_code": "32"
+  },
+  {
+    "code": "3204",
+    "name_th": "จอมพระ",
+    "parent_code": "32"
+  },
+  {
+    "code": "3205",
+    "name_th": "ปราสาท",
+    "parent_code": "32"
+  },
+  {
+    "code": "3206",
+    "name_th": "กาบเชิง",
+    "parent_code": "32"
+  },
+  {
+    "code": "3207",
+    "name_th": "รัตนบุรี",
+    "parent_code": "32"
+  },
+  {
+    "code": "3208",
+    "name_th": "สนม",
+    "parent_code": "32"
+  },
+  {
+    "code": "3209",
+    "name_th": "ศีขรภูมิ",
+    "parent_code": "32"
+  },
+  {
+    "code": "3210",
+    "name_th": "สังขะ",
+    "parent_code": "32"
+  },
+  {
+    "code": "3211",
+    "name_th": "ลำดวน",
+    "parent_code": "32"
+  },
+  {
+    "code": "3212",
+    "name_th": "สำโรงทาบ",
+    "parent_code": "32"
+  },
+  {
+    "code": "3213",
+    "name_th": "บัวเชด",
+    "parent_code": "32"
+  },
+  {
+    "code": "3214",
+    "name_th": "พนมดงรัก",
+    "parent_code": "32"
+  },
+  {
+    "code": "3215",
+    "name_th": "ศรีณรงค์",
+    "parent_code": "32"
+  },
+  {
+    "code": "3216",
+    "name_th": "เขวาสินรินทร์",
+    "parent_code": "32"
+  },
+  {
+    "code": "3217",
+    "name_th": "โนนนารายณ์",
+    "parent_code": "32"
+  },
+  {
+    "code": "3301",
+    "name_th": "เมืองศรีสะเกษ",
+    "parent_code": "33"
+  },
+  {
+    "code": "3302",
+    "name_th": "ยางชุมน้อย",
+    "parent_code": "33"
+  },
+  {
+    "code": "3303",
+    "name_th": "กันทรารมย์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3304",
+    "name_th": "กันทรลักษ์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3305",
+    "name_th": "ขุขันธ์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3306",
+    "name_th": "ไพรบึง",
+    "parent_code": "33"
+  },
+  {
+    "code": "3307",
+    "name_th": "ปรางค์กู่",
+    "parent_code": "33"
+  },
+  {
+    "code": "3308",
+    "name_th": "ขุนหาญ",
+    "parent_code": "33"
+  },
+  {
+    "code": "3309",
+    "name_th": "ราษีไศล",
+    "parent_code": "33"
+  },
+  {
+    "code": "3310",
+    "name_th": "อุทุมพรพิสัย",
+    "parent_code": "33"
+  },
+  {
+    "code": "3311",
+    "name_th": "บึงบูรพ์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3312",
+    "name_th": "ห้วยทับทัน",
+    "parent_code": "33"
+  },
+  {
+    "code": "3313",
+    "name_th": "โนนคูณ",
+    "parent_code": "33"
+  },
+  {
+    "code": "3314",
+    "name_th": "ศรีรัตนะ",
+    "parent_code": "33"
+  },
+  {
+    "code": "3315",
+    "name_th": "น้ำเกลี้ยง",
+    "parent_code": "33"
+  },
+  {
+    "code": "3316",
+    "name_th": "วังหิน",
+    "parent_code": "33"
+  },
+  {
+    "code": "3317",
+    "name_th": "ภูสิงห์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3318",
+    "name_th": "เมืองจันทร์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3319",
+    "name_th": "เบญจลักษ์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3320",
+    "name_th": "พยุห์",
+    "parent_code": "33"
+  },
+  {
+    "code": "3321",
+    "name_th": "โพธิ์ศรีสุวรรณ",
+    "parent_code": "33"
+  },
+  {
+    "code": "3322",
+    "name_th": "ศิลาลาด",
+    "parent_code": "33"
+  },
+  {
+    "code": "3401",
+    "name_th": "เมืองอุบลราชธานี",
+    "parent_code": "34"
+  },
+  {
+    "code": "3402",
+    "name_th": "ศรีเมืองใหม่",
+    "parent_code": "34"
+  },
+  {
+    "code": "3403",
+    "name_th": "โขงเจียม",
+    "parent_code": "34"
+  },
+  {
+    "code": "3404",
+    "name_th": "เขื่องใน",
+    "parent_code": "34"
+  },
+  {
+    "code": "3405",
+    "name_th": "เขมราฐ",
+    "parent_code": "34"
+  },
+  {
+    "code": "3407",
+    "name_th": "เดชอุดม",
+    "parent_code": "34"
+  },
+  {
+    "code": "3408",
+    "name_th": "นาจะหลวย",
+    "parent_code": "34"
+  },
+  {
+    "code": "3409",
+    "name_th": "น้ำยืน",
+    "parent_code": "34"
+  },
+  {
+    "code": "3410",
+    "name_th": "บุณฑริก",
+    "parent_code": "34"
+  },
+  {
+    "code": "3411",
+    "name_th": "ตระการพืชผล",
+    "parent_code": "34"
+  },
+  {
+    "code": "3412",
+    "name_th": "กุดข้าวปุ้น",
+    "parent_code": "34"
+  },
+  {
+    "code": "3414",
+    "name_th": "ม่วงสามสิบ",
+    "parent_code": "34"
+  },
+  {
+    "code": "3415",
+    "name_th": "วารินชำราบ",
+    "parent_code": "34"
+  },
+  {
+    "code": "3419",
+    "name_th": "พิบูลมังสาหาร",
+    "parent_code": "34"
+  },
+  {
+    "code": "3420",
+    "name_th": "ตาลสุม",
+    "parent_code": "34"
+  },
+  {
+    "code": "3421",
+    "name_th": "โพธิ์ไทร",
+    "parent_code": "34"
+  },
+  {
+    "code": "3422",
+    "name_th": "สำโรง",
+    "parent_code": "34"
+  },
+  {
+    "code": "3424",
+    "name_th": "ดอนมดแดง",
+    "parent_code": "34"
+  },
+  {
+    "code": "3425",
+    "name_th": "สิรินธร",
+    "parent_code": "34"
+  },
+  {
+    "code": "3426",
+    "name_th": "ทุ่งศรีอุดม",
+    "parent_code": "34"
+  },
+  {
+    "code": "3429",
+    "name_th": "นาเยีย",
+    "parent_code": "34"
+  },
+  {
+    "code": "3430",
+    "name_th": "นาตาล",
+    "parent_code": "34"
+  },
+  {
+    "code": "3431",
+    "name_th": "เหล่าเสือโก้ก",
+    "parent_code": "34"
+  },
+  {
+    "code": "3432",
+    "name_th": "สว่างวีระวงศ์",
+    "parent_code": "34"
+  },
+  {
+    "code": "3433",
+    "name_th": "น้ำขุ่น",
+    "parent_code": "34"
+  },
+  {
+    "code": "3501",
+    "name_th": "เมืองยโสธร",
+    "parent_code": "35"
+  },
+  {
+    "code": "3502",
+    "name_th": "ทรายมูล",
+    "parent_code": "35"
+  },
+  {
+    "code": "3503",
+    "name_th": "กุดชุม",
+    "parent_code": "35"
+  },
+  {
+    "code": "3504",
+    "name_th": "คำเขื่อนแก้ว",
+    "parent_code": "35"
+  },
+  {
+    "code": "3505",
+    "name_th": "ป่าติ้ว",
+    "parent_code": "35"
+  },
+  {
+    "code": "3506",
+    "name_th": "มหาชนะชัย",
+    "parent_code": "35"
+  },
+  {
+    "code": "3507",
+    "name_th": "ค้อวัง",
+    "parent_code": "35"
+  },
+  {
+    "code": "3508",
+    "name_th": "เลิงนกทา",
+    "parent_code": "35"
+  },
+  {
+    "code": "3509",
+    "name_th": "ไทยเจริญ",
+    "parent_code": "35"
+  },
+  {
+    "code": "3601",
+    "name_th": "เมืองชัยภูมิ",
+    "parent_code": "36"
+  },
+  {
+    "code": "3602",
+    "name_th": "บ้านเขว้า",
+    "parent_code": "36"
+  },
+  {
+    "code": "3603",
+    "name_th": "คอนสวรรค์",
+    "parent_code": "36"
+  },
+  {
+    "code": "3604",
+    "name_th": "เกษตรสมบูรณ์",
+    "parent_code": "36"
+  },
+  {
+    "code": "3605",
+    "name_th": "หนองบัวแดง",
+    "parent_code": "36"
+  },
+  {
+    "code": "3606",
+    "name_th": "จัตุรัส",
+    "parent_code": "36"
+  },
+  {
+    "code": "3607",
+    "name_th": "บำเหน็จณรงค์",
+    "parent_code": "36"
+  },
+  {
+    "code": "3608",
+    "name_th": "หนองบัวระเหว",
+    "parent_code": "36"
+  },
+  {
+    "code": "3609",
+    "name_th": "เทพสถิต",
+    "parent_code": "36"
+  },
+  {
+    "code": "3610",
+    "name_th": "ภูเขียว",
+    "parent_code": "36"
+  },
+  {
+    "code": "3611",
+    "name_th": "บ้านแท่น",
+    "parent_code": "36"
+  },
+  {
+    "code": "3612",
+    "name_th": "แก้งคร้อ",
+    "parent_code": "36"
+  },
+  {
+    "code": "3613",
+    "name_th": "คอนสาร",
+    "parent_code": "36"
+  },
+  {
+    "code": "3614",
+    "name_th": "ภักดีชุมพล",
+    "parent_code": "36"
+  },
+  {
+    "code": "3615",
+    "name_th": "เนินสง่า",
+    "parent_code": "36"
+  },
+  {
+    "code": "3616",
+    "name_th": "ซับใหญ่",
+    "parent_code": "36"
+  },
+  {
+    "code": "3701",
+    "name_th": "เมืองอำนาจเจริญ",
+    "parent_code": "37"
+  },
+  {
+    "code": "3702",
+    "name_th": "ชานุมาน",
+    "parent_code": "37"
+  },
+  {
+    "code": "3703",
+    "name_th": "ปทุมราชวงศา",
+    "parent_code": "37"
+  },
+  {
+    "code": "3704",
+    "name_th": "พนา",
+    "parent_code": "37"
+  },
+  {
+    "code": "3705",
+    "name_th": "เสนางคนิคม",
+    "parent_code": "37"
+  },
+  {
+    "code": "3706",
+    "name_th": "หัวตะพาน",
+    "parent_code": "37"
+  },
+  {
+    "code": "3707",
+    "name_th": "ลืออำนาจ",
+    "parent_code": "37"
+  },
+  {
+    "code": "3801",
+    "name_th": "เมืองบึงกาฬ",
+    "parent_code": "38"
+  },
+  {
+    "code": "3802",
+    "name_th": "เซกา",
+    "parent_code": "38"
+  },
+  {
+    "code": "3803",
+    "name_th": "โซ่พิสัย",
+    "parent_code": "38"
+  },
+  {
+    "code": "3804",
+    "name_th": "พรเจริญ",
+    "parent_code": "38"
+  },
+  {
+    "code": "3805",
+    "name_th": "ศรีวิไล",
+    "parent_code": "38"
+  },
+  {
+    "code": "3806",
+    "name_th": "บึงโขงหลง",
+    "parent_code": "38"
+  },
+  {
+    "code": "3807",
+    "name_th": "ปากคาด",
+    "parent_code": "38"
+  },
+  {
+    "code": "3808",
+    "name_th": "บุ่งคล้า",
+    "parent_code": "38"
+  },
+  {
+    "code": "3901",
+    "name_th": "เมืองหนองบัวลำภู",
+    "parent_code": "39"
+  },
+  {
+    "code": "3902",
+    "name_th": "นากลาง",
+    "parent_code": "39"
+  },
+  {
+    "code": "3903",
+    "name_th": "โนนสัง",
+    "parent_code": "39"
+  },
+  {
+    "code": "3904",
+    "name_th": "ศรีบุญเรือง",
+    "parent_code": "39"
+  },
+  {
+    "code": "3905",
+    "name_th": "สุวรรณคูหา",
+    "parent_code": "39"
+  },
+  {
+    "code": "3906",
+    "name_th": "นาวัง",
+    "parent_code": "39"
+  },
+  {
+    "code": "4001",
+    "name_th": "เมืองขอนแก่น",
+    "parent_code": "40"
+  },
+  {
+    "code": "4002",
+    "name_th": "บ้านฝาง",
+    "parent_code": "40"
+  },
+  {
+    "code": "4003",
+    "name_th": "พระยืน",
+    "parent_code": "40"
+  },
+  {
+    "code": "4004",
+    "name_th": "หนองเรือ",
+    "parent_code": "40"
+  },
+  {
+    "code": "4005",
+    "name_th": "ชุมแพ",
+    "parent_code": "40"
+  },
+  {
+    "code": "4006",
+    "name_th": "สีชมพู",
+    "parent_code": "40"
+  },
+  {
+    "code": "4007",
+    "name_th": "น้ำพอง",
+    "parent_code": "40"
+  },
+  {
+    "code": "4008",
+    "name_th": "อุบลรัตน์",
+    "parent_code": "40"
+  },
+  {
+    "code": "4009",
+    "name_th": "กระนวน",
+    "parent_code": "40"
+  },
+  {
+    "code": "4010",
+    "name_th": "บ้านไผ่",
+    "parent_code": "40"
+  },
+  {
+    "code": "4011",
+    "name_th": "เปือยน้อย",
+    "parent_code": "40"
+  },
+  {
+    "code": "4012",
+    "name_th": "พล",
+    "parent_code": "40"
+  },
+  {
+    "code": "4013",
+    "name_th": "แวงใหญ่",
+    "parent_code": "40"
+  },
+  {
+    "code": "4014",
+    "name_th": "แวงน้อย",
+    "parent_code": "40"
+  },
+  {
+    "code": "4015",
+    "name_th": "หนองสองห้อง",
+    "parent_code": "40"
+  },
+  {
+    "code": "4016",
+    "name_th": "ภูเวียง",
+    "parent_code": "40"
+  },
+  {
+    "code": "4017",
+    "name_th": "มัญจาคีรี",
+    "parent_code": "40"
+  },
+  {
+    "code": "4018",
+    "name_th": "ชนบท",
+    "parent_code": "40"
+  },
+  {
+    "code": "4019",
+    "name_th": "เขาสวนกวาง",
+    "parent_code": "40"
+  },
+  {
+    "code": "4020",
+    "name_th": "ภูผาม่าน",
+    "parent_code": "40"
+  },
+  {
+    "code": "4021",
+    "name_th": "ซำสูง",
+    "parent_code": "40"
+  },
+  {
+    "code": "4022",
+    "name_th": "โคกโพธิ์ไชย",
+    "parent_code": "40"
+  },
+  {
+    "code": "4023",
+    "name_th": "หนองนาคำ",
+    "parent_code": "40"
+  },
+  {
+    "code": "4024",
+    "name_th": "บ้านแฮด",
+    "parent_code": "40"
+  },
+  {
+    "code": "4025",
+    "name_th": "โนนศิลา",
+    "parent_code": "40"
+  },
+  {
+    "code": "4029",
+    "name_th": "เวียงเก่า",
+    "parent_code": "40"
+  },
+  {
+    "code": "4101",
+    "name_th": "เมืองอุดรธานี",
+    "parent_code": "41"
+  },
+  {
+    "code": "4102",
+    "name_th": "กุดจับ",
+    "parent_code": "41"
+  },
+  {
+    "code": "4103",
+    "name_th": "หนองวัวซอ",
+    "parent_code": "41"
+  },
+  {
+    "code": "4104",
+    "name_th": "กุมภวาปี",
+    "parent_code": "41"
+  },
+  {
+    "code": "4105",
+    "name_th": "โนนสะอาด",
+    "parent_code": "41"
+  },
+  {
+    "code": "4106",
+    "name_th": "หนองหาน",
+    "parent_code": "41"
+  },
+  {
+    "code": "4107",
+    "name_th": "ทุ่งฝน",
+    "parent_code": "41"
+  },
+  {
+    "code": "4108",
+    "name_th": "ไชยวาน",
+    "parent_code": "41"
+  },
+  {
+    "code": "4109",
+    "name_th": "ศรีธาตุ",
+    "parent_code": "41"
+  },
+  {
+    "code": "4110",
+    "name_th": "วังสามหมอ",
+    "parent_code": "41"
+  },
+  {
+    "code": "4111",
+    "name_th": "บ้านดุง",
+    "parent_code": "41"
+  },
+  {
+    "code": "4117",
+    "name_th": "บ้านผือ",
+    "parent_code": "41"
+  },
+  {
+    "code": "4118",
+    "name_th": "น้ำโสม",
+    "parent_code": "41"
+  },
+  {
+    "code": "4119",
+    "name_th": "เพ็ญ",
+    "parent_code": "41"
+  },
+  {
+    "code": "4120",
+    "name_th": "สร้างคอม",
+    "parent_code": "41"
+  },
+  {
+    "code": "4121",
+    "name_th": "หนองแสง",
+    "parent_code": "41"
+  },
+  {
+    "code": "4122",
+    "name_th": "นายูง",
+    "parent_code": "41"
+  },
+  {
+    "code": "4123",
+    "name_th": "พิบูลย์รักษ์",
+    "parent_code": "41"
+  },
+  {
+    "code": "4124",
+    "name_th": "กู่แก้ว",
+    "parent_code": "41"
+  },
+  {
+    "code": "4125",
+    "name_th": "ประจักษ์ศิลปาคม",
+    "parent_code": "41"
+  },
+  {
+    "code": "4201",
+    "name_th": "เมืองเลย",
+    "parent_code": "42"
+  },
+  {
+    "code": "4202",
+    "name_th": "นาด้วง",
+    "parent_code": "42"
+  },
+  {
+    "code": "4203",
+    "name_th": "เชียงคาน",
+    "parent_code": "42"
+  },
+  {
+    "code": "4204",
+    "name_th": "ปากชม",
+    "parent_code": "42"
+  },
+  {
+    "code": "4205",
+    "name_th": "ด่านซ้าย",
+    "parent_code": "42"
+  },
+  {
+    "code": "4206",
+    "name_th": "นาแห้ว",
+    "parent_code": "42"
+  },
+  {
+    "code": "4207",
+    "name_th": "ภูเรือ",
+    "parent_code": "42"
+  },
+  {
+    "code": "4208",
+    "name_th": "ท่าลี่",
+    "parent_code": "42"
+  },
+  {
+    "code": "4209",
+    "name_th": "วังสะพุง",
+    "parent_code": "42"
+  },
+  {
+    "code": "4210",
+    "name_th": "ภูกระดึง",
+    "parent_code": "42"
+  },
+  {
+    "code": "4211",
+    "name_th": "ภูหลวง",
+    "parent_code": "42"
+  },
+  {
+    "code": "4212",
+    "name_th": "ผาขาว",
+    "parent_code": "42"
+  },
+  {
+    "code": "4213",
+    "name_th": "เอราวัณ",
+    "parent_code": "42"
+  },
+  {
+    "code": "4214",
+    "name_th": "หนองหิน",
+    "parent_code": "42"
+  },
+  {
+    "code": "4301",
+    "name_th": "เมืองหนองคาย",
+    "parent_code": "43"
+  },
+  {
+    "code": "4302",
+    "name_th": "ท่าบ่อ",
+    "parent_code": "43"
+  },
+  {
+    "code": "4305",
+    "name_th": "โพนพิสัย",
+    "parent_code": "43"
+  },
+  {
+    "code": "4307",
+    "name_th": "ศรีเชียงใหม่",
+    "parent_code": "43"
+  },
+  {
+    "code": "4308",
+    "name_th": "สังคม",
+    "parent_code": "43"
+  },
+  {
+    "code": "4314",
+    "name_th": "สระใคร",
+    "parent_code": "43"
+  },
+  {
+    "code": "4315",
+    "name_th": "เฝ้าไร่",
+    "parent_code": "43"
+  },
+  {
+    "code": "4316",
+    "name_th": "รัตนวาปี",
+    "parent_code": "43"
+  },
+  {
+    "code": "4317",
+    "name_th": "โพธิ์ตาก",
+    "parent_code": "43"
+  },
+  {
+    "code": "4401",
+    "name_th": "เมืองมหาสารคาม",
+    "parent_code": "44"
+  },
+  {
+    "code": "4402",
+    "name_th": "แกดำ",
+    "parent_code": "44"
+  },
+  {
+    "code": "4403",
+    "name_th": "โกสุมพิสัย",
+    "parent_code": "44"
+  },
+  {
+    "code": "4404",
+    "name_th": "กันทรวิชัย",
+    "parent_code": "44"
+  },
+  {
+    "code": "4405",
+    "name_th": "เชียงยืน",
+    "parent_code": "44"
+  },
+  {
+    "code": "4406",
+    "name_th": "บรบือ",
+    "parent_code": "44"
+  },
+  {
+    "code": "4407",
+    "name_th": "นาเชือก",
+    "parent_code": "44"
+  },
+  {
+    "code": "4408",
+    "name_th": "พยัคฆภูมิพิสัย",
+    "parent_code": "44"
+  },
+  {
+    "code": "4409",
+    "name_th": "วาปีปทุม",
+    "parent_code": "44"
+  },
+  {
+    "code": "4410",
+    "name_th": "นาดูน",
+    "parent_code": "44"
+  },
+  {
+    "code": "4411",
+    "name_th": "ยางสีสุราช",
+    "parent_code": "44"
+  },
+  {
+    "code": "4412",
+    "name_th": "กุดรัง",
+    "parent_code": "44"
+  },
+  {
+    "code": "4413",
+    "name_th": "ชื่นชม",
+    "parent_code": "44"
+  },
+  {
+    "code": "4501",
+    "name_th": "เมืองร้อยเอ็ด",
+    "parent_code": "45"
+  },
+  {
+    "code": "4502",
+    "name_th": "เกษตรวิสัย",
+    "parent_code": "45"
+  },
+  {
+    "code": "4503",
+    "name_th": "ปทุมรัตต์",
+    "parent_code": "45"
+  },
+  {
+    "code": "4504",
+    "name_th": "จตุรพักตรพิมาน",
+    "parent_code": "45"
+  },
+  {
+    "code": "4505",
+    "name_th": "ธวัชบุรี",
+    "parent_code": "45"
+  },
+  {
+    "code": "4506",
+    "name_th": "พนมไพร",
+    "parent_code": "45"
+  },
+  {
+    "code": "4507",
+    "name_th": "โพนทอง",
+    "parent_code": "45"
+  },
+  {
+    "code": "4508",
+    "name_th": "โพธิ์ชัย",
+    "parent_code": "45"
+  },
+  {
+    "code": "4509",
+    "name_th": "หนองพอก",
+    "parent_code": "45"
+  },
+  {
+    "code": "4510",
+    "name_th": "เสลภูมิ",
+    "parent_code": "45"
+  },
+  {
+    "code": "4511",
+    "name_th": "สุวรรณภูมิ",
+    "parent_code": "45"
+  },
+  {
+    "code": "4512",
+    "name_th": "เมืองสรวง",
+    "parent_code": "45"
+  },
+  {
+    "code": "4513",
+    "name_th": "โพนทราย",
+    "parent_code": "45"
+  },
+  {
+    "code": "4514",
+    "name_th": "อาจสามารถ",
+    "parent_code": "45"
+  },
+  {
+    "code": "4515",
+    "name_th": "เมยวดี",
+    "parent_code": "45"
+  },
+  {
+    "code": "4516",
+    "name_th": "ศรีสมเด็จ",
+    "parent_code": "45"
+  },
+  {
+    "code": "4517",
+    "name_th": "จังหาร",
+    "parent_code": "45"
+  },
+  {
+    "code": "4518",
+    "name_th": "เชียงขวัญ",
+    "parent_code": "45"
+  },
+  {
+    "code": "4519",
+    "name_th": "หนองฮี",
+    "parent_code": "45"
+  },
+  {
+    "code": "4520",
+    "name_th": "ทุ่งเขาหลวง",
+    "parent_code": "45"
+  },
+  {
+    "code": "4601",
+    "name_th": "เมืองกาฬสินธุ์",
+    "parent_code": "46"
+  },
+  {
+    "code": "4602",
+    "name_th": "นามน",
+    "parent_code": "46"
+  },
+  {
+    "code": "4603",
+    "name_th": "กมลาไสย",
+    "parent_code": "46"
+  },
+  {
+    "code": "4604",
+    "name_th": "ร่องคำ",
+    "parent_code": "46"
+  },
+  {
+    "code": "4605",
+    "name_th": "กุฉินารายณ์",
+    "parent_code": "46"
+  },
+  {
+    "code": "4606",
+    "name_th": "เขาวง",
+    "parent_code": "46"
+  },
+  {
+    "code": "4607",
+    "name_th": "ยางตลาด",
+    "parent_code": "46"
+  },
+  {
+    "code": "4608",
+    "name_th": "ห้วยเม็ก",
+    "parent_code": "46"
+  },
+  {
+    "code": "4609",
+    "name_th": "สหัสขันธ์",
+    "parent_code": "46"
+  },
+  {
+    "code": "4610",
+    "name_th": "คำม่วง",
+    "parent_code": "46"
+  },
+  {
+    "code": "4611",
+    "name_th": "ท่าคันโท",
+    "parent_code": "46"
+  },
+  {
+    "code": "4612",
+    "name_th": "หนองกุงศรี",
+    "parent_code": "46"
+  },
+  {
+    "code": "4613",
+    "name_th": "สมเด็จ",
+    "parent_code": "46"
+  },
+  {
+    "code": "4614",
+    "name_th": "ห้วยผึ้ง",
+    "parent_code": "46"
+  },
+  {
+    "code": "4615",
+    "name_th": "สามชัย",
+    "parent_code": "46"
+  },
+  {
+    "code": "4616",
+    "name_th": "นาคู",
+    "parent_code": "46"
+  },
+  {
+    "code": "4617",
+    "name_th": "ดอนจาน",
+    "parent_code": "46"
+  },
+  {
+    "code": "4618",
+    "name_th": "ฆ้องชัย",
+    "parent_code": "46"
+  },
+  {
+    "code": "4701",
+    "name_th": "เมืองสกลนคร",
+    "parent_code": "47"
+  },
+  {
+    "code": "4702",
+    "name_th": "กุสุมาลย์",
+    "parent_code": "47"
+  },
+  {
+    "code": "4703",
+    "name_th": "กุดบาก",
+    "parent_code": "47"
+  },
+  {
+    "code": "4704",
+    "name_th": "พรรณานิคม",
+    "parent_code": "47"
+  },
+  {
+    "code": "4705",
+    "name_th": "พังโคน",
+    "parent_code": "47"
+  },
+  {
+    "code": "4706",
+    "name_th": "วาริชภูมิ",
+    "parent_code": "47"
+  },
+  {
+    "code": "4707",
+    "name_th": "นิคมน้ำอูน",
+    "parent_code": "47"
+  },
+  {
+    "code": "4708",
+    "name_th": "วานรนิวาส",
+    "parent_code": "47"
+  },
+  {
+    "code": "4709",
+    "name_th": "คำตากล้า",
+    "parent_code": "47"
+  },
+  {
+    "code": "4710",
+    "name_th": "บ้านม่วง",
+    "parent_code": "47"
+  },
+  {
+    "code": "4711",
+    "name_th": "อากาศอำนวย",
+    "parent_code": "47"
+  },
+  {
+    "code": "4712",
+    "name_th": "สว่างแดนดิน",
+    "parent_code": "47"
+  },
+  {
+    "code": "4713",
+    "name_th": "ส่องดาว",
+    "parent_code": "47"
+  },
+  {
+    "code": "4714",
+    "name_th": "เต่างอย",
+    "parent_code": "47"
+  },
+  {
+    "code": "4715",
+    "name_th": "โคกศรีสุพรรณ",
+    "parent_code": "47"
+  },
+  {
+    "code": "4716",
+    "name_th": "เจริญศิลป์",
+    "parent_code": "47"
+  },
+  {
+    "code": "4717",
+    "name_th": "โพนนาแก้ว",
+    "parent_code": "47"
+  },
+  {
+    "code": "4718",
+    "name_th": "ภูพาน",
+    "parent_code": "47"
+  },
+  {
+    "code": "4801",
+    "name_th": "เมืองนครพนม",
+    "parent_code": "48"
+  },
+  {
+    "code": "4802",
+    "name_th": "ปลาปาก",
+    "parent_code": "48"
+  },
+  {
+    "code": "4803",
+    "name_th": "ท่าอุเทน",
+    "parent_code": "48"
+  },
+  {
+    "code": "4804",
+    "name_th": "บ้านแพง",
+    "parent_code": "48"
+  },
+  {
+    "code": "4805",
+    "name_th": "ธาตุพนม",
+    "parent_code": "48"
+  },
+  {
+    "code": "4806",
+    "name_th": "เรณูนคร",
+    "parent_code": "48"
+  },
+  {
+    "code": "4807",
+    "name_th": "นาแก",
+    "parent_code": "48"
+  },
+  {
+    "code": "4808",
+    "name_th": "ศรีสงคราม",
+    "parent_code": "48"
+  },
+  {
+    "code": "4809",
+    "name_th": "นาหว้า",
+    "parent_code": "48"
+  },
+  {
+    "code": "4810",
+    "name_th": "โพนสวรรค์",
+    "parent_code": "48"
+  },
+  {
+    "code": "4811",
+    "name_th": "นาทม",
+    "parent_code": "48"
+  },
+  {
+    "code": "4812",
+    "name_th": "วังยาง",
+    "parent_code": "48"
+  },
+  {
+    "code": "4901",
+    "name_th": "เมืองมุกดาหาร",
+    "parent_code": "49"
+  },
+  {
+    "code": "4902",
+    "name_th": "นิคมคำสร้อย",
+    "parent_code": "49"
+  },
+  {
+    "code": "4903",
+    "name_th": "ดอนตาล",
+    "parent_code": "49"
+  },
+  {
+    "code": "4904",
+    "name_th": "ดงหลวง",
+    "parent_code": "49"
+  },
+  {
+    "code": "4905",
+    "name_th": "คำชะอี",
+    "parent_code": "49"
+  },
+  {
+    "code": "4906",
+    "name_th": "หว้านใหญ่",
+    "parent_code": "49"
+  },
+  {
+    "code": "4907",
+    "name_th": "หนองสูง",
+    "parent_code": "49"
+  },
+  {
+    "code": "5001",
+    "name_th": "เมืองเชียงใหม่",
+    "parent_code": "50"
+  },
+  {
+    "code": "5002",
+    "name_th": "จอมทอง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5003",
+    "name_th": "แม่แจ่ม",
+    "parent_code": "50"
+  },
+  {
+    "code": "5004",
+    "name_th": "เชียงดาว",
+    "parent_code": "50"
+  },
+  {
+    "code": "5005",
+    "name_th": "ดอยสะเก็ด",
+    "parent_code": "50"
+  },
+  {
+    "code": "5006",
+    "name_th": "แม่แตง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5007",
+    "name_th": "แม่ริม",
+    "parent_code": "50"
+  },
+  {
+    "code": "5008",
+    "name_th": "สะเมิง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5009",
+    "name_th": "ฝาง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5010",
+    "name_th": "แม่อาย",
+    "parent_code": "50"
+  },
+  {
+    "code": "5011",
+    "name_th": "พร้าว",
+    "parent_code": "50"
+  },
+  {
+    "code": "5012",
+    "name_th": "สันป่าตอง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5013",
+    "name_th": "สันกำแพง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5014",
+    "name_th": "สันทราย",
+    "parent_code": "50"
+  },
+  {
+    "code": "5015",
+    "name_th": "หางดง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5016",
+    "name_th": "ฮอด",
+    "parent_code": "50"
+  },
+  {
+    "code": "5017",
+    "name_th": "ดอยเต่า",
+    "parent_code": "50"
+  },
+  {
+    "code": "5018",
+    "name_th": "อมก๋อย",
+    "parent_code": "50"
+  },
+  {
+    "code": "5019",
+    "name_th": "สารภี",
+    "parent_code": "50"
+  },
+  {
+    "code": "5020",
+    "name_th": "เวียงแหง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5021",
+    "name_th": "ไชยปราการ",
+    "parent_code": "50"
+  },
+  {
+    "code": "5022",
+    "name_th": "แม่วาง",
+    "parent_code": "50"
+  },
+  {
+    "code": "5023",
+    "name_th": "แม่ออน",
+    "parent_code": "50"
+  },
+  {
+    "code": "5024",
+    "name_th": "ดอยหล่อ",
+    "parent_code": "50"
+  },
+  {
+    "code": "5101",
+    "name_th": "เมืองลำพูน",
+    "parent_code": "51"
+  },
+  {
+    "code": "5102",
+    "name_th": "แม่ทา",
+    "parent_code": "51"
+  },
+  {
+    "code": "5103",
+    "name_th": "บ้านโฮ่ง",
+    "parent_code": "51"
+  },
+  {
+    "code": "5104",
+    "name_th": "ลี้",
+    "parent_code": "51"
+  },
+  {
+    "code": "5105",
+    "name_th": "ทุ่งหัวช้าง",
+    "parent_code": "51"
+  },
+  {
+    "code": "5106",
+    "name_th": "ป่าซาง",
+    "parent_code": "51"
+  },
+  {
+    "code": "5107",
+    "name_th": "บ้านธิ",
+    "parent_code": "51"
+  },
+  {
+    "code": "5108",
+    "name_th": "เวียงหนองล่อง",
+    "parent_code": "51"
+  },
+  {
+    "code": "5201",
+    "name_th": "เมืองลำปาง",
+    "parent_code": "52"
+  },
+  {
+    "code": "5202",
+    "name_th": "แม่เมาะ",
+    "parent_code": "52"
+  },
+  {
+    "code": "5203",
+    "name_th": "เกาะคา",
+    "parent_code": "52"
+  },
+  {
+    "code": "5204",
+    "name_th": "เสริมงาม",
+    "parent_code": "52"
+  },
+  {
+    "code": "5205",
+    "name_th": "งาว",
+    "parent_code": "52"
+  },
+  {
+    "code": "5206",
+    "name_th": "แจ้ห่ม",
+    "parent_code": "52"
+  },
+  {
+    "code": "5207",
+    "name_th": "วังเหนือ",
+    "parent_code": "52"
+  },
+  {
+    "code": "5208",
+    "name_th": "เถิน",
+    "parent_code": "52"
+  },
+  {
+    "code": "5209",
+    "name_th": "แม่พริก",
+    "parent_code": "52"
+  },
+  {
+    "code": "5210",
+    "name_th": "แม่ทะ",
+    "parent_code": "52"
+  },
+  {
+    "code": "5211",
+    "name_th": "สบปราบ",
+    "parent_code": "52"
+  },
+  {
+    "code": "5212",
+    "name_th": "ห้างฉัตร",
+    "parent_code": "52"
+  },
+  {
+    "code": "5213",
+    "name_th": "เมืองปาน",
+    "parent_code": "52"
+  },
+  {
+    "code": "5301",
+    "name_th": "เมืองอุตรดิตถ์",
+    "parent_code": "53"
+  },
+  {
+    "code": "5302",
+    "name_th": "ตรอน",
+    "parent_code": "53"
+  },
+  {
+    "code": "5303",
+    "name_th": "ท่าปลา",
+    "parent_code": "53"
+  },
+  {
+    "code": "5304",
+    "name_th": "น้ำปาด",
+    "parent_code": "53"
+  },
+  {
+    "code": "5305",
+    "name_th": "ฟากท่า",
+    "parent_code": "53"
+  },
+  {
+    "code": "5306",
+    "name_th": "บ้านโคก",
+    "parent_code": "53"
+  },
+  {
+    "code": "5307",
+    "name_th": "พิชัย",
+    "parent_code": "53"
+  },
+  {
+    "code": "5308",
+    "name_th": "ลับแล",
+    "parent_code": "53"
+  },
+  {
+    "code": "5309",
+    "name_th": "ทองแสนขัน",
+    "parent_code": "53"
+  },
+  {
+    "code": "5401",
+    "name_th": "เมืองแพร่",
+    "parent_code": "54"
+  },
+  {
+    "code": "5402",
+    "name_th": "ร้องกวาง",
+    "parent_code": "54"
+  },
+  {
+    "code": "5403",
+    "name_th": "ลอง",
+    "parent_code": "54"
+  },
+  {
+    "code": "5404",
+    "name_th": "สูงเม่น",
+    "parent_code": "54"
+  },
+  {
+    "code": "5405",
+    "name_th": "เด่นชัย",
+    "parent_code": "54"
+  },
+  {
+    "code": "5406",
+    "name_th": "สอง",
+    "parent_code": "54"
+  },
+  {
+    "code": "5407",
+    "name_th": "วังชิ้น",
+    "parent_code": "54"
+  },
+  {
+    "code": "5408",
+    "name_th": "หนองม่วงไข่",
+    "parent_code": "54"
+  },
+  {
+    "code": "5501",
+    "name_th": "เมืองน่าน",
+    "parent_code": "55"
+  },
+  {
+    "code": "5502",
+    "name_th": "แม่จริม",
+    "parent_code": "55"
+  },
+  {
+    "code": "5503",
+    "name_th": "บ้านหลวง",
+    "parent_code": "55"
+  },
+  {
+    "code": "5504",
+    "name_th": "นาน้อย",
+    "parent_code": "55"
+  },
+  {
+    "code": "5505",
+    "name_th": "ปัว",
+    "parent_code": "55"
+  },
+  {
+    "code": "5506",
+    "name_th": "ท่าวังผา",
+    "parent_code": "55"
+  },
+  {
+    "code": "5507",
+    "name_th": "เวียงสา",
+    "parent_code": "55"
+  },
+  {
+    "code": "5508",
+    "name_th": "ทุ่งช้าง",
+    "parent_code": "55"
+  },
+  {
+    "code": "5509",
+    "name_th": "เชียงกลาง",
+    "parent_code": "55"
+  },
+  {
+    "code": "5510",
+    "name_th": "นาหมื่น",
+    "parent_code": "55"
+  },
+  {
+    "code": "5511",
+    "name_th": "สันติสุข",
+    "parent_code": "55"
+  },
+  {
+    "code": "5512",
+    "name_th": "บ่อเกลือ",
+    "parent_code": "55"
+  },
+  {
+    "code": "5513",
+    "name_th": "สองแคว",
+    "parent_code": "55"
+  },
+  {
+    "code": "5514",
+    "name_th": "ภูเพียง",
+    "parent_code": "55"
+  },
+  {
+    "code": "5515",
+    "name_th": "เฉลิมพระเกียรติ",
+    "parent_code": "55"
+  },
+  {
+    "code": "5601",
+    "name_th": "เมืองพะเยา",
+    "parent_code": "56"
+  },
+  {
+    "code": "5602",
+    "name_th": "จุน",
+    "parent_code": "56"
+  },
+  {
+    "code": "5603",
+    "name_th": "เชียงคำ",
+    "parent_code": "56"
+  },
+  {
+    "code": "5604",
+    "name_th": "เชียงม่วน",
+    "parent_code": "56"
+  },
+  {
+    "code": "5605",
+    "name_th": "ดอกคำใต้",
+    "parent_code": "56"
+  },
+  {
+    "code": "5606",
+    "name_th": "ปง",
+    "parent_code": "56"
+  },
+  {
+    "code": "5607",
+    "name_th": "แม่ใจ",
+    "parent_code": "56"
+  },
+  {
+    "code": "5608",
+    "name_th": "ภูซาง",
+    "parent_code": "56"
+  },
+  {
+    "code": "5609",
+    "name_th": "ภูกามยาว",
+    "parent_code": "56"
+  },
+  {
+    "code": "5701",
+    "name_th": "เมืองเชียงราย",
+    "parent_code": "57"
+  },
+  {
+    "code": "5702",
+    "name_th": "เวียงชัย",
+    "parent_code": "57"
+  },
+  {
+    "code": "5703",
+    "name_th": "เชียงของ",
+    "parent_code": "57"
+  },
+  {
+    "code": "5704",
+    "name_th": "เทิง",
+    "parent_code": "57"
+  },
+  {
+    "code": "5705",
+    "name_th": "พาน",
+    "parent_code": "57"
+  },
+  {
+    "code": "5706",
+    "name_th": "ป่าแดด",
+    "parent_code": "57"
+  },
+  {
+    "code": "5707",
+    "name_th": "แม่จัน",
+    "parent_code": "57"
+  },
+  {
+    "code": "5708",
+    "name_th": "เชียงแสน",
+    "parent_code": "57"
+  },
+  {
+    "code": "5709",
+    "name_th": "แม่สาย",
+    "parent_code": "57"
+  },
+  {
+    "code": "5710",
+    "name_th": "แม่สรวย",
+    "parent_code": "57"
+  },
+  {
+    "code": "5711",
+    "name_th": "เวียงป่าเป้า",
+    "parent_code": "57"
+  },
+  {
+    "code": "5712",
+    "name_th": "พญาเม็งราย",
+    "parent_code": "57"
+  },
+  {
+    "code": "5713",
+    "name_th": "เวียงแก่น",
+    "parent_code": "57"
+  },
+  {
+    "code": "5714",
+    "name_th": "ขุนตาล",
+    "parent_code": "57"
+  },
+  {
+    "code": "5715",
+    "name_th": "แม่ฟ้าหลวง",
+    "parent_code": "57"
+  },
+  {
+    "code": "5716",
+    "name_th": "แม่ลาว",
+    "parent_code": "57"
+  },
+  {
+    "code": "5717",
+    "name_th": "เวียงเชียงรุ้ง",
+    "parent_code": "57"
+  },
+  {
+    "code": "5718",
+    "name_th": "ดอยหลวง",
+    "parent_code": "57"
+  },
+  {
+    "code": "5801",
+    "name_th": "เมืองแม่ฮ่องสอน",
+    "parent_code": "58"
+  },
+  {
+    "code": "5802",
+    "name_th": "ขุนยวม",
+    "parent_code": "58"
+  },
+  {
+    "code": "5803",
+    "name_th": "ปาย",
+    "parent_code": "58"
+  },
+  {
+    "code": "5804",
+    "name_th": "แม่สะเรียง",
+    "parent_code": "58"
+  },
+  {
+    "code": "5805",
+    "name_th": "แม่ลาน้อย",
+    "parent_code": "58"
+  },
+  {
+    "code": "5806",
+    "name_th": "สบเมย",
+    "parent_code": "58"
+  },
+  {
+    "code": "5807",
+    "name_th": "ปางมะผ้า",
+    "parent_code": "58"
+  },
+  {
+    "code": "6001",
+    "name_th": "เมืองนครสวรรค์",
+    "parent_code": "60"
+  },
+  {
+    "code": "6002",
+    "name_th": "โกรกพระ",
+    "parent_code": "60"
+  },
+  {
+    "code": "6003",
+    "name_th": "ชุมแสง",
+    "parent_code": "60"
+  },
+  {
+    "code": "6004",
+    "name_th": "หนองบัว",
+    "parent_code": "60"
+  },
+  {
+    "code": "6005",
+    "name_th": "บรรพตพิสัย",
+    "parent_code": "60"
+  },
+  {
+    "code": "6006",
+    "name_th": "เก้าเลี้ยว",
+    "parent_code": "60"
+  },
+  {
+    "code": "6007",
+    "name_th": "ตาคลี",
+    "parent_code": "60"
+  },
+  {
+    "code": "6008",
+    "name_th": "ท่าตะโก",
+    "parent_code": "60"
+  },
+  {
+    "code": "6009",
+    "name_th": "ไพศาลี",
+    "parent_code": "60"
+  },
+  {
+    "code": "6010",
+    "name_th": "พยุหะคีรี",
+    "parent_code": "60"
+  },
+  {
+    "code": "6011",
+    "name_th": "ลาดยาว",
+    "parent_code": "60"
+  },
+  {
+    "code": "6012",
+    "name_th": "ตากฟ้า",
+    "parent_code": "60"
+  },
+  {
+    "code": "6013",
+    "name_th": "แม่วงก์",
+    "parent_code": "60"
+  },
+  {
+    "code": "6014",
+    "name_th": "แม่เปิน",
+    "parent_code": "60"
+  },
+  {
+    "code": "6015",
+    "name_th": "ชุมตาบง",
+    "parent_code": "60"
+  },
+  {
+    "code": "6101",
+    "name_th": "เมืองอุทัยธานี",
+    "parent_code": "61"
+  },
+  {
+    "code": "6102",
+    "name_th": "ทัพทัน",
+    "parent_code": "61"
+  },
+  {
+    "code": "6103",
+    "name_th": "สว่างอารมณ์",
+    "parent_code": "61"
+  },
+  {
+    "code": "6104",
+    "name_th": "หนองฉาง",
+    "parent_code": "61"
+  },
+  {
+    "code": "6105",
+    "name_th": "หนองขาหย่าง",
+    "parent_code": "61"
+  },
+  {
+    "code": "6106",
+    "name_th": "บ้านไร่",
+    "parent_code": "61"
+  },
+  {
+    "code": "6107",
+    "name_th": "ลานสัก",
+    "parent_code": "61"
+  },
+  {
+    "code": "6108",
+    "name_th": "ห้วยคต",
+    "parent_code": "61"
+  },
+  {
+    "code": "6201",
+    "name_th": "เมืองกำแพงเพชร",
+    "parent_code": "62"
+  },
+  {
+    "code": "6202",
+    "name_th": "ไทรงาม",
+    "parent_code": "62"
+  },
+  {
+    "code": "6203",
+    "name_th": "คลองลาน",
+    "parent_code": "62"
+  },
+  {
+    "code": "6204",
+    "name_th": "ขาณุวรลักษบุรี",
+    "parent_code": "62"
+  },
+  {
+    "code": "6205",
+    "name_th": "คลองขลุง",
+    "parent_code": "62"
+  },
+  {
+    "code": "6206",
+    "name_th": "พรานกระต่าย",
+    "parent_code": "62"
+  },
+  {
+    "code": "6207",
+    "name_th": "ลานกระบือ",
+    "parent_code": "62"
+  },
+  {
+    "code": "6208",
+    "name_th": "ทรายทองวัฒนา",
+    "parent_code": "62"
+  },
+  {
+    "code": "6209",
+    "name_th": "ปางศิลาทอง",
+    "parent_code": "62"
+  },
+  {
+    "code": "6210",
+    "name_th": "บึงสามัคคี",
+    "parent_code": "62"
+  },
+  {
+    "code": "6211",
+    "name_th": "โกสัมพีนคร",
+    "parent_code": "62"
+  },
+  {
+    "code": "6301",
+    "name_th": "เมืองตาก",
+    "parent_code": "63"
+  },
+  {
+    "code": "6302",
+    "name_th": "บ้านตาก",
+    "parent_code": "63"
+  },
+  {
+    "code": "6303",
+    "name_th": "สามเงา",
+    "parent_code": "63"
+  },
+  {
+    "code": "6304",
+    "name_th": "แม่ระมาด",
+    "parent_code": "63"
+  },
+  {
+    "code": "6305",
+    "name_th": "ท่าสองยาง",
+    "parent_code": "63"
+  },
+  {
+    "code": "6306",
+    "name_th": "แม่สอด",
+    "parent_code": "63"
+  },
+  {
+    "code": "6307",
+    "name_th": "พบพระ",
+    "parent_code": "63"
+  },
+  {
+    "code": "6308",
+    "name_th": "อุ้มผาง",
+    "parent_code": "63"
+  },
+  {
+    "code": "6309",
+    "name_th": "วังเจ้า",
+    "parent_code": "63"
+  },
+  {
+    "code": "6401",
+    "name_th": "เมืองสุโขทัย",
+    "parent_code": "64"
+  },
+  {
+    "code": "6402",
+    "name_th": "บ้านด่านลานหอย",
+    "parent_code": "64"
+  },
+  {
+    "code": "6403",
+    "name_th": "คีรีมาศ",
+    "parent_code": "64"
+  },
+  {
+    "code": "6404",
+    "name_th": "กงไกรลาศ",
+    "parent_code": "64"
+  },
+  {
+    "code": "6405",
+    "name_th": "ศรีสัชนาลัย",
+    "parent_code": "64"
+  },
+  {
+    "code": "6406",
+    "name_th": "ศรีสำโรง",
+    "parent_code": "64"
+  },
+  {
+    "code": "6407",
+    "name_th": "สวรรคโลก",
+    "parent_code": "64"
+  },
+  {
+    "code": "6408",
+    "name_th": "ศรีนคร",
+    "parent_code": "64"
+  },
+  {
+    "code": "6409",
+    "name_th": "ทุ่งเสลี่ยม",
+    "parent_code": "64"
+  },
+  {
+    "code": "6501",
+    "name_th": "เมืองพิษณุโลก",
+    "parent_code": "65"
+  },
+  {
+    "code": "6502",
+    "name_th": "นครไทย",
+    "parent_code": "65"
+  },
+  {
+    "code": "6503",
+    "name_th": "ชาติตระการ",
+    "parent_code": "65"
+  },
+  {
+    "code": "6504",
+    "name_th": "บางระกำ",
+    "parent_code": "65"
+  },
+  {
+    "code": "6505",
+    "name_th": "บางกระทุ่ม",
+    "parent_code": "65"
+  },
+  {
+    "code": "6506",
+    "name_th": "พรหมพิราม",
+    "parent_code": "65"
+  },
+  {
+    "code": "6507",
+    "name_th": "วัดโบสถ์",
+    "parent_code": "65"
+  },
+  {
+    "code": "6508",
+    "name_th": "วังทอง",
+    "parent_code": "65"
+  },
+  {
+    "code": "6509",
+    "name_th": "เนินมะปราง",
+    "parent_code": "65"
+  },
+  {
+    "code": "6601",
+    "name_th": "เมืองพิจิตร",
+    "parent_code": "66"
+  },
+  {
+    "code": "6602",
+    "name_th": "วังทรายพูน",
+    "parent_code": "66"
+  },
+  {
+    "code": "6603",
+    "name_th": "โพธิ์ประทับช้าง",
+    "parent_code": "66"
+  },
+  {
+    "code": "6604",
+    "name_th": "ตะพานหิน",
+    "parent_code": "66"
+  },
+  {
+    "code": "6605",
+    "name_th": "บางมูลนาก",
+    "parent_code": "66"
+  },
+  {
+    "code": "6606",
+    "name_th": "โพทะเล",
+    "parent_code": "66"
+  },
+  {
+    "code": "6607",
+    "name_th": "สามง่าม",
+    "parent_code": "66"
+  },
+  {
+    "code": "6608",
+    "name_th": "ทับคล้อ",
+    "parent_code": "66"
+  },
+  {
+    "code": "6609",
+    "name_th": "สากเหล็ก",
+    "parent_code": "66"
+  },
+  {
+    "code": "6610",
+    "name_th": "บึงนาราง",
+    "parent_code": "66"
+  },
+  {
+    "code": "6611",
+    "name_th": "ดงเจริญ",
+    "parent_code": "66"
+  },
+  {
+    "code": "6612",
+    "name_th": "วชิรบารมี",
+    "parent_code": "66"
+  },
+  {
+    "code": "6701",
+    "name_th": "เมืองเพชรบูรณ์",
+    "parent_code": "67"
+  },
+  {
+    "code": "6702",
+    "name_th": "ชนแดน",
+    "parent_code": "67"
+  },
+  {
+    "code": "6703",
+    "name_th": "หล่มสัก",
+    "parent_code": "67"
+  },
+  {
+    "code": "6704",
+    "name_th": "หล่มเก่า",
+    "parent_code": "67"
+  },
+  {
+    "code": "6705",
+    "name_th": "วิเชียรบุรี",
+    "parent_code": "67"
+  },
+  {
+    "code": "6706",
+    "name_th": "ศรีเทพ",
+    "parent_code": "67"
+  },
+  {
+    "code": "6707",
+    "name_th": "หนองไผ่",
+    "parent_code": "67"
+  },
+  {
+    "code": "6708",
+    "name_th": "บึงสามพัน",
+    "parent_code": "67"
+  },
+  {
+    "code": "6709",
+    "name_th": "น้ำหนาว",
+    "parent_code": "67"
+  },
+  {
+    "code": "6710",
+    "name_th": "วังโป่ง",
+    "parent_code": "67"
+  },
+  {
+    "code": "6711",
+    "name_th": "เขาค้อ",
+    "parent_code": "67"
+  },
+  {
+    "code": "7001",
+    "name_th": "เมืองราชบุรี",
+    "parent_code": "70"
+  },
+  {
+    "code": "7002",
+    "name_th": "จอมบึง",
+    "parent_code": "70"
+  },
+  {
+    "code": "7003",
+    "name_th": "สวนผึ้ง",
+    "parent_code": "70"
+  },
+  {
+    "code": "7004",
+    "name_th": "ดำเนินสะดวก",
+    "parent_code": "70"
+  },
+  {
+    "code": "7005",
+    "name_th": "บ้านโป่ง",
+    "parent_code": "70"
+  },
+  {
+    "code": "7006",
+    "name_th": "บางแพ",
+    "parent_code": "70"
+  },
+  {
+    "code": "7007",
+    "name_th": "โพธาราม",
+    "parent_code": "70"
+  },
+  {
+    "code": "7008",
+    "name_th": "ปากท่อ",
+    "parent_code": "70"
+  },
+  {
+    "code": "7009",
+    "name_th": "วัดเพลง",
+    "parent_code": "70"
+  },
+  {
+    "code": "7010",
+    "name_th": "บ้านคา",
+    "parent_code": "70"
+  },
+  {
+    "code": "7074",
+    "name_th": "ท้องถิ่นเทศบาลตำบลบ้านฆ้อง",
+    "parent_code": "70"
+  },
+  {
+    "code": "7101",
+    "name_th": "เมืองกาญจนบุรี",
+    "parent_code": "71"
+  },
+  {
+    "code": "7102",
+    "name_th": "ไทรโยค",
+    "parent_code": "71"
+  },
+  {
+    "code": "7103",
+    "name_th": "บ่อพลอย",
+    "parent_code": "71"
+  },
+  {
+    "code": "7104",
+    "name_th": "ศรีสวัสดิ์",
+    "parent_code": "71"
+  },
+  {
+    "code": "7105",
+    "name_th": "ท่ามะกา",
+    "parent_code": "71"
+  },
+  {
+    "code": "7106",
+    "name_th": "ท่าม่วง",
+    "parent_code": "71"
+  },
+  {
+    "code": "7107",
+    "name_th": "ทองผาภูมิ",
+    "parent_code": "71"
+  },
+  {
+    "code": "7108",
+    "name_th": "สังขละบุรี",
+    "parent_code": "71"
+  },
+  {
+    "code": "7109",
+    "name_th": "พนมทวน",
+    "parent_code": "71"
+  },
+  {
+    "code": "7110",
+    "name_th": "เลาขวัญ",
+    "parent_code": "71"
+  },
+  {
+    "code": "7111",
+    "name_th": "ด่านมะขามเตี้ย",
+    "parent_code": "71"
+  },
+  {
+    "code": "7112",
+    "name_th": "หนองปรือ",
+    "parent_code": "71"
+  },
+  {
+    "code": "7113",
+    "name_th": "ห้วยกระเจา",
+    "parent_code": "71"
+  },
+  {
+    "code": "7201",
+    "name_th": "เมืองสุพรรณบุรี",
+    "parent_code": "72"
+  },
+  {
+    "code": "7202",
+    "name_th": "เดิมบางนางบวช",
+    "parent_code": "72"
+  },
+  {
+    "code": "7203",
+    "name_th": "ด่านช้าง",
+    "parent_code": "72"
+  },
+  {
+    "code": "7204",
+    "name_th": "บางปลาม้า",
+    "parent_code": "72"
+  },
+  {
+    "code": "7205",
+    "name_th": "ศรีประจันต์",
+    "parent_code": "72"
+  },
+  {
+    "code": "7206",
+    "name_th": "ดอนเจดีย์",
+    "parent_code": "72"
+  },
+  {
+    "code": "7207",
+    "name_th": "สองพี่น้อง",
+    "parent_code": "72"
+  },
+  {
+    "code": "7208",
+    "name_th": "สามชุก",
+    "parent_code": "72"
+  },
+  {
+    "code": "7209",
+    "name_th": "อู่ทอง",
+    "parent_code": "72"
+  },
+  {
+    "code": "7210",
+    "name_th": "หนองหญ้าไซ",
+    "parent_code": "72"
+  },
+  {
+    "code": "7301",
+    "name_th": "เมืองนครปฐม",
+    "parent_code": "73"
+  },
+  {
+    "code": "7302",
+    "name_th": "กำแพงแสน",
+    "parent_code": "73"
+  },
+  {
+    "code": "7303",
+    "name_th": "นครชัยศรี",
+    "parent_code": "73"
+  },
+  {
+    "code": "7304",
+    "name_th": "ดอนตูม",
+    "parent_code": "73"
+  },
+  {
+    "code": "7305",
+    "name_th": "บางเลน",
+    "parent_code": "73"
+  },
+  {
+    "code": "7306",
+    "name_th": "สามพราน",
+    "parent_code": "73"
+  },
+  {
+    "code": "7307",
+    "name_th": "พุทธมณฑล",
+    "parent_code": "73"
+  },
+  {
+    "code": "7401",
+    "name_th": "เมืองสมุทรสาคร",
+    "parent_code": "74"
+  },
+  {
+    "code": "7402",
+    "name_th": "กระทุ่มแบน",
+    "parent_code": "74"
+  },
+  {
+    "code": "7403",
+    "name_th": "บ้านแพ้ว",
+    "parent_code": "74"
+  },
+  {
+    "code": "7501",
+    "name_th": "เมืองสมุทรสงคราม",
+    "parent_code": "75"
+  },
+  {
+    "code": "7502",
+    "name_th": "บางคนที",
+    "parent_code": "75"
+  },
+  {
+    "code": "7503",
+    "name_th": "อัมพวา",
+    "parent_code": "75"
+  },
+  {
+    "code": "7601",
+    "name_th": "เมืองเพชรบุรี",
+    "parent_code": "76"
+  },
+  {
+    "code": "7602",
+    "name_th": "เขาย้อย",
+    "parent_code": "76"
+  },
+  {
+    "code": "7603",
+    "name_th": "หนองหญ้าปล้อง",
+    "parent_code": "76"
+  },
+  {
+    "code": "7604",
+    "name_th": "ชะอำ",
+    "parent_code": "76"
+  },
+  {
+    "code": "7605",
+    "name_th": "ท่ายาง",
+    "parent_code": "76"
+  },
+  {
+    "code": "7606",
+    "name_th": "บ้านลาด",
+    "parent_code": "76"
+  },
+  {
+    "code": "7607",
+    "name_th": "บ้านแหลม",
+    "parent_code": "76"
+  },
+  {
+    "code": "7608",
+    "name_th": "แก่งกระจาน",
+    "parent_code": "76"
+  },
+  {
+    "code": "7701",
+    "name_th": "เมืองประจวบคีรีขันธ์",
+    "parent_code": "77"
+  },
+  {
+    "code": "7702",
+    "name_th": "กุยบุรี",
+    "parent_code": "77"
+  },
+  {
+    "code": "7703",
+    "name_th": "ทับสะแก",
+    "parent_code": "77"
+  },
+  {
+    "code": "7704",
+    "name_th": "บางสะพาน",
+    "parent_code": "77"
+  },
+  {
+    "code": "7705",
+    "name_th": "บางสะพานน้อย",
+    "parent_code": "77"
+  },
+  {
+    "code": "7706",
+    "name_th": "ปราณบุรี",
+    "parent_code": "77"
+  },
+  {
+    "code": "7707",
+    "name_th": "หัวหิน",
+    "parent_code": "77"
+  },
+  {
+    "code": "7708",
+    "name_th": "สามร้อยยอด",
+    "parent_code": "77"
+  },
+  {
+    "code": "8001",
+    "name_th": "เมืองนครศรีธรรมราช",
+    "parent_code": "80"
+  },
+  {
+    "code": "8002",
+    "name_th": "พรหมคีรี",
+    "parent_code": "80"
+  },
+  {
+    "code": "8003",
+    "name_th": "ลานสกา",
+    "parent_code": "80"
+  },
+  {
+    "code": "8004",
+    "name_th": "ฉวาง",
+    "parent_code": "80"
+  },
+  {
+    "code": "8005",
+    "name_th": "พิปูน",
+    "parent_code": "80"
+  },
+  {
+    "code": "8006",
+    "name_th": "เชียรใหญ่",
+    "parent_code": "80"
+  },
+  {
+    "code": "8007",
+    "name_th": "ชะอวด",
+    "parent_code": "80"
+  },
+  {
+    "code": "8008",
+    "name_th": "ท่าศาลา",
+    "parent_code": "80"
+  },
+  {
+    "code": "8009",
+    "name_th": "ทุ่งสง",
+    "parent_code": "80"
+  },
+  {
+    "code": "8010",
+    "name_th": "นาบอน",
+    "parent_code": "80"
+  },
+  {
+    "code": "8011",
+    "name_th": "ทุ่งใหญ่",
+    "parent_code": "80"
+  },
+  {
+    "code": "8012",
+    "name_th": "ปากพนัง",
+    "parent_code": "80"
+  },
+  {
+    "code": "8013",
+    "name_th": "ร่อนพิบูลย์",
+    "parent_code": "80"
+  },
+  {
+    "code": "8014",
+    "name_th": "สิชล",
+    "parent_code": "80"
+  },
+  {
+    "code": "8015",
+    "name_th": "ขนอม",
+    "parent_code": "80"
+  },
+  {
+    "code": "8016",
+    "name_th": "หัวไทร",
+    "parent_code": "80"
+  },
+  {
+    "code": "8017",
+    "name_th": "บางขัน",
+    "parent_code": "80"
+  },
+  {
+    "code": "8018",
+    "name_th": "ถ้ำพรรณรา",
+    "parent_code": "80"
+  },
+  {
+    "code": "8019",
+    "name_th": "จุฬาภรณ์",
+    "parent_code": "80"
+  },
+  {
+    "code": "8020",
+    "name_th": "พระพรหม",
+    "parent_code": "80"
+  },
+  {
+    "code": "8021",
+    "name_th": "นบพิตำ",
+    "parent_code": "80"
+  },
+  {
+    "code": "8022",
+    "name_th": "ช้างกลาง",
+    "parent_code": "80"
+  },
+  {
+    "code": "8023",
+    "name_th": "เฉลิมพระเกียรติ",
+    "parent_code": "80"
+  },
+  {
+    "code": "8101",
+    "name_th": "เมืองกระบี่",
+    "parent_code": "81"
+  },
+  {
+    "code": "8102",
+    "name_th": "เขาพนม",
+    "parent_code": "81"
+  },
+  {
+    "code": "8103",
+    "name_th": "เกาะลันตา",
+    "parent_code": "81"
+  },
+  {
+    "code": "8104",
+    "name_th": "คลองท่อม",
+    "parent_code": "81"
+  },
+  {
+    "code": "8105",
+    "name_th": "อ่าวลึก",
+    "parent_code": "81"
+  },
+  {
+    "code": "8106",
+    "name_th": "ปลายพระยา",
+    "parent_code": "81"
+  },
+  {
+    "code": "8107",
+    "name_th": "ลำทับ",
+    "parent_code": "81"
+  },
+  {
+    "code": "8108",
+    "name_th": "เหนือคลอง",
+    "parent_code": "81"
+  },
+  {
+    "code": "8201",
+    "name_th": "เมืองพังงา",
+    "parent_code": "82"
+  },
+  {
+    "code": "8202",
+    "name_th": "เกาะยาว",
+    "parent_code": "82"
+  },
+  {
+    "code": "8203",
+    "name_th": "กะปง",
+    "parent_code": "82"
+  },
+  {
+    "code": "8204",
+    "name_th": "ตะกั่วทุ่ง",
+    "parent_code": "82"
+  },
+  {
+    "code": "8205",
+    "name_th": "ตะกั่วป่า",
+    "parent_code": "82"
+  },
+  {
+    "code": "8206",
+    "name_th": "คุระบุรี",
+    "parent_code": "82"
+  },
+  {
+    "code": "8207",
+    "name_th": "ทับปุด",
+    "parent_code": "82"
+  },
+  {
+    "code": "8208",
+    "name_th": "ท้ายเหมือง",
+    "parent_code": "82"
+  },
+  {
+    "code": "8301",
+    "name_th": "เมืองภูเก็ต",
+    "parent_code": "83"
+  },
+  {
+    "code": "8302",
+    "name_th": "กะทู้",
+    "parent_code": "83"
+  },
+  {
+    "code": "8303",
+    "name_th": "ถลาง",
+    "parent_code": "83"
+  },
+  {
+    "code": "8401",
+    "name_th": "เมืองสุราษฎร์ธานี",
+    "parent_code": "84"
+  },
+  {
+    "code": "8402",
+    "name_th": "กาญจนดิษฐ์",
+    "parent_code": "84"
+  },
+  {
+    "code": "8403",
+    "name_th": "ดอนสัก",
+    "parent_code": "84"
+  },
+  {
+    "code": "8404",
+    "name_th": "เกาะสมุย",
+    "parent_code": "84"
+  },
+  {
+    "code": "8405",
+    "name_th": "เกาะพะงัน",
+    "parent_code": "84"
+  },
+  {
+    "code": "8406",
+    "name_th": "ไชยา",
+    "parent_code": "84"
+  },
+  {
+    "code": "8407",
+    "name_th": "ท่าชนะ",
+    "parent_code": "84"
+  },
+  {
+    "code": "8408",
+    "name_th": "คีรีรัฐนิคม",
+    "parent_code": "84"
+  },
+  {
+    "code": "8409",
+    "name_th": "บ้านตาขุน",
+    "parent_code": "84"
+  },
+  {
+    "code": "8410",
+    "name_th": "พนม",
+    "parent_code": "84"
+  },
+  {
+    "code": "8411",
+    "name_th": "ท่าฉาง",
+    "parent_code": "84"
+  },
+  {
+    "code": "8412",
+    "name_th": "บ้านนาสาร",
+    "parent_code": "84"
+  },
+  {
+    "code": "8413",
+    "name_th": "บ้านนาเดิม",
+    "parent_code": "84"
+  },
+  {
+    "code": "8414",
+    "name_th": "เคียนซา",
+    "parent_code": "84"
+  },
+  {
+    "code": "8415",
+    "name_th": "เวียงสระ",
+    "parent_code": "84"
+  },
+  {
+    "code": "8416",
+    "name_th": "พระแสง",
+    "parent_code": "84"
+  },
+  {
+    "code": "8417",
+    "name_th": "พุนพิน",
+    "parent_code": "84"
+  },
+  {
+    "code": "8418",
+    "name_th": "ชัยบุรี",
+    "parent_code": "84"
+  },
+  {
+    "code": "8419",
+    "name_th": "วิภาวดี",
+    "parent_code": "84"
+  },
+  {
+    "code": "8501",
+    "name_th": "เมืองระนอง",
+    "parent_code": "85"
+  },
+  {
+    "code": "8502",
+    "name_th": "ละอุ่น",
+    "parent_code": "85"
+  },
+  {
+    "code": "8503",
+    "name_th": "กะเปอร์",
+    "parent_code": "85"
+  },
+  {
+    "code": "8504",
+    "name_th": "กระบุรี",
+    "parent_code": "85"
+  },
+  {
+    "code": "8505",
+    "name_th": "สุขสำราญ",
+    "parent_code": "85"
+  },
+  {
+    "code": "8601",
+    "name_th": "เมืองชุมพร",
+    "parent_code": "86"
+  },
+  {
+    "code": "8602",
+    "name_th": "ท่าแซะ",
+    "parent_code": "86"
+  },
+  {
+    "code": "8603",
+    "name_th": "ปะทิว",
+    "parent_code": "86"
+  },
+  {
+    "code": "8604",
+    "name_th": "หลังสวน",
+    "parent_code": "86"
+  },
+  {
+    "code": "8605",
+    "name_th": "ละแม",
+    "parent_code": "86"
+  },
+  {
+    "code": "8606",
+    "name_th": "พะโต๊ะ",
+    "parent_code": "86"
+  },
+  {
+    "code": "8607",
+    "name_th": "สวี",
+    "parent_code": "86"
+  },
+  {
+    "code": "8608",
+    "name_th": "ทุ่งตะโก",
+    "parent_code": "86"
+  },
+  {
+    "code": "9001",
+    "name_th": "เมืองสงขลา",
+    "parent_code": "90"
+  },
+  {
+    "code": "9002",
+    "name_th": "สทิงพระ",
+    "parent_code": "90"
+  },
+  {
+    "code": "9003",
+    "name_th": "จะนะ",
+    "parent_code": "90"
+  },
+  {
+    "code": "9004",
+    "name_th": "นาทวี",
+    "parent_code": "90"
+  },
+  {
+    "code": "9005",
+    "name_th": "เทพา",
+    "parent_code": "90"
+  },
+  {
+    "code": "9006",
+    "name_th": "สะบ้าย้อย",
+    "parent_code": "90"
+  },
+  {
+    "code": "9007",
+    "name_th": "ระโนด",
+    "parent_code": "90"
+  },
+  {
+    "code": "9008",
+    "name_th": "กระแสสินธุ์",
+    "parent_code": "90"
+  },
+  {
+    "code": "9009",
+    "name_th": "รัตภูมิ",
+    "parent_code": "90"
+  },
+  {
+    "code": "9010",
+    "name_th": "สะเดา",
+    "parent_code": "90"
+  },
+  {
+    "code": "9011",
+    "name_th": "หาดใหญ่",
+    "parent_code": "90"
+  },
+  {
+    "code": "9012",
+    "name_th": "นาหม่อม",
+    "parent_code": "90"
+  },
+  {
+    "code": "9013",
+    "name_th": "ควนเนียง",
+    "parent_code": "90"
+  },
+  {
+    "code": "9014",
+    "name_th": "บางกล่ำ",
+    "parent_code": "90"
+  },
+  {
+    "code": "9015",
+    "name_th": "สิงหนคร",
+    "parent_code": "90"
+  },
+  {
+    "code": "9016",
+    "name_th": "คลองหอยโข่ง",
+    "parent_code": "90"
+  },
+  {
+    "code": "9077",
+    "name_th": "ท้องถิ่นเทศบาลตำบลสำนักขาม",
+    "parent_code": "90"
+  },
+  {
+    "code": "9101",
+    "name_th": "เมืองสตูล",
+    "parent_code": "91"
+  },
+  {
+    "code": "9102",
+    "name_th": "ควนโดน",
+    "parent_code": "91"
+  },
+  {
+    "code": "9103",
+    "name_th": "ควนกาหลง",
+    "parent_code": "91"
+  },
+  {
+    "code": "9104",
+    "name_th": "ท่าแพ",
+    "parent_code": "91"
+  },
+  {
+    "code": "9105",
+    "name_th": "ละงู",
+    "parent_code": "91"
+  },
+  {
+    "code": "9106",
+    "name_th": "ทุ่งหว้า",
+    "parent_code": "91"
+  },
+  {
+    "code": "9107",
+    "name_th": "มะนัง",
+    "parent_code": "91"
+  },
+  {
+    "code": "9201",
+    "name_th": "เมืองตรัง",
+    "parent_code": "92"
+  },
+  {
+    "code": "9202",
+    "name_th": "กันตัง",
+    "parent_code": "92"
+  },
+  {
+    "code": "9203",
+    "name_th": "ย่านตาขาว",
+    "parent_code": "92"
+  },
+  {
+    "code": "9204",
+    "name_th": "ปะเหลียน",
+    "parent_code": "92"
+  },
+  {
+    "code": "9205",
+    "name_th": "สิเกา",
+    "parent_code": "92"
+  },
+  {
+    "code": "9206",
+    "name_th": "ห้วยยอด",
+    "parent_code": "92"
+  },
+  {
+    "code": "9207",
+    "name_th": "วังวิเศษ",
+    "parent_code": "92"
+  },
+  {
+    "code": "9208",
+    "name_th": "นาโยง",
+    "parent_code": "92"
+  },
+  {
+    "code": "9209",
+    "name_th": "รัษฎา",
+    "parent_code": "92"
+  },
+  {
+    "code": "9210",
+    "name_th": "หาดสำราญ",
+    "parent_code": "92"
+  },
+  {
+    "code": "9301",
+    "name_th": "เมืองพัทลุง",
+    "parent_code": "93"
+  },
+  {
+    "code": "9302",
+    "name_th": "กงหรา",
+    "parent_code": "93"
+  },
+  {
+    "code": "9303",
+    "name_th": "เขาชัยสน",
+    "parent_code": "93"
+  },
+  {
+    "code": "9304",
+    "name_th": "ตะโหมด",
+    "parent_code": "93"
+  },
+  {
+    "code": "9305",
+    "name_th": "ควนขนุน",
+    "parent_code": "93"
+  },
+  {
+    "code": "9306",
+    "name_th": "ปากพะยูน",
+    "parent_code": "93"
+  },
+  {
+    "code": "9307",
+    "name_th": "ศรีบรรพต",
+    "parent_code": "93"
+  },
+  {
+    "code": "9308",
+    "name_th": "ป่าบอน",
+    "parent_code": "93"
+  },
+  {
+    "code": "9309",
+    "name_th": "บางแก้ว",
+    "parent_code": "93"
+  },
+  {
+    "code": "9310",
+    "name_th": "ป่าพะยอม",
+    "parent_code": "93"
+  },
+  {
+    "code": "9311",
+    "name_th": "ศรีนครินทร์",
+    "parent_code": "93"
+  },
+  {
+    "code": "9401",
+    "name_th": "เมืองปัตตานี",
+    "parent_code": "94"
+  },
+  {
+    "code": "9402",
+    "name_th": "โคกโพธิ์",
+    "parent_code": "94"
+  },
+  {
+    "code": "9403",
+    "name_th": "หนองจิก",
+    "parent_code": "94"
+  },
+  {
+    "code": "9404",
+    "name_th": "ปะนาเระ",
+    "parent_code": "94"
+  },
+  {
+    "code": "9405",
+    "name_th": "มายอ",
+    "parent_code": "94"
+  },
+  {
+    "code": "9406",
+    "name_th": "ทุ่งยางแดง",
+    "parent_code": "94"
+  },
+  {
+    "code": "9407",
+    "name_th": "สายบุรี",
+    "parent_code": "94"
+  },
+  {
+    "code": "9408",
+    "name_th": "ไม้แก่น",
+    "parent_code": "94"
+  },
+  {
+    "code": "9409",
+    "name_th": "ยะหริ่ง",
+    "parent_code": "94"
+  },
+  {
+    "code": "9410",
+    "name_th": "ยะรัง",
+    "parent_code": "94"
+  },
+  {
+    "code": "9411",
+    "name_th": "กะพ้อ",
+    "parent_code": "94"
+  },
+  {
+    "code": "9412",
+    "name_th": "แม่ลาน",
+    "parent_code": "94"
+  },
+  {
+    "code": "9501",
+    "name_th": "เมืองยะลา",
+    "parent_code": "95"
+  },
+  {
+    "code": "9502",
+    "name_th": "เบตง",
+    "parent_code": "95"
+  },
+  {
+    "code": "9503",
+    "name_th": "บันนังสตา",
+    "parent_code": "95"
+  },
+  {
+    "code": "9504",
+    "name_th": "ธารโต",
+    "parent_code": "95"
+  },
+  {
+    "code": "9505",
+    "name_th": "ยะหา",
+    "parent_code": "95"
+  },
+  {
+    "code": "9506",
+    "name_th": "รามัน",
+    "parent_code": "95"
+  },
+  {
+    "code": "9507",
+    "name_th": "กาบัง",
+    "parent_code": "95"
+  },
+  {
+    "code": "9508",
+    "name_th": "กรงปินัง",
+    "parent_code": "95"
+  },
+  {
+    "code": "9601",
+    "name_th": "เมืองนราธิวาส",
+    "parent_code": "96"
+  },
+  {
+    "code": "9602",
+    "name_th": "ตากใบ",
+    "parent_code": "96"
+  },
+  {
+    "code": "9603",
+    "name_th": "บาเจาะ",
+    "parent_code": "96"
+  },
+  {
+    "code": "9604",
+    "name_th": "ยี่งอ",
+    "parent_code": "96"
+  },
+  {
+    "code": "9605",
+    "name_th": "ระแงะ",
+    "parent_code": "96"
+  },
+  {
+    "code": "9606",
+    "name_th": "รือเสาะ",
+    "parent_code": "96"
+  },
+  {
+    "code": "9607",
+    "name_th": "ศรีสาคร",
+    "parent_code": "96"
+  },
+  {
+    "code": "9608",
+    "name_th": "แว้ง",
+    "parent_code": "96"
+  },
+  {
+    "code": "9609",
+    "name_th": "สุคิริน",
+    "parent_code": "96"
+  },
+  {
+    "code": "9610",
+    "name_th": "สุไหงโก-ลก",
+    "parent_code": "96"
+  },
+  {
+    "code": "9611",
+    "name_th": "สุไหงปาดี",
+    "parent_code": "96"
+  },
+  {
+    "code": "9612",
+    "name_th": "จะแนะ",
+    "parent_code": "96"
+  },
+  {
+    "code": "9613",
+    "name_th": "เจาะไอร้อง",
+    "parent_code": "96"
+  }
+]

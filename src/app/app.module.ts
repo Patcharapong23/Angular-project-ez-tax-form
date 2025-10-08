@@ -23,12 +23,15 @@ import { OktaAuth } from '@okta/okta-auth-js';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
     AppComponent,
     GameComponent,
     LoginComponent,
+    HomeComponent,
     RegisterComponent,
   ],
   imports: [
@@ -48,6 +51,8 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
     MatSelectModule,
     MatOptionModule,
     ReactiveFormsModule,
+    MatCheckboxModule,
+    HttpClientModule,
   ],
   providers: [
     {

@@ -39,6 +39,13 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   public onSubmit(): void {
+    // ตรวจสอบก่อนว่ากรอกครบไหม
+    if (!this.username || !this.password) {
+      this.loginValid = false;
+      //alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      return;
+    }
+
     this.loginValid = true;
 
     this._authService
