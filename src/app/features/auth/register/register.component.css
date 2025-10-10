@@ -1,4 +1,5 @@
 /* ------- Typography ------- */
+
 h1 {
   text-align: center;
   margin-top: 2rem;
@@ -439,4 +440,28 @@ upload-label {
   gap: 6.593px;
   border-radius: 4.396px;
   background: #fff;
+}
+.mat-form-field .mat-input-element[disabled] {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* ให้ mat-form-field วางแผ่นใสได้ */
+.mf-relative {
+  position: relative;
+}
+
+/* แผ่นใส */
+.field-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: transparent;
+  cursor: not-allowed; /* ให้รู้สึกว่าใช้ไม่ได้ */
+  border-radius: 12px; /* ให้คลุมตามทรงฟิลด์สวย ๆ */
+}
+
+/* เปลี่ยนเคอร์เซอร์ที่กล่องเวลาล็อก */
+.blocked .mat-mdc-text-field-wrapper {
+  cursor: not-allowed;
 }

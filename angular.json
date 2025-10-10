@@ -20,6 +20,10 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "@okta/okta-auth-js",
+              "tic-tac-toe-minimax"
+            ],
             "outputPath": "dist/material-tic-tac-toe",
             "index": "src/index.html",
             "main": "src/main.ts",

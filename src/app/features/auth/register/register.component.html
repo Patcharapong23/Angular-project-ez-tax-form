@@ -11,6 +11,7 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <!-- ===== STEP 1 ===== -->
       <div *ngIf="step === 1" class="step-panel">
+        <!-- ชื่อ-นามสกุล -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อ-นามสกุล</mat-label>
           <input
@@ -19,24 +20,15 @@
             autocomplete="name"
             [attr.maxlength]="fullNameMaxLen"
           />
-          <mat-error
-            *ngIf="
-              fullName?.hasError('required') &&
-              (fullName?.touched || step1Submitted)
-            "
+          <mat-error *ngIf="fullName?.hasError('required')"
+            >กรุณากรอกชื่อ-นามสกุล</mat-error
           >
-            กรุณากรอกชื่อ-นามสกุล
-          </mat-error>
-          <mat-error
-            *ngIf="
-              fullName?.hasError('minlength') &&
-              (fullName?.touched || step1Submitted)
-            "
+          <mat-error *ngIf="fullName?.hasError('minlength')"
+            >อย่างน้อย 2 ตัวอักษร</mat-error
           >
-            อย่างน้อย 2 ตัวอักษร
-          </mat-error>
         </mat-form-field>
 
+        <!-- อีเมล -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>อีเมล</mat-label>
           <input
@@ -49,24 +41,23 @@
             spellcheck="false"
             (keydown)="blockThai($event)"
           />
-          <!-- <mat-hint align="end">
-            {{ email?.value?.length || 0 }}/{{ emailMaxLen }}
-          </mat-hint> -->
-          <!-- ข้อความผิดพลาด -->
-          <mat-error *ngIf="email?.hasError('required') && email?.touched">
-            กรุณากรอกอีเมล
-          </mat-error>
-          <mat-error *ngIf="email?.hasError('maxlength') && email?.touched">
-            อีเมลยาวเกิน {{ emailMaxLen }} ตัวอักษร
-          </mat-error>
-          <mat-error *ngIf="email?.hasError('pattern') && email?.touched">
+          <mat-error *ngIf="email?.hasError('required')"
+            >กรุณากรอกอีเมล</mat-error
+          >
+          <mat-error *ngIf="email?.hasError('maxlength')"
+            >อีเมลยาวเกิน {{ emailMaxLen }} ตัวอักษร</mat-error
+          >
+          <mat-error
+            *ngIf="email?.hasError('pattern') || email?.hasError('email')"
+          >
             รูปแบบอีเมลไม่ถูกต้อง (ตัวอย่าง: name@example.com)
           </mat-error>
-          <mat-error *ngIf="email?.hasError('nonAscii') && email?.touched">
+          <mat-error *ngIf="email?.hasError('nonAscii')">
             ห้ามใช้อักขระภาษาไทยหรืออักขระที่อยู่นอก ASCII ในอีเมล
           </mat-error>
         </mat-form-field>
 
+        <!-- Password + meter + checklist -->
         <div formGroupName="passwordGroup" class="pw-grid">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสผ่าน</mat-label>
@@ -83,30 +74,20 @@
               matSuffix
               type="button"
               (click)="hidePass = !hidePass"
+              aria-label="แสดง/ซ่อนรหัสผ่าน"
             >
               <mat-icon>{{
                 hidePass ? "visibility_off" : "visibility"
               }}</mat-icon>
             </button>
-            <mat-error
-              *ngIf="
-                password?.hasError('required') &&
-                (password?.touched || step1Submitted)
-              "
+            <mat-error *ngIf="password?.hasError('required')"
+              >กรุณากรอกรหัสผ่าน</mat-error
             >
-              กรุณากรอกรหัสผ่าน
-            </mat-error>
-            <mat-error
-              *ngIf="
-                password?.hasError('minlength') &&
-                (password?.touched || step1Submitted)
-              "
+            <mat-error *ngIf="password?.hasError('minlength')"
+              >อย่างน้อย 6 ตัวอักษร</mat-error
             >
-              อย่างน้อย 6 ตัวอักษร
-            </mat-error>
           </mat-form-field>
 
-          <!-- meter + checklist -->
           <div
             class="pw-meter"
             [class.done]="allOk"
@@ -155,29 +136,18 @@
               matSuffix
               type="button"
               (click)="hideConfirm = !hideConfirm"
+              aria-label="แสดง/ซ่อนยืนยันรหัสผ่าน"
             >
               <mat-icon>{{
                 hideConfirm ? "visibility_off" : "visibility"
               }}</mat-icon>
             </button>
-            <mat-error
-              *ngIf="
-                confirmPassword?.hasError('required') &&
-                (confirmPassword?.touched || step1Submitted)
-              "
+            <mat-error *ngIf="confirmPassword?.hasError('required')"
+              >กรุณายืนยันรหัสผ่าน</mat-error
             >
-              กรุณายืนยันรหัสผ่าน
-            </mat-error>
-            <mat-error
-              *ngIf="
-                passwordGroup?.hasError('passwordsNotMatch') &&
-                (confirmPassword?.dirty ||
-                  confirmPassword?.touched ||
-                  step1Submitted)
-              "
+            <mat-error *ngIf="passwordGroup?.hasError('passwordsNotMatch')"
+              >รหัสผ่านไม่ตรงกัน</mat-error
             >
-              รหัสผ่านไม่ตรงกัน
-            </mat-error>
           </mat-form-field>
         </div>
 
@@ -196,6 +166,7 @@
 
       <!-- ===== STEP 2 ===== -->
       <div *ngIf="step === 2" class="step-panel" formGroupName="company">
+        <!-- Upload logo -->
         <div
           class="upload-box"
           [class.has-image]="logoPreview"
@@ -205,9 +176,9 @@
             #logoInput
             type="file"
             accept="image/*"
-            formControlName="logo"
             (change)="onLogoSelected($event)"
           />
+
           <img
             *ngIf="logoPreview"
             class="logo-preview"
@@ -225,28 +196,18 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อบริษัท</mat-label>
           <input matInput formControlName="companyName" />
-          <mat-error
-            *ngIf="
-              company.get('companyName')?.hasError('required') &&
-              (company.get('companyName')?.touched || step2Submitted)
-            "
+          <mat-error *ngIf="company.get('companyName')?.hasError('required')"
+            >กรุณากรอกชื่อบริษัท</mat-error
           >
-            กรุณากรอกชื่อบริษัท
-          </mat-error>
         </mat-form-field>
 
         <div class="grid-2">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสสาขา 5 หลัก</mat-label>
             <input matInput maxlength="5" formControlName="branchCode" />
-            <mat-error
-              *ngIf="
-                company.get('branchCode')?.hasError('required') &&
-                (company.get('branchCode')?.touched || step2Submitted)
-              "
+            <mat-error *ngIf="company.get('branchCode')?.hasError('required')"
+              >กรุณากรอกรหัสสาขา</mat-error
             >
-              กรุณากรอกรหัสสาขา
-            </mat-error>
             <mat-error
               *ngIf="
                 company.get('branchCode')?.hasError('minlength') ||
@@ -260,28 +221,18 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>ชื่อสาขา</mat-label>
             <input matInput formControlName="branchName" />
-            <mat-error
-              *ngIf="
-                company.get('branchName')?.hasError('required') &&
-                (company.get('branchName')?.touched || step2Submitted)
-              "
+            <mat-error *ngIf="company.get('branchName')?.hasError('required')"
+              >กรุณากรอกชื่อสาขา</mat-error
             >
-              กรุณากรอกชื่อสาขา
-            </mat-error>
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>เลขประจำตัวผู้เสียภาษีอากร 13 หลัก</mat-label>
           <input matInput maxlength="13" formControlName="taxId" />
-          <mat-error
-            *ngIf="
-              company.get('taxId')?.hasError('required') &&
-              (company.get('taxId')?.touched || step2Submitted)
-            "
+          <mat-error *ngIf="company.get('taxId')?.hasError('required')"
+            >กรุณากรอกเลขประจำตัวผู้เสียภาษีอากร</mat-error
           >
-            กรุณากรอกเลขประจำตัวผู้เสียภาษีอากร
-          </mat-error>
           <mat-error
             *ngIf="
               company.get('taxId')?.hasError('minlength') ||
@@ -300,98 +251,136 @@
         <h3 class="section-title">
           ที่อยู่ (ภาษาไทย) <span class="req">*</span>
         </h3>
+
         <div formGroupName="addressTh">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>เลขที่อาคาร</mat-label>
-            <input matInput formControlName="buildingNo" />
-            <mat-error
-              *ngIf="
-                addressTh.get('buildingNo')?.hasError('required') &&
-                (addressTh.get('buildingNo')?.touched || step2Submitted)
-              "
-            >
-              กรุณากรอกเลขที่อาคาร
-            </mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>ชื่ออาคาร/ซอย/ถนน</mat-label>
-            <input matInput formControlName="street" />
-          </mat-form-field>
-
+          <!-- จังหวัด -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>จังหวัด</mat-label>
-            <mat-select
+            <input
+              matInput
+              type="text"
               formControlName="province"
-              (selectionChange)="onProvinceChange($event.value)"
+              [matAutocomplete]="autoProv"
+              #provTrig="matAutocompleteTrigger"
+              (focus)="provTrig.openPanel()"
+              (input)="onProvinceInput($any($event.target).value)"
+              (blur)="fixProvinceDisplay()"
+            />
+            <mat-autocomplete
+              #autoProv="matAutocomplete"
+              [displayWith]="displayProvince.bind(this)"
+              autoActiveFirstOption
+              (optionSelected)="onProvinceSelected($event.option.value)"
             >
-              <mat-option *ngFor="let p of provinces" [value]="p.code">{{
+              <mat-option *ngFor="let p of filteredProvinces" [value]="p">{{
                 p.name_th
               }}</mat-option>
-            </mat-select>
-            <mat-error
-              *ngIf="
-                addressTh.get('province')?.hasError('required') &&
-                (addressTh.get('province')?.touched || step2Submitted)
-              "
+            </mat-autocomplete>
+            <mat-error *ngIf="addressTh.get('province')?.hasError('required')"
+              >กรุณาเลือกจังหวัด</mat-error
             >
-              กรุณาเลือกจังหวัด
-            </mat-error>
           </mat-form-field>
 
           <div class="grid-2">
-            <mat-form-field appearance="outline" class="full-width">
+            <!-- เขต/อำเภอ -->
+            <mat-form-field
+              appearance="outline"
+              class="full-width mf-relative"
+              [class.blocked]="isDistrictLocked"
+            >
+              <div
+                class="field-blocker"
+                *ngIf="isDistrictLocked"
+                title="กรุณาเลือกจังหวัดหรือกรอก ZIP ก่อน"
+              ></div>
+
               <mat-label>เขต/อำเภอ</mat-label>
-              <mat-select
+              <input
+                matInput
+                type="text"
                 formControlName="district"
-                (selectionChange)="onDistrictChange($event.value)"
+                [matAutocomplete]="autoDist"
+                #distTrig="matAutocompleteTrigger"
+                [readonly]="isDistrictLocked"
+                [disabled]="isDistrictLocked"
+                [attr.tabindex]="isDistrictLocked ? -1 : 0"
+                (focus)="onDistrictFocus(distTrig)"
+                (input)="onDistrictType($any($event.target).value)"
+                (blur)="fixDistrictDisplay()"
+              />
+              <mat-autocomplete
+                #autoDist="matAutocomplete"
+                [displayWith]="displayDistrict.bind(this)"
+                autoActiveFirstOption
+                (optionSelected)="onDistrictSelected($event.option.value)"
               >
-                <mat-option *ngFor="let d of districts" [value]="d.code">{{
+                <mat-option *ngFor="let d of filteredDistricts" [value]="d">{{
                   d.name_th
                 }}</mat-option>
-              </mat-select>
-              <mat-error
-                *ngIf="
-                  addressTh.get('district')?.hasError('required') &&
-                  (addressTh.get('district')?.touched || step2Submitted)
-                "
+              </mat-autocomplete>
+              <mat-error *ngIf="addressTh.get('district')?.hasError('required')"
+                >กรุณาเลือกเขต/อำเภอ</mat-error
               >
-                กรุณาเลือกเขต/อำเภอ
-              </mat-error>
             </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
+            <!-- แขวง/ตำบล -->
+            <mat-form-field
+              appearance="outline"
+              class="full-width mf-relative"
+              [class.blocked]="isSubdistrictLocked"
+            >
+              <div
+                class="field-blocker"
+                *ngIf="isSubdistrictLocked"
+                title="กรุณาเลือกอำเภอหรือกรอก ZIP ก่อน"
+              ></div>
+
               <mat-label>แขวง/ตำบล</mat-label>
-              <mat-select
+              <input
+                matInput
+                type="text"
                 formControlName="subdistrict"
-                (selectionChange)="onSubdistrictChange($event.value)"
+                [matAutocomplete]="autoSub"
+                #subTrig="matAutocompleteTrigger"
+                [readonly]="isSubdistrictLocked"
+                [disabled]="isSubdistrictLocked"
+                [attr.tabindex]="isSubdistrictLocked ? -1 : 0"
+                (focus)="onSubdistrictFocus(subTrig)"
+                (input)="onSubdistrictType($any($event.target).value)"
+                (blur)="fixSubdistrictDisplay()"
+              />
+              <mat-autocomplete
+                #autoSub="matAutocomplete"
+                [displayWith]="displaySubdistrict.bind(this)"
+                autoActiveFirstOption
+                (optionSelected)="onSubdistrictSelected($event.option.value)"
               >
-                <mat-option *ngFor="let s of subdistricts" [value]="s.code">{{
-                  s.name_th
-                }}</mat-option>
-              </mat-select>
+                <mat-option
+                  *ngFor="let s of filteredSubdistricts"
+                  [value]="s"
+                  >{{ s.name_th }}</mat-option
+                >
+              </mat-autocomplete>
               <mat-error
-                *ngIf="
-                  addressTh.get('subdistrict')?.hasError('required') &&
-                  (addressTh.get('subdistrict')?.touched || step2Submitted)
-                "
+                *ngIf="addressTh.get('subdistrict')?.hasError('required')"
+                >กรุณาเลือกแขวง/ตำบล</mat-error
               >
-                กรุณาเลือกแขวง/ตำบล
-              </mat-error>
             </mat-form-field>
           </div>
 
+          <!-- ZIP -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสไปรษณีย์</mat-label>
-            <input matInput formControlName="postalCode" />
-            <mat-error
-              *ngIf="
-                addressTh.get('postalCode')?.hasError('required') &&
-                (addressTh.get('postalCode')?.touched || step2Submitted)
-              "
+            <input
+              matInput
+              formControlName="postalCode"
+              maxlength="5"
+              (keyup.enter)="onZipEnter()"
+            />
+            <mat-hint>กด Enter เพื่อค้นหาข้อมูลจากรหัสไปรษณีย์</mat-hint>
+            <mat-error *ngIf="addressTh.get('postalCode')?.hasError('required')"
+              >กรุณากรอกรหัสไปรษณีย์</mat-error
             >
-              กรุณากรอกรหัสไปรษณีย์
-            </mat-error>
           </mat-form-field>
         </div>
 
@@ -403,9 +392,9 @@
           </mat-form-field>
         </div>
 
-        <mat-checkbox formControlName="acceptTos">
-          ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ
-        </mat-checkbox>
+        <mat-checkbox formControlName="acceptTos"
+          >ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ</mat-checkbox
+        >
         <div
           class="tiny-error"
           *ngIf="
@@ -421,9 +410,6 @@
         </div>
 
         <div class="actions">
-          <button mat-stroked-button type="button" (click)="onBack()">
-            ย้อนกลับ
-          </button>
           <button
             mat-raised-button
             color="primary"
@@ -432,6 +418,9 @@
             [disabled]="isSubmitting"
           >
             {{ isSubmitting ? "กำลังบันทึก..." : "ลงทะเบียน" }}
+          </button>
+          <button mat-stroked-button type="button" (click)="onBack()">
+            ย้อนกลับ
           </button>
         </div>
       </div>

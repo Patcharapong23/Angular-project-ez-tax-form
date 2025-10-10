@@ -1,19 +1,28 @@
 import { Injectable } from '@angular/core';
-import { Router, CanActivate, UrlTree } from '@angular/router';
-import { AuthService } from './auth.service';
-import { map, Observable } from 'rxjs';
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+} from '@angular/router';
+import { AuthService } from './shared/auth.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
+  constructor(private auth: AuthService, private router: Router) {}
 
-  constructor(private _authService: AuthService, private _router: Router) {}
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): boolean | UrlTree {
+    if (this.auth.isLoggedIn()) return true;
 
-  public canActivate(): Observable<boolean | UrlTree> {
-    return this._authService.isAuthenticated$
-      .pipe(
-        map((s: boolean) => s ? true: this._router.parseUrl('/login'))
-      );
+    // เก็บ returnUrl แล้วพาไป login พร้อม query param
+    const target = state.url || '/dashboard';
+    this.auth.setReturnUrl(target);
+    return this.router.createUrlTree(['/login'], {
+      queryParams: { returnUrl: target },
+    });
   }
 }

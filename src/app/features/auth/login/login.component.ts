@@ -1,62 +1,53 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../../auth.service';
-import { filter, Subject, take, takeUntil } from 'rxjs';
+import { AuthService } from '../../../shared/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
-  encapsulation: ViewEncapsulation.None, // <-- สำคัญ
 })
-export class LoginComponent implements OnInit, OnDestroy {
-  public loginValid = true;
-  public username = '';
-  public password = '';
-
-  private _destroySub$ = new Subject<void>();
-  private readonly returnUrl: string;
+export class LoginComponent implements OnInit {
+  username = '';
+  password = '';
+  errorMsg = '';
+  loginValid = true;
+  returnUrl = '/dashboard';
 
   constructor(
-    private _route: ActivatedRoute,
-    private _router: Router,
-    private _authService: AuthService
-  ) {
-    this.returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/game';
+    private route: ActivatedRoute,
+    private router: Router,
+    private auth: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    // อ่าน returnUrl จาก query param แล้วจำไว้
+    const ru = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (ru) this.returnUrl = ru;
+    this.auth.setReturnUrl(this.returnUrl);
+
+    // ถ้าเคยล็อกอินแล้ว ให้เด้งไปเลย
+    if (this.auth.isLoggedIn()) {
+      this.router.navigateByUrl(this.returnUrl);
+    }
   }
 
-  public ngOnInit(): void {
-    this._authService.isAuthenticated$
-      .pipe(
-        filter((isAuthenticated: boolean) => isAuthenticated),
-        takeUntil(this._destroySub$)
-      )
-      .subscribe((_) => this._router.navigateByUrl(this.returnUrl));
-  }
+  onSubmit(): void {
+    this.errorMsg = '';
+    this.loginValid = true;
 
-  public ngOnDestroy(): void {
-    this._destroySub$.next();
-  }
-
-  public onSubmit(): void {
-    // ตรวจสอบก่อนว่ากรอกครบไหม
     if (!this.username || !this.password) {
       this.loginValid = false;
-      //alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+      this.errorMsg = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
       return;
     }
 
-    this.loginValid = true;
-
-    this._authService
-      .login(this.username, this.password)
-      .pipe(take(1))
-      .subscribe({
-        next: (_) => {
-          this.loginValid = true;
-          this._router.navigateByUrl('/game');
-        },
-        error: (_) => (this.loginValid = false),
-      });
+    this.auth.login(this.username, this.password).subscribe({
+      next: () => this.router.navigateByUrl(this.auth.getReturnUrl()),
+      error: (e) => {
+        this.loginValid = false;
+        this.errorMsg = e?.message || 'เข้าสู่ระบบไม่สำเร็จ';
+      },
+    });
   }
 }

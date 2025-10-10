@@ -17,7 +17,7 @@
           name="username"
           [(ngModel)]="username"
           required
-          #usernameInput="ngModel"
+          autocomplete="username"
         />
         <mat-error *ngIf="!username && !loginValid">
           กรุณากรอกชื่อผู้ใช้
@@ -31,11 +31,11 @@
         <mat-label>รหัสผ่าน</mat-label>
         <input
           matInput
-          type="password"
           name="password"
           [(ngModel)]="password"
           required
-          #passwordInput="ngModel"
+          type="password"
+          autocomplete="current-password"
         />
         <mat-error *ngIf="!password && !loginValid">
           กรุณากรอกรหัสผ่าน
