@@ -1,0 +1,95 @@
+<aside
+  class="sidebar"
+  [class.collapsed]="isCollapsed"
+  [class.hover-expand]="hoverExpand"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  <!-- ปุ่ม Toggle วงกลม: จุดจะแสดงเฉพาะตอนล็อก -->
+  <button
+    class="circle-toggle"
+    [class.locked]="isLocked"
+    (click)="toggleLock()"
+    aria-label="Toggle sidebar lock"
+  >
+    <span class="dot"></span>
+  </button>
+
+  <div class="sidebar-header">
+    <img class="brand-logo" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      <li>
+        <a class="nav-item active">
+          <i class="ti ti-layout-dashboard nav-icon"></i>
+          <span class="nav-label">แดชบอร์ด</span>
+        </a>
+      </li>
+
+      <li>
+        <div class="nav-item" (click)="toggleSubMenu('dataManagement')">
+          <i class="ti ti-database nav-icon"></i>
+          <span class="nav-label">จัดการข้อมูล</span>
+          <i
+            class="ti ti-chevron-right sub-arrow"
+            [class.rotate]="openSubMenu === 'dataManagement'"
+          ></i>
+        </div>
+        <ul class="sub-menu" [class.open]="openSubMenu === 'dataManagement'">
+          <li><a>ข้อมูลบริษัท</a></li>
+          <li><a>ข้อมูลสาขา</a></li>
+          <li><a>ข้อมูลทั่วไป</a></li>
+          <li><a>ข้อมูลลูกค้า</a></li>
+          <li><a>ข้อมูลสินค้า</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <div class="nav-item" (click)="toggleSubMenu('documentManagement')">
+          <i class="ti ti-file-text nav-icon"></i>
+          <span class="nav-label">จัดการเอกสาร</span>
+          <i
+            class="ti ti-chevron-right sub-arrow"
+            [class.rotate]="openSubMenu === 'documentManagement'"
+          ></i>
+        </div>
+        <ul
+          class="sub-menu"
+          [class.open]="openSubMenu === 'documentManagement'"
+        >
+          <li><a>นำเข้าข้อมูล</a></li>
+          <li><a>รายการเอกสารทั้งหมด</a></li>
+          <li><a>จัดการแม่แบบข้อมูล</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a class="nav-item">
+          <i class="ti ti-user nav-icon"></i>
+          <span class="nav-label">จัดการผู้ใช้และสิทธิ์</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item">
+          <i class="ti ti-history nav-icon"></i>
+          <span class="nav-label">ประวัติการทำรายการ</span>
+        </a>
+      </li>
+      <li>
+        <a class="nav-item">
+          <i class="ti ti-settings nav-icon"></i>
+          <span class="nav-label">ตั้งค่า API</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-item" (click)="logout()">
+      <i class="ti ti-logout nav-icon"></i>
+      <span class="nav-label">ออกจากระบบ</span>
+    </a>
+  </div>
+</aside>

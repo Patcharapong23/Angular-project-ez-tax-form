@@ -123,7 +123,9 @@ mat-form-field.full-width {
 .link {
   color: #0b57d0;
   text-decoration: none;
-  font-weight: 400;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
 }
 .link:hover {
   text-decoration: underline;
@@ -132,7 +134,7 @@ mat-form-field.full-width {
 /* ลืมรหัสผ่านชิดขวาใต้ช่องรหัสผ่าน */
 .forgot-wrapper {
   text-align: right;
-  margin: -4px 0 16px;
+  margin: -24px 0 32px;
 }
 .forgot {
   font-size: 14px;
@@ -141,9 +143,13 @@ mat-form-field.full-width {
 /* ------- Foot Note ------- */
 .foot-note {
   margin-top: 24px;
-  padding: 16px 0 0;
+  padding-top: 16px;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+  font-style: normal;
+  color: #6e6b7b;
+  text-align: center;
+  border-top: 1px solid #ebe9f1;
 }
 
 /* ------- Error Message ------- */
@@ -168,4 +174,17 @@ mat-form-field.full-width {
 /* ✅ ป้องกันไม้เอกไม้โทหาย — ยกเลิก line-height ที่มากับ Material */
 :host ::ng-deep .mat-mdc-input-element {
   line-height: normal !important;
+}
+
+.form-error {
+  color: red;
+  /* font-size: 13px; */
+  /* margin-top: -12px;
+  margin-bottom: 12px; */
+  text-align: center;
+}
+
+.mat-error {
+  font-size: 13px;
+  margin-top: 1px;
 }

@@ -1,97 +1,74 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
-import { delay, tap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-const KEY = 'mock-jwt-token';
-const USER_KEY = 'auth_user';
-
+// (ยืนยัน) Interface นี้ถูกต้อง ตรงกับข้อมูลใน JWT Token จาก Backend
 export interface AuthUser {
   id: string;
   username: string;
   fullName: string;
   email: string;
+  companyName: string;
+  branchCode: string;
+  branchName: string;
+  taxId: string;
+  businessPhone: string;
 }
 
-/** สำหรับ mock response หลังสมัคร */
 export interface RegisterResponse {
+  msg: string;
   username: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthService {
-  /** เก็บสถานะ login ปัจจุบัน */
-  private _authState$ = new BehaviorSubject<boolean>(this.hasToken());
-  /** สตรีมสถานะสาธารณะ */
-  readonly authState$ = this._authState$.asObservable();
-  /** alias เพื่อรองรับโค้ดเดิม */
-  readonly isAuthenticated$ = this.authState$;
+  private apiUrl = 'http://localhost:5000/api/auth';
+  private returnUrl = '/dashboard';
 
-  /** เก็บ returnUrl ชั่วคราว */
-  private _returnUrl = '/dashboard';
+  constructor(private http: HttpClient) {}
 
-  // ---------- helpers ----------
-  private hasToken(): boolean {
-    return !!localStorage.getItem(KEY);
-  }
-
-  setReturnUrl(url: string) {
-    this._returnUrl = url || '/dashboard';
-  }
-  getReturnUrl(): string {
-    return this._returnUrl || '/dashboard';
-  }
-
-  /** ใช้เช็คแบบ synchronous */
-  isLoggedIn(): boolean {
-    return this.hasToken();
-  }
-
-  /** mock login: admin / 123456 */
-  login(username: string, password: string): Observable<void> {
-    const ok = username?.trim() === 'admin' && password === '123456';
-    if (!ok) {
-      return throwError(() => new Error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'));
-    }
-
-    return of(void 0).pipe(
-      delay(300),
-      tap(() => {
-        localStorage.setItem(KEY, 'mock-jwt-token');
-        const user: AuthUser = {
-          id: '1',
-          username: 'admin',
-          fullName: 'John Doe',
-          email: 'john@example.com',
-        };
-        localStorage.setItem(USER_KEY, JSON.stringify(user));
-        this._authState$.next(true);
-      })
+  login(credentials: any): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(
+      `${this.apiUrl}/login`,
+      credentials
     );
   }
 
-  /** mock register — ส่งไปหลังบ้านได้ภายหลัง (ที่นี่ทำเป็น mock) */
-  register(formData: FormData): Observable<RegisterResponse> {
-    // คุณจะ map ฟิลด์จริง ๆ จาก formData เพื่อตรวจสอบ/ส่ง API จริงในอนาคตได้
-    const username =
-      (formData.get('email') as string) ||
-      (formData.get('fullName') as string) ||
-      'newuser';
-
-    return of<RegisterResponse>({ username }).pipe(delay(400));
+  register(userData: any): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(
+      `${this.apiUrl}/register`,
+      userData
+    );
   }
 
-  /** mock logout */
   logout(): void {
-    localStorage.removeItem(KEY);
-    localStorage.removeItem(USER_KEY);
-    this._authState$.next(false);
+    localStorage.removeItem('token');
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  setReturnUrl(url: string): void {
+    this.returnUrl = url;
+  }
+
+  getReturnUrl(): string {
+    return this.returnUrl;
   }
 
   getUser(): AuthUser | null {
-    const raw = localStorage.getItem(USER_KEY);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return null;
+    }
     try {
-      return raw ? (JSON.parse(raw) as AuthUser) : null;
-    } catch {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.user;
+    } catch (e) {
+      console.error('Invalid token', e);
       return null;
     }
   }

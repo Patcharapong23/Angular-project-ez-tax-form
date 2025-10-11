@@ -7,15 +7,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { AuthService } from '../../../auth.service';
+import { AuthService } from '../../../shared/auth.service';
 import { of } from 'rxjs';
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
-  let authSpy = jasmine.createSpyObj<AuthService>([], {
+  let authSpy = jasmine.createSpyObj<AuthService>('AuthService', [], {
     isAuthenticated$: of(false),
-  });
+  } as any);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

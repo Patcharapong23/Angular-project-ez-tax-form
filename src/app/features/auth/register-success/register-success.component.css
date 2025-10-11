@@ -1,0 +1,44 @@
+.success-card {
+  text-align: center;
+}
+
+.success-icon-wrapper {
+  margin: 20px 0;
+}
+
+.success-icon {
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  color: #28a745; /* สีเขียว */
+}
+
+.username-display {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+}
+
+.username-display p {
+  margin: 0;
+  color: #555;
+}
+
+.username-display .username {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  margin-top: 5px;
+}
+
+.button {
+  height: 44px;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  background: #ffcc00;
+  color: #111;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}

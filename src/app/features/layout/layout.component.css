@@ -1,0 +1,111 @@
+.main-content {
+  margin-left: 260px;
+  transition: margin-left 0.3s ease-in-out;
+}
+.main-content.collapsed {
+  margin-left: 80px;
+}
+
+/* --- (*** เพิ่ม/แก้ไขส่วนนี้ทั้งหมด ***) --- */
+/* --- Header (Navbar) --- */
+.main-header {
+  height: 70px;
+  padding: 0 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  position: sticky; /* ทำให้ Header อยู่กับที่ตอน scroll */
+  top: 0;
+  z-index: 900;
+}
+
+.header-button {
+  color: #555;
+}
+.header-button i {
+  font-size: 22px;
+}
+
+.header-actions {
+  margin-left: auto; /* ดันไปทางขวาสุด */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background-color: #e5e7eb;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* --- Content Area --- */
+.content-area {
+  padding: 24px;
+  background-color: #f9fafb; /* เพิ่มสีพื้นหลังให้เนื้อหา */
+  min-height: calc(100vh - 70px); /* คำนวณความสูงให้เต็มจอ */
+}
+:root {
+  --sidebar-open: 260px;
+  --sidebar-collapsed: 80px;
+  --topbar-h: 64px;
+  --bg-soft: #f6f7fb; /* พื้นหลังเทาอ่อน */
+}
+
+/* โครงแอป */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-soft);
+}
+
+/* พื้นที่ขวา (ไม่นับ Sidebar) */
+.main {
+  flex: 1;
+  margin-left: var(--sidebar-open);
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+}
+
+/* ถ้า Sidebar พับ */
+.app-shell.collapsed .main {
+  margin-left: var(--sidebar-collapsed);
+}
+
+/* Section เนื้อหา */
+.page {
+  padding: 16px 24px 24px;
+}
+
+/* หัวเรื่องหน้า */
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2b2f33;
+  margin: 8px 0 16px;
+}
+
+/* การ์ดเนื้อหาหลัก */
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  min-height: calc(100vh - var(--topbar-h) - 80px);
+  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04), 0 1px 3px rgba(17, 24, 39, 0.06);
+  padding: 16px;
+}

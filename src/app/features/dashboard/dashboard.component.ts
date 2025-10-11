@@ -1,26 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, AuthUser } from '../../shared/auth.service';
 
 @Component({
   selector: 'app-dashboard',
-  template: `
-    <div class="p-4">
-      <h2>Dashboard</h2>
-      <p *ngIf="user">ยินดีต้อนรับ, {{ user.fullName }} ({{ user.email }})</p>
-      <button mat-stroked-button color="primary" (click)="logout()">
-        ออกจากระบบ
-      </button>
-    </div>
-  `,
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
-  user: AuthUser | null = this.auth.getUser();
+export class DashboardComponent implements OnInit {
+  user: AuthUser | null = null;
+
+  // +++ เพิ่มตัวแปรสำหรับควบคุม Sidebar +++
+  isSidebarCollapsed = false;
 
   constructor(private auth: AuthService, private router: Router) {}
+
+  ngOnInit(): void {
+    this.user = this.auth.getUser();
+  }
 
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  // +++ เพิ่มฟังก์ชันสำหรับ Toggle Sidebar +++
+  toggleSidebar(): void {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
 }

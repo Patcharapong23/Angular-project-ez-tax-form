@@ -19,10 +19,11 @@
           required
           autocomplete="username"
         />
-        <mat-error *ngIf="!username && !loginValid">
+        <mat-error *ngIf="!username && errorMsg">
           กรุณากรอกชื่อผู้ใช้
         </mat-error>
       </mat-form-field>
+
       <mat-form-field
         appearance="outline"
         class="full-width"
@@ -34,13 +35,25 @@
           name="password"
           [(ngModel)]="password"
           required
-          type="password"
+          [type]="hidePass ? 'password' : 'text'"
           autocomplete="current-password"
         />
-        <mat-error *ngIf="!password && !loginValid">
-          กรุณากรอกรหัสผ่าน
-        </mat-error>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hidePass = !hidePass"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hidePass"
+        >
+          <mat-icon>{{ hidePass ? "visibility_off" : "visibility" }}</mat-icon>
+        </button>
+        <mat-error *ngIf="!password && errorMsg"> กรุณากรอกรหัสผ่าน </mat-error>
       </mat-form-field>
+
+      <div class="form-error" *ngIf="errorMsg">
+        {{ errorMsg }}
+      </div>
 
       <div class="forgot-wrapper">
         <a class="link forgot" routerLink="/forgot-password">ลืมรหัสผ่าน?</a>
@@ -51,7 +64,7 @@
     </form>
 
     <p class="foot-note">
-      มีบัญชีใช้งานแล้วหรือยัง?
+      ยังไม่มีบัญชีผู้ใช้งาน?
       <a class="link" routerLink="/register">สมัครบัญชีใหม่</a>
     </p>
   </div>

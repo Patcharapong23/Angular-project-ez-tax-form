@@ -46,23 +46,10 @@ h1 {
   font-weight: 400;
 }
 
-/* ------- Form Fields ------- */
-.full-width {
-  width: 100%;
-}
-
-mat-form-field.full-width {
+/* mat-form-field.full-width {
   display: block;
   margin-bottom: 12px;
-}
-
-/* ------- Foot note ------- */
-.foot-note {
-  margin-top: 24px;
-  padding: 16px 0 0;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
-}
+} */
 
 /* ------- Links ------- */
 .link {
@@ -179,13 +166,6 @@ mat-form-field.full-width {
   display: block;
 }
 
-/* ตัวอย่างเครือบบางส่วน ให้เข้ากับงานเดิมของคุณ */
-.auth-shell {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  background: #fff;
-}
 .auth-card {
   width: min(800px, 92vw);
   background: #fff;
@@ -235,13 +215,6 @@ mat-form-field.full-width {
 /* ------- Layout ------- */
 :host {
   display: block;
-}
-
-.auth-shell {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: clamp(16px, 4vw, 32px);
 }
 
 .auth-card {
@@ -419,16 +392,21 @@ mat-checkbox {
 /* ------- Foot note ------- */
 .foot-note {
   margin-top: 24px;
-  padding: 16px 0 0;
+  padding-top: 16px;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
+  font-weight: 500;
+  font-style: normal;
+  color: #6e6b7b;
   text-align: center;
+  border-top: 1px solid #ebe9f1;
 }
 
 .link {
   color: #0b57d0;
   text-decoration: none;
-  font-weight: 500;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
 }
 .link:hover {
   text-decoration: underline;
@@ -464,4 +442,38 @@ upload-label {
 /* เปลี่ยนเคอร์เซอร์ที่กล่องเวลาล็อก */
 .blocked .mat-mdc-text-field-wrapper {
   cursor: not-allowed;
+}
+
+.form-row,
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(250px, 1fr)
+  ); /* ทำให้ responsive */
+  gap: 16px;
+}
+
+.section-title .req {
+  color: #ea5455;
+  font-weight: bold;
+  margin-left: 4px;
+}
+.actions {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+button[mat-stroked-button] {
+  height: 48px;
+  border-radius: 8px;
+  font-weight: 700;
+  border: 1px solid #d8d6de;
+  color: #6e6b7b;
+}
+
+button[mat-stroked-button]:hover {
+  background-color: #f8f8f8;
 }

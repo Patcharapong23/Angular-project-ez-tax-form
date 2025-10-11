@@ -1,1 +1,170 @@
+/* --- Layout หลัก --- */
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+}
 
+/* --- Sidebar --- */
+.sidebar {
+  width: 260px;
+  background-color: #ffffff; /* สีเทาเข้ม */
+  color: #d1d5db; /* สีเทาอ่อน */
+  display: flex;
+  box-shadow: 0 2px 4px 0 #292927;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+.sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #374151;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar-header .brand-logo {
+  height: 35px;
+}
+
+.sidebar-header .company-name {
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffffff;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+  padding: 16px 0;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  cursor: pointer;
+  text-decoration: none;
+  color: #d1d5db;
+  white-space: nowrap;
+}
+
+.nav-item:hover {
+  background-color: #374151;
+  color: #ffffff;
+}
+
+.nav-item.active {
+  border-radius: 6px;
+  background: var(--mode-light-dark, #fc0);
+  color: #292927;
+
+  font-weight: 500;
+}
+
+.nav-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  padding: 20px 0;
+  border-top: 1px solid #374151;
+}
+
+/* --- Main Content --- */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #f9fafb;
+  width: calc(100% - 260px);
+  transition: width 0.3s ease;
+}
+
+.main-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.user-info {
+  margin-left: auto;
+}
+
+.content-area {
+  padding: 24px;
+  flex-grow: 1;
+}
+
+/* --- Collapsed State --- */
+.sidebar-collapsed .sidebar {
+  width: 80px;
+}
+.sidebar-collapsed .sidebar .company-name,
+.sidebar-collapsed .sidebar .nav-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+.sidebar-collapsed .main-content {
+  width: calc(100% - 80px);
+}
+
+/* --- Styles สำหรับ Cards (จากของเดิม) --- */
+.main-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 24px;
+}
+.dashboard-actions {
+  display: flex;
+  gap: 24px;
+}
+.action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  height: 150px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #111827;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.action-card:hover {
+  border-color: #3b82f6;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.action-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: #3b82f6;
+}
+.action-label {
+  font-size: 16px;
+  font-weight: 500;
+}

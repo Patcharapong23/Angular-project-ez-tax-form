@@ -9,9 +9,7 @@
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <!-- ===== STEP 1 ===== -->
       <div *ngIf="step === 1" class="step-panel">
-        <!-- ชื่อ-นามสกุล -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อ-นามสกุล</mat-label>
           <input
@@ -28,7 +26,6 @@
           >
         </mat-form-field>
 
-        <!-- อีเมล -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>อีเมล</mat-label>
           <input
@@ -57,7 +54,6 @@
           </mat-error>
         </mat-form-field>
 
-        <!-- Password + meter + checklist -->
         <div formGroupName="passwordGroup" class="pw-grid">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสผ่าน</mat-label>
@@ -164,9 +160,7 @@
         </div>
       </div>
 
-      <!-- ===== STEP 2 ===== -->
       <div *ngIf="step === 2" class="step-panel" formGroupName="company">
-        <!-- Upload logo -->
         <div
           class="upload-box"
           [class.has-image]="logoPreview"
@@ -178,7 +172,6 @@
             accept="image/*"
             (change)="onLogoSelected($event)"
           />
-
           <img
             *ngIf="logoPreview"
             class="logo-preview"
@@ -190,9 +183,7 @@
         <p class="upload-note">
           ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB
         </p>
-
         <h3 class="section-title">ข้อมูลบริษัท <span class="req">*</span></h3>
-
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อบริษัท</mat-label>
           <input matInput formControlName="companyName" />
@@ -200,7 +191,6 @@
             >กรุณากรอกชื่อบริษัท</mat-error
           >
         </mat-form-field>
-
         <div class="grid-2">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสสาขา 5 หลัก</mat-label>
@@ -217,7 +207,6 @@
               ต้องเป็นตัวเลข 5 หลัก
             </mat-error>
           </mat-form-field>
-
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>ชื่อสาขา</mat-label>
             <input matInput formControlName="branchName" />
@@ -226,7 +215,6 @@
             >
           </mat-form-field>
         </div>
-
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>เลขประจำตัวผู้เสียภาษีอากร 13 หลัก</mat-label>
           <input matInput maxlength="13" formControlName="taxId" />
@@ -242,7 +230,6 @@
             ต้องเป็นตัวเลข 13 หลัก
           </mat-error>
         </mat-form-field>
-
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>เบอร์ติดต่อธุรกิจ</mat-label>
           <input matInput formControlName="businessPhone" />
@@ -253,7 +240,20 @@
         </h3>
 
         <div formGroupName="addressTh">
-          <!-- จังหวัด -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>เลขที่อาคาร</mat-label>
+            <input matInput formControlName="buildingNo" />
+            <mat-error
+              *ngIf="addressTh.get('buildingNo')?.hasError('required')"
+            >
+              กรุณากรอกเลขที่อาคาร
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>ชื่ออาคาร/ชั้นที่/ซอย/ถนน (ถ้ามี)</mat-label>
+            <input matInput formControlName="street" />
+          </mat-form-field>
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>จังหวัด</mat-label>
             <input
@@ -282,7 +282,6 @@
           </mat-form-field>
 
           <div class="grid-2">
-            <!-- เขต/อำเภอ -->
             <mat-form-field
               appearance="outline"
               class="full-width mf-relative"
@@ -293,7 +292,6 @@
                 *ngIf="isDistrictLocked"
                 title="กรุณาเลือกจังหวัดหรือกรอก ZIP ก่อน"
               ></div>
-
               <mat-label>เขต/อำเภอ</mat-label>
               <input
                 matInput
@@ -322,8 +320,6 @@
                 >กรุณาเลือกเขต/อำเภอ</mat-error
               >
             </mat-form-field>
-
-            <!-- แขวง/ตำบล -->
             <mat-form-field
               appearance="outline"
               class="full-width mf-relative"
@@ -334,7 +330,6 @@
                 *ngIf="isSubdistrictLocked"
                 title="กรุณาเลือกอำเภอหรือกรอก ZIP ก่อน"
               ></div>
-
               <mat-label>แขวง/ตำบล</mat-label>
               <input
                 matInput
@@ -367,8 +362,6 @@
               >
             </mat-form-field>
           </div>
-
-          <!-- ZIP -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสไปรษณีย์</mat-label>
             <input

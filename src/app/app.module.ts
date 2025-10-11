@@ -16,11 +16,15 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SidebarComponent } from './shared/sidebar/sidebar.component';
+import { LayoutComponent } from './features/layout/layout.component';
+import { TopbarComponent } from './shared/topbar/topbar.component';
 
 /* ===== Components ===== */
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { RegisterSuccessComponent } from './features/auth/register-success/register-success.component';
 
 /* ===== Guards (ถ้ามี) ===== */
 import { AuthGuard } from './auth.guard';
@@ -29,8 +33,12 @@ import { AuthGuard } from './auth.guard';
   declarations: [
     AppComponent,
     LoginComponent,
+    RegisterSuccessComponent,
     RegisterComponent,
     DashboardComponent,
+    SidebarComponent,
+    TopbarComponent,
+    LayoutComponent,
   ],
   imports: [
     BrowserModule,

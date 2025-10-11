@@ -1,0 +1,26 @@
+<div class="auth-shell">
+  <div class="auth-card success-card">
+    <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
+
+    <div class="success-icon-wrapper">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+    </div>
+
+    <h1 class="title">สร้างบัญชีผู้ใช้งานสำเร็จ</h1>
+
+    <div *ngIf="username" class="username-display">
+      <p>ชื่อผู้ใช้งานของคุณคือ:</p>
+      <p class="username">{{ username }}</p>
+    </div>
+
+    <button
+      mat-raised-button
+      class="full-width button"
+      type="button"
+      color="primary"
+      (click)="goToLogin()"
+    >
+      ไปที่หน้าเข้าสู่ระบบ
+    </button>
+  </div>
+</div>

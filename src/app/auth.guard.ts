@@ -6,9 +6,12 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AuthService } from './shared/auth.service';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthGuard implements CanActivate {
   constructor(private auth: AuthService, private router: Router) {}
 
@@ -16,13 +19,17 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean | UrlTree {
-    if (this.auth.isLoggedIn()) return true;
-
-    // เก็บ returnUrl แล้วพาไป login พร้อม query param
-    const target = state.url || '/dashboard';
-    this.auth.setReturnUrl(target);
-    return this.router.createUrlTree(['/login'], {
-      queryParams: { returnUrl: target },
-    });
+    if (this.auth.isLoggedIn()) {
+      // ถ้า Login แล้ว, ให้ไปต่อได้
+      return true;
+    } else {
+      // ถ้ายังไม่ได้ Login
+      // ให้จำ URL ที่ผู้ใช้พยายามจะเข้าไป
+      const targetUrl = state.url;
+      // เราสามารถสร้าง Query Parameter เพื่อส่งต่อไปยังหน้า Login ได้
+      return this.router.createUrlTree(['/login'], {
+        queryParams: { returnUrl: targetUrl },
+      });
+    }
   }
 }

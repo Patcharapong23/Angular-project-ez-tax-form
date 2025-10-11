@@ -8,11 +8,13 @@ import { AuthService } from '../../../shared/auth.service';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
+  // --- (1) เปลี่ยนจาก email เป็น username ---
   username = '';
   password = '';
   errorMsg = '';
-  loginValid = true;
-  returnUrl = '/dashboard';
+
+  // --- (2) เพิ่มตัวแปรสำหรับซ่อนรหัสผ่าน ---
+  hidePass = true;
 
   constructor(
     private route: ActivatedRoute,
@@ -21,32 +23,32 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // อ่าน returnUrl จาก query param แล้วจำไว้
-    const ru = this.route.snapshot.queryParamMap.get('returnUrl');
-    if (ru) this.returnUrl = ru;
-    this.auth.setReturnUrl(this.returnUrl);
-
-    // ถ้าเคยล็อกอินแล้ว ให้เด้งไปเลย
     if (this.auth.isLoggedIn()) {
-      this.router.navigateByUrl(this.returnUrl);
+      this.router.navigate(['/dashboard']);
     }
   }
 
   onSubmit(): void {
     this.errorMsg = '';
-    this.loginValid = true;
-
     if (!this.username || !this.password) {
-      this.loginValid = false;
-      this.errorMsg = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
+      this.errorMsg = 'ไม่สามารถเข้าสู่ระบบได้';
       return;
     }
 
-    this.auth.login(this.username, this.password).subscribe({
-      next: () => this.router.navigateByUrl(this.auth.getReturnUrl()),
+    // --- (3) สร้าง object ที่มี key เป็น username และ password ---
+    const credentials = {
+      username: this.username,
+      password: this.password,
+    };
+
+    this.auth.login(credentials).subscribe({
+      next: (response) => {
+        localStorage.setItem('token', response.token);
+        this.router.navigate(['/dashboard']);
+      },
       error: (e) => {
-        this.loginValid = false;
-        this.errorMsg = e?.message || 'เข้าสู่ระบบไม่สำเร็จ';
+        // แสดงข้อความ error จาก Backend
+        this.errorMsg = e.error?.msg || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
       },
     });
   }
