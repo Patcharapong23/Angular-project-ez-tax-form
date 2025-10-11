@@ -4,24 +4,26 @@
   </div>
 
   <div class="header-actions">
+    <!-- trigger dropdown -->
     <div class="user-profile" (click)="isProfileMenuOpen = !isProfileMenuOpen">
-      <img class="user-avatar" [src]="getAvatarUrl()" alt="User Avatar" />
+      <div class="avatar">
+        <span class="initial">
+          {{ displayName() || "U" | slice : 0 : 2 }}
+        </span>
+      </div>
 
       <div class="user-details">
-        <div class="name">{{ user?.fullName }}</div>
+        <div class="name">{{ displayName() }}</div>
         <div class="role">ผู้ดูแลระบบ</div>
       </div>
-      <i
-        class="ti ti-chevron-down profile-arrow"
-        [class.rotate]="isProfileMenuOpen"
-      ></i>
     </div>
 
+    <!-- เมนู dropdown -->
     <div class="profile-dropdown" [class.open]="isProfileMenuOpen">
-      <a class="dropdown-item" (click)="logout()">
+      <div class="dropdown-item" (click)="logout()">
         <i class="ti ti-logout"></i>
         <span>ออกจากระบบ</span>
-      </a>
+      </div>
     </div>
   </div>
 </header>

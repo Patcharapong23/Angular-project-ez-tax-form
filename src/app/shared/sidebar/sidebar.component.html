@@ -5,7 +5,6 @@
   (mouseenter)="onMouseEnter()"
   (mouseleave)="onMouseLeave()"
 >
-  <!-- ปุ่ม Toggle วงกลม: จุดจะแสดงเฉพาะตอนล็อก -->
   <button
     class="circle-toggle"
     [class.locked]="isLocked"
@@ -21,15 +20,27 @@
 
   <nav class="sidebar-nav">
     <ul>
+      <!-- Dashboard -->
       <li>
-        <a class="nav-item active">
+        <a
+          class="nav-item"
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
           <i class="ti ti-layout-dashboard nav-icon"></i>
           <span class="nav-label">แดชบอร์ด</span>
         </a>
       </li>
 
+      <!-- จัดการข้อมูล -->
       <li>
-        <div class="nav-item" (click)="toggleSubMenu('dataManagement')">
+        <div
+          class="nav-item"
+          (click)="toggleSubMenu('dataManagement')"
+          [class.opened]="openSubMenu === 'dataManagement'"
+          [class.selected]="activeMain === 'dataManagement'"
+        >
           <i class="ti ti-database nav-icon"></i>
           <span class="nav-label">จัดการข้อมูล</span>
           <i
@@ -38,16 +49,42 @@
           ></i>
         </div>
         <ul class="sub-menu" [class.open]="openSubMenu === 'dataManagement'">
-          <li><a>ข้อมูลบริษัท</a></li>
-          <li><a>ข้อมูลสาขา</a></li>
-          <li><a>ข้อมูลทั่วไป</a></li>
-          <li><a>ข้อมูลลูกค้า</a></li>
-          <li><a>ข้อมูลสินค้า</a></li>
+          <li>
+            <a routerLink="/company" routerLinkActive="active-sub"
+              >ข้อมูลบริษัท</a
+            >
+          </li>
+          <li>
+            <a routerLink="/branches" routerLinkActive="active-sub"
+              >ข้อมูลสาขา</a
+            >
+          </li>
+          <li>
+            <a routerLink="/general" routerLinkActive="active-sub"
+              >ข้อมูลทั่วไป</a
+            >
+          </li>
+          <li>
+            <a routerLink="/customers" routerLinkActive="active-sub"
+              >ข้อมูลลูกค้า</a
+            >
+          </li>
+          <li>
+            <a routerLink="/products" routerLinkActive="active-sub"
+              >ข้อมูลสินค้า</a
+            >
+          </li>
         </ul>
       </li>
 
+      <!-- จัดการเอกสาร -->
       <li>
-        <div class="nav-item" (click)="toggleSubMenu('documentManagement')">
+        <div
+          class="nav-item"
+          (click)="toggleSubMenu('documentManagement')"
+          [class.opened]="openSubMenu === 'documentManagement'"
+          [class.selected]="activeMain === 'documentManagement'"
+        >
           <i class="ti ti-file-text nav-icon"></i>
           <span class="nav-label">จัดการเอกสาร</span>
           <i
@@ -59,26 +96,43 @@
           class="sub-menu"
           [class.open]="openSubMenu === 'documentManagement'"
         >
-          <li><a>นำเข้าข้อมูล</a></li>
-          <li><a>รายการเอกสารทั้งหมด</a></li>
-          <li><a>จัดการแม่แบบข้อมูล</a></li>
+          <li>
+            <a routerLink="/documents/import" routerLinkActive="active-sub"
+              >นำเข้าข้อมูล</a
+            >
+          </li>
+          <li>
+            <a routerLink="/documentsall" routerLinkActive="active-sub"
+              >รายการเอกสารทั้งหมด</a
+            >
+          </li>
+          <li>
+            <a routerLink="/documents/templates" routerLinkActive="active-sub"
+              >จัดการแม่แบบข้อมูล</a
+            >
+          </li>
         </ul>
       </li>
 
+      <!-- อื่น ๆ -->
       <li>
-        <a class="nav-item">
+        <a class="nav-item" routerLink="/users" routerLinkActive="active">
           <i class="ti ti-user nav-icon"></i>
           <span class="nav-label">จัดการผู้ใช้และสิทธิ์</span>
         </a>
       </li>
       <li>
-        <a class="nav-item">
+        <a class="nav-item" routerLink="/history" routerLinkActive="active">
           <i class="ti ti-history nav-icon"></i>
           <span class="nav-label">ประวัติการทำรายการ</span>
         </a>
       </li>
       <li>
-        <a class="nav-item">
+        <a
+          class="nav-item"
+          routerLink="/api-settings"
+          routerLinkActive="active"
+        >
           <i class="ti ti-settings nav-icon"></i>
           <span class="nav-label">ตั้งค่า API</span>
         </a>

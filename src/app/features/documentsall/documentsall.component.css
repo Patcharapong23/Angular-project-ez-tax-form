@@ -1,0 +1,181 @@
+/* ใช้โครง page เดิมจากแดชบอร์ดอยู่แล้ว */
+.page {
+  padding: 16px 0 24px;
+  min-height: calc(100vh - 64px);
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2b2f33;
+  margin: 8px 0 14px;
+}
+
+/* quick-card = การ์ดค้นหา */
+.search-card {
+  padding: 16px;
+}
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* กริดช่องกรอก */
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 1fr));
+  gap: 14px 16px;
+}
+
+/* field + input/select */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.field input,
+.field select {
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  outline: none;
+  background: #fff;
+}
+.field input:focus,
+.field select:focus {
+  border-color: #b4c2ff;
+  box-shadow: 0 0 0 3px rgba(48, 115, 255, 0.12);
+}
+
+/* ช่วงวันที่ */
+.range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.range input {
+  flex: 1;
+}
+
+/* แถวปุ่ม */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.grow {
+  flex: 1;
+}
+.btn {
+  height: 40px;
+  border-radius: 10px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-warning {
+  background: #ffc107;
+  color: #1f2937;
+}
+.btn-outline {
+  background: #fff;
+  color: #e11d48;
+  border-color: #fecaca;
+}
+.btn:hover {
+  filter: brightness(0.98);
+}
+
+/* ตาราง */
+.table-card {
+  background: #fff;
+  border-radius: 16px;
+  margin-top: 16px;
+  overflow: auto;
+  box-shadow: 0 4px 18px rgba(17, 24, 39, 0.04),
+    0 1px 3px rgba(17, 24, 39, 0.06);
+  border: 1px solid #eceff5;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.doc-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  z-index: 1;
+  text-align: left;
+  font-weight: 700;
+  color: #374151;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.doc-table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+}
+.doc-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-blue {
+  background: #e5efff;
+  color: #3056d3;
+}
+.badge-amber {
+  background: #fff7e6;
+  color: #b45309;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.icon-btn.danger {
+  color: #ef4444;
+  border-color: #fee2e2;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .grid-3 {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .action-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -13,6 +13,17 @@ export interface AuthUser {
   branchName: string;
   taxId: string;
   businessPhone: string;
+  addressTh: {
+    buildingNo: string;
+    street: string;
+    province: string;
+    district: string;
+    subdistrict: string;
+    postalCode: string;
+  };
+  addressEn: {
+    line1: string;
+  };
 }
 
 export interface RegisterResponse {

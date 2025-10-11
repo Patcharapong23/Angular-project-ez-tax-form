@@ -57,7 +57,7 @@
 /* --- Content Area --- */
 .content-area {
   padding: 24px;
-  background-color: #f9fafb; /* เพิ่มสีพื้นหลังให้เนื้อหา */
+  background-color: #f8f7fa; /* เพิ่มสีพื้นหลังให้เนื้อหา */
   min-height: calc(100vh - 70px); /* คำนวณความสูงให้เต็มจอ */
 }
 :root {

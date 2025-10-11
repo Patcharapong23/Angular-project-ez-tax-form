@@ -73,6 +73,12 @@
   flex-shrink: 0;
   margin-right: 16px;
 }
+/* เมื่อเมนูหลักกำลังเปิด sub-menu */
+.nav-item.opened {
+  background-color: #dee2e6; /* เหลืองอ่อน */
+  color: #292927;
+  font-weight: 600;
+}
 .sidebar-footer {
   padding: 20px 0;
   border-top: 1px solid #eee;
@@ -92,20 +98,110 @@
   transition: max-height 0.3s ease-in-out;
   background-color: #fafafa;
 }
+.sub-menu li {
+  position: relative;
+}
 .sub-menu.open {
   max-height: 300px;
 }
+.sub-menu li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2b2f33; /* สีจุด */
+  position: absolute;
+  left: 38px; /* ปรับจาก 28px → 44px ให้ตรงกับ icon หลัก */
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.9;
+}
+
 .sub-menu a {
   display: block;
-  padding: 10px 20px 10px 54px;
+  padding: 10px 20px 10px 68px; /* +14px จากเดิม เพื่อชดเชยที่จุดถูกเลื่อน */
   color: #555;
   text-decoration: none;
+}
+
+/* Hover ให้จุดเข้มขึ้น + พื้นหลังอ่อน */
+.sub-menu li:hover::before {
+  background: #000;
 }
 .sub-menu a:hover {
   background-color: #f0f0f0;
   color: #292927;
 }
 
+/* (ออปชั่น) ถ้ามีสถานะ active ของรายการย่อย */
+.sub-menu a.active {
+  background: #ffc107;
+  color: #292927;
+}
+/* .sub-menu a.active ~ * {
+} */
+.sidebar-nav .nav-item,
+.sidebar .sub-menu a {
+  margin: 4px 10px; /* <<< เหมือน .nav-item */
+  border-radius: 8px;
+
+  box-sizing: border-box;
+}
+
+/* พื้นที่คลิกและระยะห่างของ sub item */
+.sidebar .sub-menu {
+  padding: 4px 0;
+}
+.sidebar .sub-menu a {
+  display: block;
+  padding: 10px 20px 10px 68px; /* เผื่อช่องไอคอน/จุด */
+  color: #555;
+  text-decoration: none;
+}
+
+/* จุดนำหน้าให้ตรงกับไอคอนของเมนูหลัก */
+.sidebar .sub-menu li {
+  position: relative;
+}
+.sidebar .sub-menu li::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 38px; /* ปรับให้ตรงกับแนว icon เมนูหลัก */
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2b2f33;
+  transform: translateY(-50%);
+  opacity: 0.9;
+}
+
+/* สถานะ active ของรายการย่อย ให้กรอบพอดีขอบเหมือนหัวข้อหลัก */
+.sidebar .sub-menu a.active {
+  background: #ffc107;
+  color: #292927;
+  font-weight: 600;
+}
+
+.nav-item.active {
+  background-color: #ffc107;
+  color: #292927;
+  font-weight: 600;
+}
+
+/* หัวข้อหลักของกลุ่มที่กำลังดูอยู่ */
+.nav-item.selected {
+  background-color: #ffc107; /* เหลืองอ่อน */
+  color: #292927;
+  font-weight: 600;
+}
+
+/* รายการย่อยที่ active */
+.sub-menu a.active-sub {
+  background: #ffc107;
+  color: #292927;
+  font-weight: 600;
+}
 /* ---- Toggle Button (วงกลมเล็กลง) ---- */
 .circle-toggle {
   position: absolute;

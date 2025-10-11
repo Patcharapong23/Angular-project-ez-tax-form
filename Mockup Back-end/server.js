@@ -1,17 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors"); // <-- (1) Import cors
+const cors = require("cors");
 
 const app = express();
 
 // --- Middlewares ---
-app.use(cors()); // <-- (2) เปิดใช้งาน CORS สำหรับทุก Route
-app.use(express.json()); // ให้ Express อ่าน JSON body ได้
+app.use(cors());
+app.use(express.json());
 
-// --- เชื่อมต่อ MongoDB Atlas ---
+// --- เชื่อมต่อ MongoDB Atlas โดยใช้ตัวแปรใหม่ ---
 mongoose
-  .connect(process.env.MONGO_URI, {
+  .connect(mongoURI, {
+    // <--- ใช้ mongoURI ที่แก้ไขแล้ว
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

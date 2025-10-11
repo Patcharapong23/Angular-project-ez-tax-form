@@ -25,6 +25,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { RegisterSuccessComponent } from './features/auth/register-success/register-success.component';
+import { DocumentsAllComponent } from './features/documentsall/documentsall.component';
 
 /* ===== Guards (ถ้ามี) ===== */
 import { AuthGuard } from './auth.guard';
@@ -39,6 +40,7 @@ import { AuthGuard } from './auth.guard';
     SidebarComponent,
     TopbarComponent,
     LayoutComponent,
+    DocumentsAllComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,135 @@
+<section class="page">
+  <!-- ชื่อหน้า -->
+  <h1 class="page-title">รายการเอกสารทั้งหมด</h1>
+
+  <!-- Placeholder Card = กล่องค้นหา -->
+  <div class="quick-grid">
+    <div class="quick-card placeholder search-card">
+      <form (ngSubmit)="search()" class="search-form">
+        <div class="grid-3">
+          <div class="field">
+            <label>เลขที่เอกสาร</label>
+            <input type="text" [(ngModel)]="f.docNo" name="docNo" />
+          </div>
+
+          <div class="field">
+            <label>เลขที่ผู้เสียภาษีลูกค้า</label>
+            <input
+              type="text"
+              [(ngModel)]="f.customerTaxId"
+              name="customerTaxId"
+            />
+          </div>
+
+          <div class="field">
+            <label>ประเภทเอกสาร</label>
+            <select [(ngModel)]="f.docType" name="docType">
+              <option value="">ทั้งหมด</option>
+              <option value="T01">ใบเสร็จรับเงิน (T01)</option>
+              <option value="IV">ใบแจ้งหนี้/ใบกำกับภาษี</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>วันที่ออกเอกสาร (เริ่มต้น–สิ้นสุด)</label>
+            <div class="range">
+              <input
+                type="date"
+                [(ngModel)]="f.issueDateFrom"
+                name="issueDateFrom"
+              />
+              <span>—</span>
+              <input
+                type="date"
+                [(ngModel)]="f.issueDateTo"
+                name="issueDateTo"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>วันที่สร้างเอกสาร (เริ่มต้น–สิ้นสุด)</label>
+            <div class="range">
+              <input
+                type="date"
+                [(ngModel)]="f.createdFrom"
+                name="createdFrom"
+              />
+              <span>—</span>
+              <input type="date" [(ngModel)]="f.createdTo" name="createdTo" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label>สถานะเอกสาร</label>
+            <select [(ngModel)]="f.status" name="status">
+              <option value="">ทั้งหมด</option>
+              <option value="new">เอกสารใหม่</option>
+              <option value="latest">อัปเดตล่าสุด</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <div class="grow"></div>
+          <button type="submit" class="btn btn-warning">ค้นหา</button>
+          <button type="button" class="btn btn-outline" (click)="clear()">
+            เคลียร์
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ตารางข้อมูล -->
+  <div class="table-card">
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" /></th>
+          <th>เลขที่เอกสาร</th>
+          <th>เลขที่ผู้เสีย</th>
+          <th>ชื่อลูกค้า</th>
+          <th>รหัสสาขา</th>
+          <th>ประเภทเอกสาร</th>
+          <th>วันที่ออกเอกสาร</th>
+          <th>วันที่สร้างเอกสาร</th>
+          <th>สถานะเอกสาร</th>
+          <th>การดำเนินการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td><input type="checkbox" /></td>
+          <td>{{ r.docNo }}</td>
+          <td>{{ r.taxId }}</td>
+          <td>{{ r.customer }}</td>
+          <td>{{ r.branch }}</td>
+          <td>{{ r.type }}</td>
+          <td>{{ r.issueDate | date : "dd/MM/yyyy" }}</td>
+          <td>{{ r.createdAt | date : "dd/MM/yyyy" }}</td>
+          <td>
+            <span
+              class="badge"
+              [class.badge-blue]="r.status === 'new'"
+              [class.badge-amber]="r.status === 'latest'"
+            >
+              {{ r.status === "new" ? "เอกสารใหม่" : "อัปเดตล่าสุด" }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="icon-btn" title="ดู">
+              <i class="ti ti-eye"></i>
+            </button>
+            <button class="icon-btn" title="แก้ไข">
+              <i class="ti ti-edit"></i>
+            </button>
+            <button class="icon-btn danger" title="ลบ">
+              <i class="ti ti-x"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
