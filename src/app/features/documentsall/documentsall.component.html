@@ -1,8 +1,18 @@
 <section class="page">
-  <!-- ชื่อหน้า -->
-  <h1 class="page-title">รายการเอกสารทั้งหมด</h1>
-
-  <!-- Placeholder Card = กล่องค้นหา -->
+  <div
+    style="
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    "
+  >
+    <h1 class="page-title" style="margin: 0">รายการเอกสารทั้งหมด</h1>
+    <button class="btn btn-primary" (click)="createNewDocument()">
+      <i class="ti ti-plus"></i>
+      สร้างเอกสารใหม่
+    </button>
+  </div>
   <div class="quick-grid">
     <div class="quick-card placeholder search-card">
       <form (ngSubmit)="search()" class="search-form">
@@ -26,7 +36,13 @@
             <select [(ngModel)]="f.docType" name="docType">
               <option value="">ทั้งหมด</option>
               <option value="T01">ใบเสร็จรับเงิน (T01)</option>
-              <option value="IV">ใบแจ้งหนี้/ใบกำกับภาษี</option>
+              <option value="T02">ใบแจ้งหนี้ / ใบกำกับภาษี (T02)</option>
+              <option value="T03">ใบเสร็จรับเงิน / ใบกำกับภาษี (T03)</option>
+              <option value="T04">ใบส่งของ / ใบกำกับภาษี (T04)</option>
+              <option value="380">ใบแจ้งหนี้ (380)</option>
+              <option value="388">ใบกำกับภาษี (388)</option>
+              <option value="80">ใบเพิ่มหนี้ (80)</option>
+              <option value="81">ใบลดหนี้ (81)</option>
             </select>
           </div>
 
@@ -64,8 +80,8 @@
             <label>สถานะเอกสาร</label>
             <select [(ngModel)]="f.status" name="status">
               <option value="">ทั้งหมด</option>
-              <option value="new">เอกสารใหม่</option>
-              <option value="latest">อัปเดตล่าสุด</option>
+              <option value="active">ใช้งาน</option>
+              <option value="cancelled">ยกเลิก</option>
             </select>
           </div>
         </div>
@@ -81,14 +97,13 @@
     </div>
   </div>
 
-  <!-- ตารางข้อมูล -->
   <div class="table-card">
     <table class="doc-table">
       <thead>
         <tr>
           <th><input type="checkbox" /></th>
           <th>เลขที่เอกสาร</th>
-          <th>เลขที่ผู้เสีย</th>
+          <th>เลขที่ผู้เสียภาษี</th>
           <th>ชื่อลูกค้า</th>
           <th>รหัสสาขา</th>
           <th>ประเภทเอกสาร</th>
@@ -109,24 +124,29 @@
           <td>{{ r.issueDate | date : "dd/MM/yyyy" }}</td>
           <td>{{ r.createdAt | date : "dd/MM/yyyy" }}</td>
           <td>
-            <span
-              class="badge"
-              [class.badge-blue]="r.status === 'new'"
-              [class.badge-amber]="r.status === 'latest'"
-            >
-              {{ r.status === "new" ? "เอกสารใหม่" : "อัปเดตล่าสุด" }}
+            <span class="badge" [ngClass]="getStatusClass(r.status)">
+              {{ getStatusText(r.status) }}
             </span>
           </td>
           <td class="actions">
-            <button class="icon-btn" title="ดู">
+            <button class="icon-btn" title="ดู" (click)="viewInvoice(r.id)">
               <i class="ti ti-eye"></i>
             </button>
-            <button class="icon-btn" title="แก้ไข">
+            <button class="icon-btn" title="แก้ไข" (click)="editInvoice(r.id)">
               <i class="ti ti-edit"></i>
             </button>
-            <button class="icon-btn danger" title="ลบ">
+            <button
+              class="icon-btn danger"
+              title="ยกเลิก"
+              (click)="cancelInvoice(r.id)"
+            >
               <i class="ti ti-x"></i>
             </button>
+          </td>
+        </tr>
+        <tr *ngIf="rows.length === 0">
+          <td colspan="10" style="text-align: center; padding: 1rem">
+            ไม่พบข้อมูลเอกสาร
           </td>
         </tr>
       </tbody>

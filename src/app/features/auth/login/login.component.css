@@ -188,3 +188,6 @@ mat-form-field.full-width {
   font-size: 13px;
   margin-top: 1px;
 }
+.mat-form-field {
+  line-height: 1.5;
+}

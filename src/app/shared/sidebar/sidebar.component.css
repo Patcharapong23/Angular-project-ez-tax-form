@@ -10,6 +10,7 @@
   top: 0;
   left: 0;
   z-index: 1000;
+  background: #ffffff;
   transition: width 0.3s ease-in-out, box-shadow 0.3s ease,
     background-color 0.3s ease;
 }
@@ -41,11 +42,13 @@
   flex-grow: 1;
   padding: 16px 0;
   overflow-y: auto;
+  background-color: #ffffff;
 }
 .sidebar-nav ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  background-color: #ffffff;
 }
 .nav-item {
   display: flex;
@@ -144,7 +147,6 @@
 .sidebar .sub-menu a {
   margin: 4px 10px; /* <<< เหมือน .nav-item */
   border-radius: 8px;
-
   box-sizing: border-box;
 }
 

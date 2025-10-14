@@ -83,6 +83,9 @@ $material-tic-tac-toe-theme: mat.define-light-theme(
 .mat-mdc-text-field-wrapper {
   border-radius: 8px !important;
 }
-.mat-form-field {
-  line-height: 1.5; // หรือ 1.6 จะปลอดภัยกับภาษาไทย
+// .mat-form-field {
+//   line-height: 1.5; // หรือ 1.6 จะปลอดภัยกับภาษาไทย
+// }
+::ng-deep .mat-form-field-appearance-outline .mat-select-arrow-wrapper {
+  display: none !important;
 }

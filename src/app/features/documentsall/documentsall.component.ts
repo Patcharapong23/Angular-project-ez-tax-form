@@ -1,58 +1,131 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { Invoice, InvoiceService } from '../invoice/invoice.service';
+import { NewDocumentDialogComponent } from '../dialogs/new-document-dialog/new-document-dialog.component';
+
+// Interface สำหรับข้อมูลที่จะแสดงในตาราง
+export interface DocumentRow {
+  id: string;
+  docNo: string;
+  taxId: string;
+  customer: string;
+  branch: string;
+  type: string;
+  issueDate: Date;
+  createdAt: Date | undefined;
+  status: string;
+}
 
 @Component({
-  selector: 'app-documents-all',
+  selector: 'app-documentsall',
   templateUrl: './documentsall.component.html',
   styleUrls: ['./documentsall.component.css'],
 })
-export class DocumentsAllComponent {
-  f = {
-    docNo: '',
-    customerTaxId: '',
-    docType: '',
-    issueDateFrom: '',
-    issueDateTo: '',
-    createdFrom: '',
-    createdTo: '',
-    status: '',
-  };
+export class DocumentsallComponent implements OnInit {
+  f: any = {};
+  private allInvoices: Invoice[] = [];
+  rows: DocumentRow[] = [];
 
-  rows = [
-    {
-      docNo: 'TE-0001',
-      taxId: '10-XXXXXXX',
-      customer: 'VG Co., Ltd.',
-      branch: '00000',
-      type: 'ใบเสร็จรับเงิน (T01)',
-      issueDate: new Date(2022, 1, 23),
-      createdAt: new Date(2022, 0, 10),
-      status: 'new',
-    },
-    {
-      docNo: 'UK-0002',
-      taxId: '20-XXXXXXX',
-      customer: 'UK Co., Ltd.',
-      branch: '00001',
-      type: 'ใบแจ้งหนี้/ใบกำกับภาษี',
-      issueDate: new Date(2022, 1, 24),
-      createdAt: new Date(2022, 0, 10),
-      status: 'latest',
-    },
-  ];
+  constructor(
+    private invoiceService: InvoiceService,
+    private router: Router,
+    public dialog: MatDialog // Inject MatDialog ที่นี่
+  ) {}
 
-  search() {
-    /* TODO: call API */
+  ngOnInit(): void {
+    this.loadInvoices();
   }
-  clear() {
-    this.f = {
-      docNo: '',
-      customerTaxId: '',
-      docType: '',
-      issueDateFrom: '',
-      issueDateTo: '',
-      createdFrom: '',
-      createdTo: '',
-      status: '',
-    };
+
+  loadInvoices(): void {
+    this.invoiceService.getInvoices().subscribe((data: Invoice[]) => {
+      this.allInvoices = data;
+      this.search();
+    });
+  }
+
+  private mapInvoicesToRows(invoices: Invoice[]): DocumentRow[] {
+    return invoices.map((inv) => ({
+      id: inv._id!,
+      docNo: inv.documentNumber || '-',
+      taxId: inv.customer.taxId,
+      customer: inv.customer.name,
+      branch: inv.customer.branchCode || 'สำนักงานใหญ่',
+      type: inv.documentType,
+      issueDate: inv.issueDate,
+      createdAt: inv.createdAt,
+      status: inv.status,
+    }));
+  }
+
+  search(): void {
+    const filteredInvoices = this.allInvoices.filter((inv) => {
+      const matchDocNo =
+        !this.f.docNo || inv.documentNumber?.includes(this.f.docNo);
+      const matchCustomerTaxId =
+        !this.f.customerTaxId ||
+        inv.customer.taxId.includes(this.f.customerTaxId);
+      const matchDocType =
+        !this.f.docType || inv.documentType === this.f.docType;
+      return matchDocNo && matchCustomerTaxId && matchDocType;
+    });
+
+    this.rows = this.mapInvoicesToRows(filteredInvoices);
+  }
+
+  clear(): void {
+    this.f = {};
+    this.search();
+  }
+
+  getStatusClass(status: string): string {
+    if (status === 'active') return 'badge-green';
+    if (status === 'cancelled') return 'badge-red';
+    return 'badge-gray';
+  }
+
+  getStatusText(status: string): string {
+    if (status === 'active') return 'ใช้งาน';
+    if (status === 'cancelled') return 'ยกเลิก';
+    return status;
+  }
+
+  createNewDocument(): void {
+    const dialogRef = this.dialog.open(NewDocumentDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      panelClass: 'newdoc-dialog', // <-- คลาสหลักของ dialog
+      backdropClass: 'newdoc-backdrop',
+      autoFocus: false,
+      // panelClass: 'custom-dialog-container',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && result.documentType && result.documentTemplate) {
+        this.router.navigate(['/invoice/new'], {
+          queryParams: {
+            type: result.documentType,
+            template: result.documentTemplate,
+          },
+        });
+      }
+    });
+  }
+
+  viewInvoice(id: string): void {
+    console.log('View invoice:', id);
+  }
+
+  editInvoice(id: string): void {
+    this.router.navigate(['/invoice/edit', id]);
+  }
+
+  cancelInvoice(id: string): void {
+    if (confirm('คุณต้องการยกเลิกเอกสารนี้ใช่หรือไม่?')) {
+      this.invoiceService.cancelInvoice(id).subscribe(() => {
+        alert('ยกเลิกเอกสารสำเร็จ');
+        this.loadInvoices();
+      });
+    }
   }
 }

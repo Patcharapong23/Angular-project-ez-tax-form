@@ -74,10 +74,12 @@
 }
 .btn {
   height: 40px;
-  border-radius: 10px;
+  border-radius: 6px;
   padding: 0 16px;
   border: 1px solid transparent;
   cursor: pointer;
+  background-color: #ffcc00;
+  box-shadow: 0 2px 4px 0 rgba(165, 163, 174, 0.3);
   font-weight: 600;
 }
 .btn-warning {

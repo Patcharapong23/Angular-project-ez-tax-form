@@ -1,0 +1,43 @@
+<form [formGroup]="invoiceForm" (ngSubmit)="onSubmit()">
+  <div class="header">
+    <h1>{{ isEditMode ? "แก้ไขเอกสาร" : "สร้างเอกสารใหม่" }}</h1>
+    <div class="actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        [routerLink]="['/documentsall']"
+      >
+        ยกเลิก
+      </button>
+      <button type="submit" class="btn btn-primary">บันทึก</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grid-4">
+      <div class="field">
+        <label>ประเภทเอกสาร</label>
+        <select formControlName="documentType">
+          <option *ngFor="let type of documentTypes" [value]="type.value">
+            {{ type.viewValue }}
+          </option>
+        </select>
+      </div>
+      <div class="field">
+        <label>แม่แบบเอกสาร</label>
+        <select formControlName="documentTemplate">
+          <option
+            *ngFor="let template of documentTemplates"
+            [value]="template.value"
+          >
+            {{ template.viewValue }}
+          </option>
+        </select>
+      </div>
+      <div class="field">
+        <label>วันที่ออกเอกสาร</label>
+        <input type="date" formControlName="issueDate" />
+      </div>
+    </div>
+  </div>
+</form>

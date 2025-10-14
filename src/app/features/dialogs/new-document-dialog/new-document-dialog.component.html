@@ -1,0 +1,98 @@
+<form [formGroup]="form" class="w-full">
+  <div class="dialog-header">
+    <h2>สร้างเอกสารใหม่</h2>
+    <button type="button" class="icon-x" (click)="close()" aria-label="close">
+      ✕
+    </button>
+  </div>
+
+  <div class="dialog-body">
+    <!-- ประเภทเอกสาร -->
+    <div class="dialog-field">
+      <label>ประเภทเอกสาร <span class="required">*</span></label>
+
+      <mat-form-field appearance="outline" class="custom-select">
+        <mat-select
+          formControlName="documentType"
+          placeholder="เลือกประเภทเอกสาร"
+        >
+          <mat-option *ngFor="let d of documentTypes" [value]="d.value">
+            {{ d.viewValue }}
+          </mat-option>
+        </mat-select>
+
+        <!-- Tabler Icon -->
+        <span matSuffix class="tabler-caret">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      </mat-form-field>
+    </div>
+
+    <!-- แม่แบบเอกสาร -->
+    <div class="dialog-field">
+      <label>แม่แบบเอกสาร</label>
+
+      <mat-form-field appearance="outline" class="custom-select">
+        <mat-select
+          formControlName="documentTemplate"
+          placeholder="เลือกแม่แบบเอกสาร"
+          [disableOptionCentering]="true"
+          panelClass="ez-select-panel"
+          (opened)="opened.template = true"
+          (closed)="opened.template = false"
+        >
+          <mat-option *ngIf="filteredTemplates.length === 0" disabled>
+            โปรดเลือกประเภทเอกสารก่อน
+          </mat-option>
+          <mat-option *ngFor="let t of filteredTemplates" [value]="t.value">
+            {{ t.viewValue }}
+          </mat-option>
+        </mat-select>
+
+        <span
+          matSuffix
+          class="tabler-caret"
+          [class.open]="opened.template"
+          aria-hidden="true"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button
+      type="button"
+      class="btn-continue"
+      [disabled]="form.invalid"
+      (click)="submit()"
+    >
+      ดำเนินการต่อ
+    </button>
+  </div>
+</form>

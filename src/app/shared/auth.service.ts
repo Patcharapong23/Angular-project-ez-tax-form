@@ -31,6 +31,30 @@ export interface RegisterResponse {
   username: string;
 }
 
+export interface InvoiceItem {
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  amount: number;
+}
+
+export interface Invoice {
+  _id?: string;
+  documentType: string;
+  documentTemplate: string;
+  customer: {
+    name: string;
+    address: string;
+    taxId: string;
+  };
+  items: InvoiceItem[];
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  grandTotal: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })

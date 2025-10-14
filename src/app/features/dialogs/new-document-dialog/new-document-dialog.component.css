@@ -1,0 +1,124 @@
+/* กล่อง dialog */
+::ng-deep .newdoc-dialog .mat-mdc-dialog-container {
+  border-radius: 14px !important;
+  background: #fff !important;
+  padding: 0 !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18) !important;
+  overflow: hidden;
+}
+
+/* header/body/actions */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px 6px;
+}
+.dialog-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: #1f2330;
+}
+.icon-x {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #444;
+  cursor: pointer;
+}
+.dialog-body {
+  padding: 8px 28px 6px;
+}
+.dialog-actions {
+  padding: 18px 28px 26px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dialog-field {
+  width: 100%;
+}
+.dialog-field + .dialog-field {
+  margin-top: 16px;
+}
+.dialog-field label {
+  display: block;
+  font-weight: 700;
+  color: #1f2330;
+  font-size: 14px;
+  margin: 12px 0 8px;
+}
+.required {
+  color: #e53935;
+}
+
+/* ให้ฟิลด์เต็มแนว */
+.custom-select ::ng-deep .mat-mdc-form-field {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* กรอบ/มุม/สูง */
+.custom-select ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+  background: #fff !important;
+}
+.custom-select ::ng-deep .mat-mdc-form-field-infix {
+  min-height: 56px !important;
+  padding-top: 16px !important;
+  padding-bottom: 8px !important;
+}
+
+/* สีเส้น */
+.custom-select ::ng-deep .mdc-notched-outline__leading,
+.custom-select ::ng-deep .mdc-notched-outline__notch,
+.custom-select ::ng-deep .mdc-notched-outline__trailing {
+  border-color: #e7e8ea !important;
+}
+.custom-select:hover ::ng-deep .mdc-notched-outline__leading,
+.custom-select:hover ::ng-deep .mdc-notched-outline__notch,
+.custom-select:hover ::ng-deep .mdc-notched-outline__trailing {
+  border-color: #d6d8dc !important;
+}
+.custom-select ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
+.custom-select ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
+.custom-select ::ng-deep .mdc-notched-outline__trailing {
+  border-color: #1f2330 !important;
+}
+
+/* ซ่อนลูกศร Material เพื่อไม่ให้ซ้ำ */
+.custom-select ::ng-deep .mat-mdc-select-arrow {
+  display: none !important;
+}
+
+/* caret Tabler (suffix) */
+.tabler-caret {
+  display: inline-flex;
+  align-items: center;
+  color: #6b7280;
+  margin-right: 4px;
+  pointer-events: none;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.tabler-caret.open {
+  transform: rotate(180deg);
+  color: #1f2330;
+}
+
+/* ปุ่มเหลือง */
+.btn-continue {
+  background: #ffd000 !important;
+  color: #111 !important;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+}
+.btn-continue:disabled {
+  background: #f3f4f6 !important;
+  color: #b5bbc3 !important;
+  box-shadow: none;
+}
