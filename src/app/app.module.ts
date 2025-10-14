@@ -17,6 +17,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { OverlayModule } from '@angular/cdk/overlay';
 
 /* ===== Components ===== */
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
@@ -54,7 +55,7 @@ import { AuthGuard } from './auth.guard';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-
+    OverlayModule,
     // Material
     MatFormFieldModule,
     MatInputModule,

@@ -4,8 +4,14 @@
 
 html,
 body {
-  font-family: "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", Roboto,
-    Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  font-family: "Noto Sans Thai", sans-serif;
+}
+
+* {
+  font-family: "Noto Sans Thai";
 }
 
 /* ฟอนต์กับวรรณยุกต์ */
@@ -144,7 +150,7 @@ body {
 .custom-dialog-container {
   background: #ffffff;
   border-radius: 16px;
-  width: 500px;
+
   max-width: 90vw;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
@@ -152,13 +158,14 @@ body {
 .mat-dialog-container {
   padding: 0 !important;
   border-radius: 16px !important;
+  background-color: red;
+  overflow: visible !important;
 }
 .custom-dialog-container .mat-dialog-container {
   background: #ffffff !important;
 
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
 }
-
 /* แบ็คดรอปจาง ๆ */
 .newdoc-backdrop {
   background: rgba(0, 0, 0, 0.35);
@@ -243,17 +250,4 @@ body {
   border: 1px solid #edeff2 !important;
   padding: 6px 0 !important;
   margin-top: 6px !important; /* ดันลง ไม่ทับฟิลด์ */
-}
-
-.cdk-overlay-pane .mat-mdc-select-panel.ez-select-panel .mdc-list-item {
-  min-height: 44px !important;
-  padding: 0 16px !important;
-  font-size: 14px !important;
-  color: #1f2330 !important;
-}
-.cdk-overlay-pane .mat-mdc-select-panel.ez-select-panel .mdc-list-item:hover,
-.cdk-overlay-pane
-  .mat-mdc-select-panel.ez-select-panel
-  .mdc-list-item.mdc-list-item--selected {
-  background: #f6f7f9 !important;
 }
