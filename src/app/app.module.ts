@@ -4,7 +4,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 /* ===== Angular Material ===== */
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,9 +27,10 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { RegisterSuccessComponent } from './features/auth/register-success/register-success.component';
-import { DocumentsallComponent } from './features/documentsAll/documentsall.component';
+import { DocumentsallComponent } from './features/documentsall/documentsall.component';
 import { InvoiceFormComponent } from './features/invoice/invoice-form/invoice-form.component';
 import { NewDocumentDialogComponent } from './features/dialogs/new-document-dialog/new-document-dialog.component';
+import { JwtInterceptor } from './shared/jwt.interceptor';
 
 /* ===== Guards ===== */
 import { AuthGuard } from './auth.guard';
@@ -56,6 +57,7 @@ import { AuthGuard } from './auth.guard';
     ReactiveFormsModule,
     HttpClientModule,
     OverlayModule,
+
     // Material
     MatFormFieldModule,
     MatInputModule,
@@ -68,7 +70,10 @@ import { AuthGuard } from './auth.guard';
     MatCheckboxModule,
     MatSelectModule,
   ],
-  providers: [AuthGuard],
+  providers: [
+    AuthGuard,
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

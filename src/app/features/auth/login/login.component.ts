@@ -1,54 +1,53 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../../shared/auth.service';
+import { AuthService, LoginResponse } from '../../../shared/auth.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
-export class LoginComponent implements OnInit {
-  // --- (1) เปลี่ยนจาก email เป็น username ---
-  username = '';
+export class LoginComponent {
+  // HTML เดิม bind กับ username/password
+  private _userName = '';
   password = '';
-  errorMsg = '';
-
-  // --- (2) เพิ่มตัวแปรสำหรับซ่อนรหัสผ่าน ---
   hidePass = true;
+  errorMsg = '';
+  returnUrl = '/dashboard'; // ค่าเริ่มต้น
 
   constructor(
-    private route: ActivatedRoute,
+    private auth: AuthService,
     private router: Router,
-    private auth: AuthService
+    private route: ActivatedRoute
   ) {}
 
-  ngOnInit(): void {
-    if (this.auth.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-    }
+  get username(): string {
+    return this._userName;
+  }
+  set username(v: string) {
+    this._userName = v ?? '';
+    this.errorMsg = '';
   }
 
-  onSubmit(): void {
-    this.errorMsg = '';
-    if (!this.username || !this.password) {
-      this.errorMsg = 'ไม่สามารถเข้าสู่ระบบได้';
-      return;
+  ngOnInit() {
+    this.returnUrl =
+      this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+  }
+
+  onSubmit() {
+    if (!this._userName || !this.password) {
+      /* ... */ return;
     }
-
-    // --- (3) สร้าง object ที่มี key เป็น username และ password ---
-    const credentials = {
-      username: this.username,
-      password: this.password,
-    };
-
-    this.auth.login(credentials).subscribe({
-      next: (response) => {
-        localStorage.setItem('token', response.token);
-        this.router.navigate(['/dashboard']);
+    this.auth.login(this._userName, this.password).subscribe({
+      next: (res) => {
+        if (res?.mustChangePassword) {
+          this.router.navigate(['/force-change-password']);
+          return;
+        }
+        this.router.navigateByUrl(this.returnUrl); // <--
       },
-      error: (e) => {
-        // แสดงข้อความ error จาก Backend
-        this.errorMsg = e.error?.msg || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      error: () => {
+        this.errorMsg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
       },
     });
   }

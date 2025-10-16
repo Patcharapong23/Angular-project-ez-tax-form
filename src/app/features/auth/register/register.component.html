@@ -9,23 +9,29 @@
     </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- STEP 1 ------------------------------------------------------------>
       <div *ngIf="step === 1" class="step-panel">
+        <!-- firstName: พิมพ์ได้ทั้งไทยและอังกฤษ -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อ-นามสกุล</mat-label>
           <input
             matInput
-            formControlName="fullName"
+            formControlName="firstName"
             autocomplete="name"
-            [attr.maxlength]="fullNameMaxLen"
+            [attr.maxlength]="firstNameMaxLen"
           />
-          <mat-error *ngIf="fullName?.hasError('required')"
+          <span matSuffix class="dropdown-caret" aria-hidden="true">
+            <i class="ti ti-user"></i>
+          </span>
+          <mat-error *ngIf="firstName?.hasError('required')"
             >กรุณากรอกชื่อ-นามสกุล</mat-error
           >
-          <mat-error *ngIf="fullName?.hasError('minlength')"
+          <mat-error *ngIf="firstName?.hasError('minlength')"
             >อย่างน้อย 2 ตัวอักษร</mat-error
           >
         </mat-form-field>
 
+        <!-- email -->
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>อีเมล</mat-label>
           <input
@@ -38,6 +44,9 @@
             spellcheck="false"
             (keydown)="blockThai($event)"
           />
+          <span matSuffix class="dropdown-caret" aria-hidden="true">
+            <i class="ti ti-mail"></i>
+          </span>
           <mat-error *ngIf="email?.hasError('required')"
             >กรุณากรอกอีเมล</mat-error
           >
@@ -54,98 +63,11 @@
           </mat-error>
         </mat-form-field>
 
-        <div formGroupName="passwordGroup" class="pw-grid">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>รหัสผ่าน</mat-label>
-            <input
-              matInput
-              [type]="hidePass ? 'password' : 'text'"
-              formControlName="password"
-              [attr.minlength]="passwordMinLen"
-              [attr.maxlength]="passwordMaxLen"
-              autocomplete="new-password"
-            />
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              (click)="hidePass = !hidePass"
-              aria-label="แสดง/ซ่อนรหัสผ่าน"
-            >
-              <mat-icon>{{
-                hidePass ? "visibility_off" : "visibility"
-              }}</mat-icon>
-            </button>
-            <mat-error *ngIf="password?.hasError('required')"
-              >กรุณากรอกรหัสผ่าน</mat-error
-            >
-            <mat-error *ngIf="password?.hasError('minlength')"
-              >อย่างน้อย 6 ตัวอักษร</mat-error
-            >
-          </mat-form-field>
-
-          <div
-            class="pw-meter"
-            [class.done]="allOk"
-            [class.warn]="!allOk && passwordScore >= 0.5"
-          >
-            <div class="bar" [style.width.%]="passwordScore * 100"></div>
-          </div>
-
-          <ul class="pw-req">
-            <li [class.ok]="rules.minLen">
-              <mat-icon class="ic">{{
-                rules.minLen ? "check_circle" : "radio_button_unchecked"
-              }}</mat-icon>
-              ตัวอักษรภาษาอังกฤษอย่างน้อย 14 ตัวอักษร
-            </li>
-            <li [class.ok]="rules.hasDigit">
-              <mat-icon class="ic">{{
-                rules.hasDigit ? "check_circle" : "radio_button_unchecked"
-              }}</mat-icon>
-              ตัวเลข อย่างน้อย 1 ตัวอักษร เช่น 0-9
-            </li>
-            <li [class.ok]="rules.hasSpecial">
-              <mat-icon class="ic">{{
-                rules.hasSpecial ? "check_circle" : "radio_button_unchecked"
-              }}</mat-icon>
-              อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น !@#$
-            </li>
-            <li [class.ok]="rules.match">
-              <mat-icon class="ic">{{
-                rules.match ? "check_circle" : "radio_button_unchecked"
-              }}</mat-icon>
-              รหัสผ่านตรงกัน
-            </li>
-          </ul>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>ยืนยันรหัสผ่าน</mat-label>
-            <input
-              matInput
-              [type]="hideConfirm ? 'password' : 'text'"
-              formControlName="confirmPassword"
-              autocomplete="new-password"
-            />
-            <button
-              mat-icon-button
-              matSuffix
-              type="button"
-              (click)="hideConfirm = !hideConfirm"
-              aria-label="แสดง/ซ่อนยืนยันรหัสผ่าน"
-            >
-              <mat-icon>{{
-                hideConfirm ? "visibility_off" : "visibility"
-              }}</mat-icon>
-            </button>
-            <mat-error *ngIf="confirmPassword?.hasError('required')"
-              >กรุณายืนยันรหัสผ่าน</mat-error
-            >
-            <mat-error *ngIf="passwordGroup?.hasError('passwordsNotMatch')"
-              >รหัสผ่านไม่ตรงกัน</mat-error
-            >
-          </mat-form-field>
-        </div>
+        <!-- userName อัตโนมัติจากอีเมล -->
+        <p class="tiny-hint">
+          ชื่อผู้ใช้ (จะถูกสร้างอัตโนมัติ):
+          <strong>{{ (email?.value || "").split("@")[0] }}</strong>
+        </p>
 
         <div class="actions">
           <button
@@ -160,7 +82,9 @@
         </div>
       </div>
 
+      <!-- STEP 2 ------------------------------------------------------------>
       <div *ngIf="step === 2" class="step-panel" formGroupName="company">
+        <!-- Upload logo -->
         <div
           class="upload-box"
           [class.has-image]="logoPreview"
@@ -183,18 +107,42 @@
         <p class="upload-note">
           ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB
         </p>
+
         <h3 class="section-title">ข้อมูลบริษัท <span class="req">*</span></h3>
+
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>ชื่อบริษัท</mat-label>
-          <input matInput formControlName="companyName" />
-          <mat-error *ngIf="company.get('companyName')?.hasError('required')"
-            >กรุณากรอกชื่อบริษัท</mat-error
+          <mat-label>ชื่อบริษัท (ภาษาไทย)</mat-label>
+          <input matInput formControlName="tenantNameTh" />
+          <span matSuffix class="dropdown-caret" aria-hidden="true"
+            ><i class="ti ti-building-skyscraper"></i
+          ></span>
+          <mat-error *ngIf="company.get('tenantNameTh')?.hasError('required')"
+            >กรุณากรอกชื่อบริษัท (ภาษาไทย)</mat-error
           >
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ชื่อบริษัท (ภาษาอังกฤษ)</mat-label>
+          <input matInput formControlName="tenantNameEn" />
+          <span matSuffix class="dropdown-caret" aria-hidden="true"
+            ><i class="ti ti-building"></i
+          ></span>
+        </mat-form-field>
+
         <div class="grid-2">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสสาขา 5 หลัก</mat-label>
-            <input matInput maxlength="5" formControlName="branchCode" />
+            <input
+              matInput
+              maxlength="5"
+              formControlName="branchCode"
+              inputmode="numeric"
+              (keydown)="onlyDigitsKeydown($event)"
+              (input)="sanitizeDigits($event, company.get('branchCode'))"
+            />
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-building-bank"></i
+            ></span>
             <mat-error *ngIf="company.get('branchCode')?.hasError('required')"
               >กรุณากรอกรหัสสาขา</mat-error
             >
@@ -207,32 +155,65 @@
               ต้องเป็นตัวเลข 5 หลัก
             </mat-error>
           </mat-form-field>
+
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>ชื่อสาขา</mat-label>
-            <input matInput formControlName="branchName" />
-            <mat-error *ngIf="company.get('branchName')?.hasError('required')"
-              >กรุณากรอกชื่อสาขา</mat-error
+            <mat-label>ชื่อสาขา (ภาษาไทย)</mat-label>
+            <input matInput formControlName="branchNameTh" />
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-building-warehouse"></i
+            ></span>
+            <mat-error *ngIf="company.get('branchNameTh')?.hasError('required')"
+              >กรุณากรอกชื่อสาขา (ภาษาไทย)</mat-error
             >
           </mat-form-field>
         </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ชื่อสาขา (อังกฤษ)</mat-label>
+          <input matInput formControlName="branchNameEn" />
+          <span matSuffix class="dropdown-caret" aria-hidden="true"
+            ><i class="ti ti-building-arch"></i
+          ></span>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>เลขประจำตัวผู้เสียภาษีอากร 13 หลัก</mat-label>
-          <input matInput maxlength="13" formControlName="taxId" />
-          <mat-error *ngIf="company.get('taxId')?.hasError('required')"
+          <input
+            matInput
+            maxlength="13"
+            formControlName="tenantTaxId"
+            inputmode="numeric"
+            (keydown)="onlyDigitsKeydown($event)"
+            (input)="sanitizeDigits($event, company.get('tenantTaxId'))"
+          />
+          <span matSuffix class="dropdown-caret" aria-hidden="true"
+            ><i class="ti ti-file-certificate"></i
+          ></span>
+          <mat-error *ngIf="company.get('tenantTaxId')?.hasError('required')"
             >กรุณากรอกเลขประจำตัวผู้เสียภาษีอากร</mat-error
           >
           <mat-error
             *ngIf="
-              company.get('taxId')?.hasError('minlength') ||
-              company.get('taxId')?.hasError('maxlength')
+              company.get('tenantTaxId')?.hasError('minlength') ||
+              company.get('tenantTaxId')?.hasError('maxlength')
             "
           >
             ต้องเป็นตัวเลข 13 หลัก
           </mat-error>
         </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>เบอร์ติดต่อธุรกิจ</mat-label>
-          <input matInput formControlName="businessPhone" />
+          <input
+            matInput
+            formControlName="tenantTel"
+            inputmode="numeric"
+            (keydown)="onlyDigitsKeydown($event)"
+            (input)="sanitizeDigits($event, company.get('tenantTel'))"
+          />
+          <span matSuffix class="dropdown-caret" aria-hidden="true"
+            ><i class="ti ti-phone"></i
+          ></span>
         </mat-form-field>
 
         <h3 class="section-title">
@@ -243,17 +224,23 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>เลขที่อาคาร</mat-label>
             <input matInput formControlName="buildingNo" />
-            <mat-error
-              *ngIf="addressTh.get('buildingNo')?.hasError('required')"
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-home"></i
+            ></span>
+            <mat-error *ngIf="addressTh.get('buildingNo')?.hasError('required')"
+              >กรุณากรอกเลขที่อาคาร</mat-error
             >
-              กรุณากรอกเลขที่อาคาร
-            </mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>ชื่ออาคาร/ชั้นที่/ซอย/ถนน (ถ้ามี)</mat-label>
-            <input matInput formControlName="street" />
+            <mat-label>ชื่ออาคาร/ชั้นที่/ซอย/ถนน (ภาษาไทย)</mat-label>
+            <input matInput formControlName="addressDetailTh" />
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-road"></i
+            ></span>
           </mat-form-field>
+
+          <!-- จังหวัด -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>จังหวัด</mat-label>
             <input
@@ -262,10 +249,13 @@
               formControlName="province"
               [matAutocomplete]="autoProv"
               #provTrig="matAutocompleteTrigger"
-              (focus)="provTrig.openPanel()"
+              (focus)="onProvinceFocus(provTrig)"
               (input)="onProvinceInput($any($event.target).value)"
               (blur)="fixProvinceDisplay()"
             />
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-chevron-down"></i
+            ></span>
             <mat-autocomplete
               #autoProv="matAutocomplete"
               [displayWith]="displayProvince.bind(this)"
@@ -282,6 +272,7 @@
           </mat-form-field>
 
           <div class="grid-2">
+            <!-- อำเภอ -->
             <mat-form-field
               appearance="outline"
               class="full-width mf-relative"
@@ -290,7 +281,7 @@
               <div
                 class="field-blocker"
                 *ngIf="isDistrictLocked"
-                title="กรุณาเลือกจังหวัดหรือกรอก ZIP ก่อน"
+                title="กรุณาเลือกจังหวัดก่อน"
               ></div>
               <mat-label>เขต/อำเภอ</mat-label>
               <input
@@ -306,6 +297,9 @@
                 (input)="onDistrictType($any($event.target).value)"
                 (blur)="fixDistrictDisplay()"
               />
+              <span matSuffix class="dropdown-caret" aria-hidden="true"
+                ><i class="ti ti-chevron-down"></i
+              ></span>
               <mat-autocomplete
                 #autoDist="matAutocomplete"
                 [displayWith]="displayDistrict.bind(this)"
@@ -320,6 +314,8 @@
                 >กรุณาเลือกเขต/อำเภอ</mat-error
               >
             </mat-form-field>
+
+            <!-- ตำบล -->
             <mat-form-field
               appearance="outline"
               class="full-width mf-relative"
@@ -328,7 +324,7 @@
               <div
                 class="field-blocker"
                 *ngIf="isSubdistrictLocked"
-                title="กรุณาเลือกอำเภอหรือกรอก ZIP ก่อน"
+                title="กรุณาเลือกอำเภอก่อน"
               ></div>
               <mat-label>แขวง/ตำบล</mat-label>
               <input
@@ -344,6 +340,9 @@
                 (input)="onSubdistrictType($any($event.target).value)"
                 (blur)="fixSubdistrictDisplay()"
               />
+              <span matSuffix class="dropdown-caret" aria-hidden="true"
+                ><i class="ti ti-chevron-down"></i
+              ></span>
               <mat-autocomplete
                 #autoSub="matAutocomplete"
                 [displayWith]="displaySubdistrict.bind(this)"
@@ -362,16 +361,29 @@
               >
             </mat-form-field>
           </div>
+
+          <!-- ZIP -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>รหัสไปรษณีย์</mat-label>
             <input
               matInput
-              formControlName="postalCode"
+              formControlName="zipCode"
               maxlength="5"
+              inputmode="numeric"
+              [readonly]="isZipReadOnly"
+              (focus)="onZipFocus()"
+              (keydown)="onlyDigitsKeydown($event)"
+              (input)="sanitizeDigits($event, addressTh.get('zipCode'))"
               (keyup.enter)="onZipEnter()"
             />
-            <mat-hint>กด Enter เพื่อค้นหาข้อมูลจากรหัสไปรษณีย์</mat-hint>
-            <mat-error *ngIf="addressTh.get('postalCode')?.hasError('required')"
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-mail"></i
+            ></span>
+            <mat-hint>
+              ใส่ให้ครบ 5 หลักหรือกด Enter → ระบบจะพยายามเติม จังหวัด/อำเภอ/ตำบล
+              ให้อัตโนมัติ
+            </mat-hint>
+            <mat-error *ngIf="addressTh.get('zipCode')?.hasError('required')"
               >กรุณากรอกรหัสไปรษณีย์</mat-error
             >
           </mat-form-field>
@@ -380,14 +392,17 @@
         <h3 class="section-title">ที่อยู่ (ภาษาอังกฤษ)</h3>
         <div formGroupName="addressEn">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>เลขที่อาคาร,ชื่ออาคาร… (English)</mat-label>
-            <input matInput formControlName="line1" />
+            <mat-label>เลขที่อาคาร/ถนน/ซอย (English)</mat-label>
+            <input matInput formControlName="addressDetailEn" />
+            <span matSuffix class="dropdown-caret" aria-hidden="true"
+              ><i class="ti ti-road"></i
+            ></span>
           </mat-form-field>
         </div>
 
-        <mat-checkbox formControlName="acceptTos"
-          >ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ</mat-checkbox
-        >
+        <mat-checkbox formControlName="acceptTos">
+          ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ
+        </mat-checkbox>
         <div
           class="tiny-error"
           *ngIf="

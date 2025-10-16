@@ -43,11 +43,13 @@ h1 {
   border-radius: 16px;
   padding: clamp(20px, 4vw, 32px);
   text-align: center;
+  /* เปิดเงานุ่ม ๆ ถ้าต้องการ */
   /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); */
 }
 
 .brand {
   width: 200px;
+  max-width: 80%;
   margin: 8px auto 16px;
   display: block;
 }
@@ -61,7 +63,7 @@ mat-form-field.full-width {
   margin-bottom: 16px;
 }
 
-/* ------- Input Fields ------- */
+/* ------- Input Fields (Angular Material MDC) ------- */
 :host ::ng-deep .mat-mdc-form-field {
   --mdc-outlined-text-field-outline-color: #000;
   --mdc-outlined-text-field-hover-outline-color: #000;
@@ -91,11 +93,27 @@ mat-form-field.full-width {
   line-height: 24px !important;
 }
 
-/* ✅ ป้องกันวรรณยุกต์หาย */
+/* ✅ ป้องกันวรรณยุกต์หาย (label/notch) */
 :host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__notch,
 :host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
 :host ::ng-deep .mat-mdc-form-field .mdc-floating-label {
   overflow: visible !important;
+}
+
+/* suffix icon (ปุ่ม toggle password) ให้จัดวางสวยเป๊ะ */
+:host ::ng-deep .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+:host ::ng-deep .mat-mdc-form-field-icon-suffix .mat-icon {
+  font-size: 20px;
+  line-height: 20px;
+}
+
+/* subscript (error/hint) ให้เว้นระยะกำลังดี */
+:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 4px;
 }
 
 /* ------- Buttons ------- */
@@ -117,6 +135,12 @@ mat-form-field.full-width {
 
 .button:active {
   background: #e6b800;
+}
+
+.button[disabled] {
+  filter: grayscale(0.3);
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 /* ------- Links ------- */
@@ -159,6 +183,29 @@ mat-form-field.full-width {
   margin-top: 4px;
 }
 
+.form-error {
+  color: #d32f2f;
+  font-size: 13px;
+  text-align: center;
+  margin: -4px 0 12px;
+}
+
+/* ปรับ error ของ mat-error (template ใช้ mat-error ด้วย) */
+.mat-error {
+  font-size: 13px;
+  margin-top: 1px;
+}
+
+/* ให้ label/ข้อความไม่โดน squeeze ในบางธีม */
+.mat-form-field {
+  line-height: 1.5;
+}
+
+/* ✅ ป้องกันไม้เอกไม้โทหาย — ยกเลิก line-height ที่มากับ Material */
+:host ::ng-deep .mat-mdc-input-element {
+  line-height: normal !important;
+}
+
 /* ------- Responsive ------- */
 @media (max-width: 480px) {
   .auth-card {
@@ -170,24 +217,4 @@ mat-form-field.full-width {
   .subtitle {
     font-size: 16px;
   }
-}
-/* ✅ ป้องกันไม้เอกไม้โทหาย — ยกเลิก line-height ที่มากับ Material */
-:host ::ng-deep .mat-mdc-input-element {
-  line-height: normal !important;
-}
-
-.form-error {
-  color: red;
-  /* font-size: 13px; */
-  /* margin-top: -12px;
-  margin-bottom: 12px; */
-  text-align: center;
-}
-
-.mat-error {
-  font-size: 13px;
-  margin-top: 1px;
-}
-.mat-form-field {
-  line-height: 1.5;
 }

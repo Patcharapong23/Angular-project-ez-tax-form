@@ -480,3 +480,7 @@ button[mat-stroked-button]:hover {
 mat-form-field {
   line-height: 1.5;
 }
+
+step-panel {
+  background-color: red;
+}

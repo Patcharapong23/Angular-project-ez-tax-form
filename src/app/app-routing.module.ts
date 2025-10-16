@@ -5,7 +5,7 @@ import { RegisterComponent } from './features/auth/register/register.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { RegisterSuccessComponent } from './features/auth/register-success/register-success.component';
 import { LayoutComponent } from './features/layout/layout.component';
-import { DocumentsallComponent } from './features/documentsAll/documentsall.component';
+import { DocumentsallComponent } from './features/documentsall/documentsall.component';
 
 import { AuthGuard } from './auth.guard';
 // ถ้ามี RegisterComponent อยู่คง path ได้เลย; ถ้าไม่มี ให้ลบ route นั้น
@@ -14,6 +14,7 @@ const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'register-success', component: RegisterSuccessComponent },
 
   {
     path: '',

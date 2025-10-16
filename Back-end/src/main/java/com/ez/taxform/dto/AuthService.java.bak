@@ -1,0 +1,51 @@
+package com.ez.taxform.service;
+
+import com.ez.taxform.dto.RegisterRequestDto;
+import com.ez.taxform.model.User;
+import com.ez.taxform.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder; // <-- Inject PasswordEncoder
+
+    /**
+     * เมธอดสำหรับลงทะเบียนผู้ใช้ใหม่
+     * @param request DTO ที่มีข้อมูลจากฟอร์ม
+     * @return Entity User ที่บันทึกแล้ว
+     */
+    public User register(RegisterRequestDto request) {
+        // สร้าง Entity User ใหม่
+        User newUser = new User();
+        
+        // --- ส่วนสำคัญ: แปลงข้อมูลจาก DTO มาใส่ใน Entity ---
+        newUser.setUsername(request.getUsername());
+        
+        // เข้ารหัส password ที่ได้รับมาจาก DTO ก่อนบันทึก
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
+        
+        // ตั้งค่าฟิลด์อื่นๆ จาก DTO
+        newUser.setFullName(request.getFullName());
+        newUser.setEmail(request.getEmail());
+        newUser.setCompanyName(request.getCompanyName());
+        newUser.setBranchCode(request.getBranchCode());
+        newUser.setBranchName(request.getBranchName());
+        newUser.setTaxId(request.getTaxId());
+        newUser.setBusinessPhone(request.getBusinessPhone());
+        newUser.setAddressTh(request.getAddressTh());
+        newUser.setAddressEn(request.getAddressEn());
+        
+        // TODO: อาจจะเพิ่มการตั้งค่า Role เริ่มต้นให้ User ที่นี่
+        // newUser.setRoles(...);
+
+        // บันทึก User ลงฐานข้อมูล
+        return userRepository.save(newUser);
+    }
+}

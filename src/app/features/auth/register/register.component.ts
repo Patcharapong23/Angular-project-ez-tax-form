@@ -1,19 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import {
   FormBuilder,
   Validators,
-  AbstractControl,
-  ValidationErrors,
   FormGroup,
+  AbstractControl,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  ThaiAddressService,
-  TAItem,
-  ZipLookupResult,
-} from '../../../shared/thai-address.service';
-import { AuthService, RegisterResponse } from '../../../shared/auth.service';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../shared/auth.service';
+
+// ---------- Types (อิงไฟล์ assets/thai/*.json) ----------
+interface Province {
+  code: string;
+  name_th: string;
+}
+interface District {
+  code: string;
+  name_th: string;
+  parent_code: string; // province.code
+}
+interface Subdistrict {
+  code: string;
+  name_th: string;
+  parent_code: string; // district.code
+  zip: string; // "10120" เป็นต้น
+}
 
 @Component({
   selector: 'app-register',
@@ -21,461 +32,542 @@ import { AuthService, RegisterResponse } from '../../../shared/auth.service';
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit {
+  // ---------------------- Step/UI ----------------------
   step = 1;
-  isSubmitting = false;
-  step1Submitted = false;
   step2Submitted = false;
+  isSubmitting = false;
   formServerError = '';
-  hidePass = true;
-  hideConfirm = true;
-  filteredProvinces: TAItem[] = [];
-  filteredDistricts: TAItem[] = [];
-  filteredSubdistricts: TAItem[] = [];
-  readonly emailMaxLen = 254;
-  readonly fullNameMaxLen = 100;
-  readonly passwordMinLen = 14;
-  readonly passwordMaxLen = 128;
-  provinces: TAItem[] = [];
-  districts: TAItem[] = [];
-  subdistricts: TAItem[] = [];
   logoPreview: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private addr: ThaiAddressService,
-    private auth: AuthService,
-    private router: Router
-  ) {}
+  // ---------------------- Limits ----------------------
+  firstNameMaxLen = 120;
+  emailMaxLen = 120;
 
-  /** ------------------ ฟอร์ม (*** แก้ไขส่วน disabled attribute ที่นี่ ***) ------------------ */
+  // ---------------------- Thai geo data ----------------------
+  provinces: Province[] = [];
+  districts: District[] = [];
+  subdistricts: Subdistrict[] = [];
+
+  // index/map
+  provinceByCode = new Map<string, Province>();
+  districtByCode = new Map<string, District>();
+
+  // grouped
+  districtsByProvince = new Map<string, District[]>();
+  subdistrictsByDistrict = new Map<string, Subdistrict[]>();
+
+  // filtered lists used by mat-autocomplete
+  filteredProvinces: Province[] = [];
+  filteredDistricts: District[] = [];
+  filteredSubdistricts: Subdistrict[] = [];
+
+  // lock state (ตามลำดับจังหวัด→อำเภอ→ตำบล)
+  isDistrictLocked = true;
+  isSubdistrictLocked = true;
+
+  // แจ้งเตือน zip (ถ้าต้องโชว์ใน UI ให้ bind เองได้)
+  zipMessage = '';
+
+  // ---------------------- Form ----------------------
   form: FormGroup = this.fb.group({
-    fullName: [
+    firstName: [
       '',
-      [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(this.fullNameMaxLen),
-      ],
+      [Validators.required, Validators.minLength(2), Validators.maxLength(120)],
     ],
     email: [
       '',
-      [
-        Validators.required,
-        Validators.email,
-        this.asciiEmailValidator,
-        Validators.maxLength(this.emailMaxLen),
-      ],
+      [Validators.required, Validators.email, Validators.maxLength(120)],
     ],
-    passwordGroup: this.fb.group(
-      {
-        password: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(this.passwordMinLen),
-            Validators.maxLength(this.passwordMaxLen),
-          ],
-        ],
-        confirmPassword: ['', [Validators.required]],
-      },
-      { validators: RegisterComponent.passwordMatchValidator }
-    ),
     company: this.fb.group({
-      logo: [null],
-      companyName: ['', Validators.required],
+      logoImg: [''],
+
+      tenantNameTh: ['', [Validators.required]],
+      tenantNameEn: [''],
+
       branchCode: [
         '',
-        [Validators.required, Validators.minLength(5), Validators.maxLength(5)],
+        [
+          Validators.required,
+          Validators.minLength(5),
+          Validators.maxLength(5),
+          Validators.pattern(/^\d+$/),
+        ],
       ],
-      branchName: ['', Validators.required],
-      taxId: [
+      branchNameTh: ['', [Validators.required]],
+      branchNameEn: [''],
+
+      tenantTaxId: [
         '',
         [
           Validators.required,
           Validators.minLength(13),
           Validators.maxLength(13),
+          Validators.pattern(/^\d+$/),
         ],
       ],
-      businessPhone: [''],
+      tenantTel: ['', [Validators.pattern(/^\d*$/)]],
+
       addressTh: this.fb.group({
-        buildingNo: ['', Validators.required],
-        street: [''],
-        province: ['', Validators.required],
-        // แก้ไขตามคำแนะนำของ Angular เพื่อลบ Warning
-        district: [{ value: '', disabled: true }, Validators.required],
-        subdistrict: [{ value: '', disabled: true }, Validators.required],
-        postalCode: ['', Validators.required],
+        buildingNo: ['', [Validators.required]],
+        addressDetailTh: [''],
+        province: [null as Province | null, Validators.required],
+        district: [null as District | null, Validators.required],
+        subdistrict: [null as Subdistrict | null, Validators.required],
+        zipCode: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(5),
+            Validators.maxLength(5),
+            Validators.pattern(/^\d+$/),
+          ],
+        ],
       }),
+
       addressEn: this.fb.group({
-        line1: ['', [Validators.maxLength(254)]],
+        addressDetailEn: [''],
       }),
+
       acceptTos: [false, Validators.requiredTrue],
     }),
   });
 
-  // --- (โค้ดส่วนที่เหลือทั้งหมดของคุณเหมือนเดิมทุกประการ) ---
-  get fullName() {
-    return this.form.get('fullName');
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private auth: AuthService,
+    private router: Router
+  ) {}
+
+  // ---------------------- Getters ----------------------
+  get firstName(): AbstractControl | null {
+    return this.form.get('firstName');
   }
-  get email() {
+  get email(): AbstractControl | null {
     return this.form.get('email');
   }
-  get passwordGroup() {
-    return this.form.get('passwordGroup') as FormGroup;
-  }
-  get password() {
-    return this.passwordGroup.get('password');
-  }
-  get confirmPassword() {
-    return this.passwordGroup.get('confirmPassword');
-  }
-  get company() {
+
+  get company(): FormGroup {
     return this.form.get('company') as FormGroup;
   }
-  get addressTh() {
+  get addressTh(): FormGroup {
     return this.company.get('addressTh') as FormGroup;
   }
-  zipLinked = false;
-  get hasProvince(): boolean {
-    return !!this.addressTh.get('province')?.value;
+  get addressEn(): FormGroup {
+    return this.company.get('addressEn') as FormGroup;
   }
-  get hasDistrict(): boolean {
-    return !!this.addressTh.get('district')?.value;
+
+  // ZIP ให้พิมพ์/แก้ได้เสมอ
+  get isZipReadOnly(): boolean {
+    return false;
   }
-  get isDistrictLocked(): boolean {
-    return !this.addressTh.get('province')?.value;
-  }
-  get isSubdistrictLocked(): boolean {
-    return !this.addressTh.get('district')?.value;
-  }
-  onDistrictFocus(trigger?: MatAutocompleteTrigger | null): void {
-    if (this.isDistrictLocked || !trigger) return;
-    trigger.openPanel();
-  }
-  onSubdistrictFocus(trigger?: MatAutocompleteTrigger | null): void {
-    if (this.isSubdistrictLocked || !trigger) return;
-    trigger.openPanel();
-  }
-  onDistrictType(term: string): void {
-    if (this.isDistrictLocked) return;
-    this.onDistrictInput(term);
-  }
-  onSubdistrictType(term: string): void {
-    if (this.isSubdistrictLocked) return;
-    this.onSubdistrictInput(term);
-  }
-  rules = { minLen: false, hasDigit: false, hasSpecial: false, match: false };
-  get passwordScore(): number {
-    const passed = [
-      this.rules.minLen,
-      this.rules.hasDigit,
-      this.rules.hasSpecial,
-    ].filter(Boolean).length;
-    return passed / 3;
-  }
-  get allOk() {
-    return this.passwordScore === 1;
-  }
+
+  // ---------------------- Lifecycle ----------------------
   ngOnInit(): void {
-    this.company.disable({ emitEvent: false });
-    this.addr.getProvinces().subscribe((list: TAItem[]) => {
-      this.provinces = list;
-      this.filteredProvinces = list.slice(0, 25);
-    });
-    this.password?.valueChanges.subscribe(() => this.updatePasswordRules());
-    this.confirmPassword?.valueChanges.subscribe(() =>
-      this.updatePasswordRules()
-    );
-    const provinceCtrl = this.addressTh.get('province');
-    const districtCtrl = this.addressTh.get('district');
-    const subdistrictCtrl = this.addressTh.get('subdistrict');
-    districtCtrl?.disable({ emitEvent: false });
-    subdistrictCtrl?.disable({ emitEvent: false });
-    provinceCtrl?.valueChanges.subscribe((v) => {
-      if (!v) {
-        districtCtrl?.disable({ emitEvent: false });
-        subdistrictCtrl?.disable({ emitEvent: false });
-      } else {
-        districtCtrl?.enable({ emitEvent: false });
-        subdistrictCtrl?.disable({ emitEvent: false });
+    this.loadThaiData();
+  }
+
+  // ==========================================================
+  //                     โหลดข้อมูลจังหวัดฯ
+  // ==========================================================
+  private loadThaiData() {
+    this.http
+      .get<Province[]>('assets/thai/provinces.json')
+      .subscribe((prov) => {
+        this.provinces = (prov || [])
+          .slice()
+          .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+        this.provinceByCode.clear();
+        this.provinces.forEach((p) => this.provinceByCode.set(p.code, p));
+        this.filteredProvinces = this.provinces.slice();
+      });
+
+    this.http.get<District[]>('assets/thai/districts.json').subscribe((ds) => {
+      this.districts = ds || [];
+      this.districtByCode.clear();
+      this.districts.forEach((d) => this.districtByCode.set(d.code, d));
+
+      this.districtsByProvince.clear();
+      for (const d of this.districts) {
+        const arr = this.districtsByProvince.get(d.parent_code) || [];
+        arr.push(d);
+        this.districtsByProvince.set(d.parent_code, arr);
       }
     });
-    districtCtrl?.valueChanges.subscribe((v) => {
-      if (!v) {
-        subdistrictCtrl?.disable({ emitEvent: false });
-      } else {
-        subdistrictCtrl?.enable({ emitEvent: false });
-      }
-    });
-    provinceCtrl?.valueChanges.subscribe((v) => {
-      const hasProvince = !!v;
-      if (!hasProvince) {
-        districtCtrl?.disable({ emitEvent: false });
-        subdistrictCtrl?.disable({ emitEvent: false });
-        this.addressTh.patchValue(
-          { district: null, subdistrict: null, postalCode: '' },
-          { emitEvent: false }
-        );
-        this.districts = [];
-        this.subdistricts = [];
-        this.filteredDistricts = [];
-        this.filteredSubdistricts = [];
-      }
-    });
-    districtCtrl?.valueChanges.subscribe((v) => {
-      const hasDistrict = !!v;
-      if (!hasDistrict) {
-        subdistrictCtrl?.disable({ emitEvent: false });
-        this.addressTh.patchValue(
-          { subdistrict: null, postalCode: '' },
-          { emitEvent: false }
-        );
-        this.subdistricts = [];
-        this.filteredSubdistricts = [];
-      }
-    });
+
+    this.http
+      .get<Subdistrict[]>('assets/thai/subdistricts.json')
+      .subscribe((ss) => {
+        this.subdistricts = (ss || []).map((s) => ({
+          ...s,
+          zip: (s.zip || '').toString().padStart(5, '0'),
+        }));
+
+        this.subdistrictsByDistrict.clear();
+        for (const s of this.subdistricts) {
+          const arr = this.subdistrictsByDistrict.get(s.parent_code) || [];
+          arr.push(s);
+          this.subdistrictsByDistrict.set(s.parent_code, arr);
+        }
+      });
   }
-  asciiEmailValidator(control: AbstractControl): ValidationErrors | null {
-    const v = (control.value ?? '') as string;
-    if (!v) return null;
-    if (/[\u0E00-\u0E7F]/.test(v) || /[^\x00-\x7F]/.test(v))
-      return { nonAscii: true };
-    return null;
+
+  // ==========================================================
+  //                     Step control
+  // ==========================================================
+  onContinue() {
+    if (!this.firstName?.valid || !this.email?.valid) {
+      this.firstName?.markAsTouched();
+      this.email?.markAsTouched();
+      return;
+    }
+    this.step = 2;
   }
-  displayProvince(v: TAItem | string | null): string {
-    if (!v) return '';
-    return typeof v === 'string'
-      ? this.provinces.find((p) => p.code === v)?.name_th ?? ''
-      : v.name_th;
+  onBack() {
+    this.step = 1;
   }
-  displayDistrict(v: TAItem | string | null): string {
-    if (!v) return '';
-    return typeof v === 'string'
-      ? this.districts.find((d) => d.code === v)?.name_th ?? ''
-      : v.name_th;
+
+  // ==========================================================
+  //                Province → District → Subdistrict
+  // ==========================================================
+  onProvinceFocus(trigger?: any) {
+    this.filteredProvinces = this.provinces.slice();
+    if (trigger?.openPanel) trigger.openPanel();
   }
-  displaySubdistrict(v: TAItem | string | null): string {
-    if (!v) return '';
-    return typeof v === 'string'
-      ? this.subdistricts.find((s) => s.code === v)?.name_th ?? ''
-      : v.name_th;
-  }
-  onProvinceInput(term: string) {
-    const t = (term || '').trim();
-    this.filteredProvinces = !t
-      ? this.provinces.slice(0, 25)
-      : this.provinces.filter((p) => p.name_th.includes(t)).slice(0, 25);
+  onProvinceInput(q: string) {
+    const v = (q || '').trim().toLowerCase();
+    this.filteredProvinces = !v
+      ? this.provinces.slice()
+      : this.provinces.filter((p) => p.name_th.toLowerCase().includes(v));
   }
   fixProvinceDisplay() {
-    const v = this.addressTh.get('province')?.value;
-    if (v && typeof v === 'string') {
-      const found = this.provinces.find((p) => p.name_th === v);
-      if (!found) this.addressTh.get('province')?.setValue(null);
-    }
+    /* no-op */
   }
-  onProvinceSelected(item: TAItem) {
-    this.addressTh.get('province')?.setValue(item);
+
+  // ✅ displayWith helpers (ต้องมีให้ตรงกับ HTML)
+  displayProvince(v: Province | string | null): string {
+    return v && typeof v === 'object' ? v.name_th : v ?? '';
+  }
+  displayDistrict(v: District | string | null): string {
+    return v && typeof v === 'object' ? v.name_th : v ?? '';
+  }
+  displaySubdistrict(v: Subdistrict | string | null): string {
+    return v && typeof v === 'object' ? v.name_th : v ?? '';
+  }
+
+  onProvinceSelected(p: Province) {
+    // เลือกจังหวัด → รีเซ็ต อำเภอ/ตำบล/ZIP
     this.addressTh.patchValue(
-      { district: null, subdistrict: null, postalCode: '' },
+      { province: p, district: null, subdistrict: null, zipCode: '' },
       { emitEvent: false }
     );
-    this.subdistricts = [];
+
+    const ds = (this.districtsByProvince.get(p.code) || []).slice();
+    ds.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+    this.filteredDistricts = ds;
+
     this.filteredSubdistricts = [];
-    this.addressTh.get('subdistrict')?.disable({ emitEvent: false });
-    this.addr.getDistricts(item.code).subscribe((list) => {
-      this.districts = list;
-      this.filteredDistricts = list.slice(0, 25);
-      this.addressTh.get('district')?.enable({ emitEvent: false });
-    });
+    this.isDistrictLocked = false;
+    this.isSubdistrictLocked = true;
+    this.zipMessage = '';
   }
-  onDistrictInput(term: string) {
-    const t = (term || '').trim();
-    this.filteredDistricts = !t
-      ? this.districts.slice(0, 25)
-      : this.districts.filter((d) => d.name_th.includes(t)).slice(0, 25);
+
+  onDistrictFocus(trigger?: any) {
+    const p = this.addressTh.get('province')?.value as Province | null;
+    const base = p ? this.districtsByProvince.get(p.code) || [] : [];
+    this.filteredDistricts = base
+      .slice()
+      .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+    if (trigger?.openPanel) trigger.openPanel();
+  }
+  onDistrictType(q: string) {
+    const p = this.addressTh.get('province')?.value as Province | null;
+    const base = p ? this.districtsByProvince.get(p.code) || [] : [];
+    const v = (q || '').trim().toLowerCase();
+    this.filteredDistricts = !v
+      ? base.slice().sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'))
+      : base
+          .filter((d) => d.name_th.toLowerCase().includes(v))
+          .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
   }
   fixDistrictDisplay() {
-    const v = this.addressTh.get('district')?.value;
-    if (v && typeof v === 'string') {
-      const found = this.districts.find((d) => d.name_th === v);
-      if (!found) this.addressTh.get('district')?.setValue(null);
-    }
+    /* no-op */
   }
-  onDistrictSelected(item: TAItem) {
-    this.addressTh.get('district')?.setValue(item);
+
+  onDistrictSelected(d: District) {
+    // เลือกอำเภอ → รีเซ็ตตำบล/ZIP
     this.addressTh.patchValue(
-      { subdistrict: null, postalCode: '' },
+      { district: d, subdistrict: null, zipCode: '' },
       { emitEvent: false }
     );
-    this.addr.getSubdistricts(item.code).subscribe((list) => {
-      this.subdistricts = list;
-      this.filteredSubdistricts = list.slice(0, 25);
-      this.addressTh.get('subdistrict')?.enable({ emitEvent: false });
-    });
+
+    const subs = (this.subdistrictsByDistrict.get(d.code) || []).slice();
+    subs.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+    this.filteredSubdistricts = subs;
+
+    this.isSubdistrictLocked = false;
+    this.zipMessage = '';
   }
-  onSubdistrictInput(term: string) {
-    const t = (term || '').trim();
-    this.filteredSubdistricts = !t
-      ? this.subdistricts.slice(0, 25)
-      : this.subdistricts.filter((s) => s.name_th.includes(t)).slice(0, 25);
+
+  onSubdistrictFocus(trigger?: any) {
+    const d = this.addressTh.get('district')?.value as District | null;
+    const base = d ? this.subdistrictsByDistrict.get(d.code) || [] : [];
+    this.filteredSubdistricts = base
+      .slice()
+      .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+    if (trigger?.openPanel) trigger.openPanel();
+  }
+  onSubdistrictType(q: string) {
+    const d = this.addressTh.get('district')?.value as District | null;
+    const base = d ? this.subdistrictsByDistrict.get(d.code) || [] : [];
+    const v = (q || '').trim().toLowerCase();
+    this.filteredSubdistricts = !v
+      ? base.slice().sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'))
+      : base
+          .filter((s) => s.name_th.toLowerCase().includes(v))
+          .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
   }
   fixSubdistrictDisplay() {
-    const v = this.addressTh.get('subdistrict')?.value;
-    if (v && typeof v === 'string') {
-      const found = this.subdistricts.find((s) => s.name_th === v);
-      if (!found) this.addressTh.get('subdistrict')?.setValue(null);
+    /* no-op */
+  }
+
+  onSubdistrictSelected(s: Subdistrict) {
+    // เลือกตำบล → เติม ZIP อัตโนมัติ
+    this.addressTh.patchValue(
+      { subdistrict: s, zipCode: s.zip },
+      { emitEvent: false }
+    );
+    this.zipMessage = '';
+  }
+
+  // ==========================================================
+  //                         ZIP
+  // ==========================================================
+  onZipFocus(): void {
+    this.zipMessage = '';
+  }
+
+  onZipEnter(): void {
+    const raw = (this.addressTh.get('zipCode')?.value || '').toString().trim();
+
+    // ✅ เคลียร์ "ตำบล" ทันทีที่ผู้ใช้กด Enter ใส่ ZIP (กันค้างจากค่าเดิม)
+    this.addressTh.patchValue({ subdistrict: null }, { emitEvent: false });
+    this.isSubdistrictLocked = true; // ล็อกไว้ก่อนจนกว่าจะรู้เขต/อำเภอที่ถูกต้อง
+    this.zipMessage = '';
+
+    // ตรวจรูปแบบ ZIP
+    if (!/^\d{5}$/.test(raw)) {
+      this.notifyZipNotFound(raw);
+      return;
     }
+
+    // หา subdistricts ตาม ZIP
+    const subs = this.subdistricts.filter((s) => s.zip === raw);
+
+    if (!subs.length) {
+      // ไม่พบ ZIP นี้ → เคลียร์ทั้งหมด + แจ้งเตือน
+      this.addressTh.patchValue(
+        { province: null, district: null, subdistrict: null, zipCode: '' },
+        { emitEvent: false }
+      );
+      this.filteredProvinces = this.provinces.slice();
+      this.filteredDistricts = [];
+      this.filteredSubdistricts = [];
+      this.isDistrictLocked = true;
+      this.isSubdistrictLocked = true;
+      this.notifyZipNotFound(raw);
+      return;
+    }
+
+    // ทำ candidate ของอำเภอ/จังหวัดจาก ZIP
+    const districtCodes = Array.from(new Set(subs.map((s) => s.parent_code)));
+    const ds = districtCodes
+      .map((c) => this.districtByCode.get(c))
+      .filter(Boolean) as District[];
+
+    const provinceCodes = Array.from(new Set(ds.map((d) => d.parent_code)));
+    const ps = provinceCodes
+      .map((c) => this.provinceByCode.get(c))
+      .filter(Boolean) as Province[];
+
+    // ----- Province -----
+    if (ps.length === 1) {
+      this.addressTh.patchValue({ province: ps[0] }, { emitEvent: false });
+      this.isDistrictLocked = false;
+
+      const dsInProv = (this.districtsByProvince.get(ps[0].code) || []).slice();
+      this.filteredDistricts = dsInProv.sort((a, b) =>
+        a.name_th.localeCompare(b.name_th, 'th')
+      );
+    } else {
+      // มีหลายจังหวัดใน ZIP เดียว → ให้ผู้ใช้เลือกจังหวัด
+      this.addressTh.patchValue({ province: null }, { emitEvent: false });
+      this.filteredProvinces = ps
+        .slice()
+        .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+      this.isDistrictLocked = true;
+      this.isSubdistrictLocked = true;
+    }
+
+    // ----- District -----
+    if (ps.length === 1 && ds.length === 1) {
+      this.addressTh.patchValue({ district: ds[0] }, { emitEvent: false });
+      this.isSubdistrictLocked = false;
+
+      const subsInDist = (
+        this.subdistrictsByDistrict.get(ds[0].code) || []
+      ).slice();
+      this.filteredSubdistricts = subsInDist.sort((a, b) =>
+        a.name_th.localeCompare(b.name_th, 'th')
+      );
+    } else if (ps.length === 1 && ds.length > 1) {
+      const prov = ps[0];
+      const dsInProv = (this.districtsByProvince.get(prov.code) || []).slice();
+      this.filteredDistricts = dsInProv
+        .filter((d) => ds.find((x) => x.code === d.code))
+        .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+      this.addressTh.patchValue({ district: null }, { emitEvent: false });
+      this.isDistrictLocked = false;
+      this.isSubdistrictLocked = true;
+    }
+
+    // ----- Subdistrict -----
+    if (ps.length === 1 && ds.length === 1) {
+      // จำกัดตำบลตาม ZIP + district ที่สรุปได้
+      const inOneDist = (
+        this.subdistrictsByDistrict.get(ds[0].code) || []
+      ).filter((s) => s.zip === raw);
+      if (inOneDist.length === 1) {
+        // เจอตำบลเดียว → เติมให้อัตโนมัติ
+        this.addressTh.patchValue(
+          { subdistrict: inOneDist[0] },
+          { emitEvent: false }
+        );
+      } else {
+        // หลายตำบลใน ZIP เดียว → ให้ผู้ใช้เลือก
+        this.filteredSubdistricts = inOneDist.sort((a, b) =>
+          a.name_th.localeCompare(b.name_th, 'th')
+        );
+        this.isSubdistrictLocked = false;
+      }
+    }
+
+    // คง ZIP ตามที่กรอกไว้
+    this.addressTh.patchValue({ zipCode: raw }, { emitEvent: false });
   }
-  onSubdistrictSelected(item: TAItem) {
-    this.addressTh.get('subdistrict')?.setValue(item);
-    this.addressTh.get('postalCode')?.setValue(item.zip ?? '');
+
+  private notifyZipNotFound(zip: string) {
+    this.zipMessage = zip
+      ? `ไม่พบรหัสไปรษณีย์ ${zip}`
+      : 'กรุณากรอกรหัสไปรษณีย์ 5 หลัก';
+    alert(this.zipMessage);
   }
-  onZipEnter() {
-    const zip = (this.addressTh.get('postalCode')?.value || '').trim();
-    if (!/^\d{5}$/.test(zip)) return;
-    this.addr.lookupByZip(zip).subscribe((result: ZipLookupResult | null) => {
-      if (!result) return;
-      const { province, district, subdistrict } = result;
-      const provinceCtrl = this.addressTh.get('province');
-      const districtCtrl = this.addressTh.get('district');
-      const subdistrictCtrl = this.addressTh.get('subdistrict');
-      provinceCtrl?.setValue(province, { emitEvent: false });
-      this.addr.getDistricts(province.code).subscribe((dlist: TAItem[]) => {
-        this.districts = dlist;
-        this.filteredDistricts = dlist.slice(0, 25);
-        districtCtrl?.enable({ emitEvent: false });
-        districtCtrl?.setValue(district, { emitEvent: false });
-        this.addr
-          .getSubdistricts(district.code)
-          .subscribe((slist: TAItem[]) => {
-            this.subdistricts = slist;
-            this.filteredSubdistricts = slist.slice(0, 25);
-            subdistrictCtrl?.enable({ emitEvent: false });
-            subdistrictCtrl?.setValue(subdistrict, { emitEvent: false });
-          });
-        this.addressTh
-          .get('postalCode')
-          ?.setValue(subdistrict.zip ?? zip, { emitEvent: false });
-      });
-    });
+
+  // ==========================================================
+  //                   Input constraints helpers
+  // ==========================================================
+  private isCtrlKey(e: KeyboardEvent) {
+    const k = e.key;
+    return (
+      k === 'Backspace' ||
+      k === 'Delete' ||
+      k === 'Tab' ||
+      k === 'ArrowLeft' ||
+      k === 'ArrowRight' ||
+      k === 'Home' ||
+      k === 'End' ||
+      e.ctrlKey ||
+      e.metaKey
+    );
+  }
+  onlyDigitsKeydown(e: KeyboardEvent) {
+    if (this.isCtrlKey(e)) return;
+    if (!/^\d$/.test(e.key)) e.preventDefault();
+  }
+  sanitizeDigits(e: Event, control?: AbstractControl | null) {
+    const el = e.target as HTMLInputElement;
+    const clean = (el.value || '').replace(/\D/g, '');
+    if (el.value !== clean) {
+      el.value = clean;
+      if (control) control.setValue(clean);
+    }
   }
   blockThai(e: KeyboardEvent) {
     if (/[\u0E00-\u0E7F]/.test(e.key)) e.preventDefault();
   }
-  updatePasswordRules() {
-    const p = this.password?.value || '';
-    const c = this.confirmPassword?.value || '';
-    this.rules.minLen = p.length >= this.passwordMinLen;
-    this.rules.hasDigit = /\d/.test(p);
-    this.rules.hasSpecial = /[!@#$%^&*()_\-+=[\]{};:'",.<>/?\\|`~]/.test(p);
-    this.rules.match = !!p && !!c && p === c;
-  }
-  static passwordMatchValidator(
-    group: AbstractControl
-  ): ValidationErrors | null {
-    const p = group.get('password')?.value;
-    const c = group.get('confirmPassword')?.value;
-    if (!p || !c) return null;
-    return p === c ? null : { passwordsNotMatch: true };
-  }
-  onContinue(): void {
-    this.step1Submitted = true;
-    ['fullName', 'email', 'passwordGroup'].forEach((n) =>
-      this.form.get(n)?.markAllAsTouched()
-    );
-    if (
-      ['fullName', 'email', 'passwordGroup'].some(
-        (n) => this.form.get(n)?.invalid
-      )
-    )
-      return;
-    this.company.enable({ emitEvent: false });
-    this.step = 2;
-    this.formServerError = '';
-  }
-  onBack(): void {
-    this.step = 1;
-    this.formServerError = '';
-  }
-  onLogoSelected(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
+
+  // Upload logo → base64 preview
+  onLogoSelected(evt: Event) {
+    const input = evt.target as HTMLInputElement;
+    const file = input?.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      alert('ไฟล์มีขนาดเกิน 10MB');
-      input.value = '';
-      return;
-    }
-    this.company.get('logo')?.setValue(file);
     const reader = new FileReader();
-    reader.onload = () => (this.logoPreview = reader.result as string);
+    reader.onload = () => {
+      this.logoPreview = reader.result as string;
+      this.company.patchValue({ logoImg: this.logoPreview });
+    };
     reader.readAsDataURL(file);
   }
 
-  onSubmit(): void {
+  // ==========================================================
+  //                        Submit
+  // ==========================================================
+  onSubmit() {
     this.step2Submitted = true;
-    this.company.markAllAsTouched();
-    if (this.form.invalid || this.isSubmitting) {
-      console.error(
-        'Form is invalid. Invalid controls:',
-        this.findInvalidControlsRecursive(this.form)
-      );
-      return;
-    }
+    if (this.form.invalid || this.isSubmitting) return;
 
     this.isSubmitting = true;
     this.formServerError = '';
-    const formValue = this.form.getRawValue();
+
+    const fv = this.form.getRawValue();
+    const c = fv.company;
+    const th = c.addressTh || {};
+    const en = c.addressEn || {};
+
+    const norm = (v: any) =>
+      v && typeof v === 'object' ? v.name_th ?? '' : v ?? '';
+
     const payload = {
-      fullName: formValue.fullName,
-      email: formValue.email,
-      passwordGroup: {
-        password: formValue.passwordGroup.password,
-        confirmPassword: formValue.passwordGroup.confirmPassword,
-      },
-      company: {
-        companyName: formValue.company.companyName,
-        branchCode: formValue.company.branchCode,
-        branchName: formValue.company.branchName,
-        taxId: formValue.company.taxId,
-        businessPhone: formValue.company.businessPhone,
-        addressTh: formValue.company.addressTh,
-        addressEn: formValue.company.addressEn,
-      },
+      firstName: fv.firstName,
+      email: fv.email,
+      logoImg: c.logoImg || null,
+
+      tenantNameTh: c.tenantNameTh,
+      tenantNameEn: c.tenantNameEn,
+
+      tenantTaxId: c.tenantTaxId,
+
+      branchCode: c.branchCode,
+      branchNameTh: c.branchNameTh,
+      branchNameEn: c.branchNameEn,
+
+      tenantTel: c.tenantTel,
+
+      buildingNo: th.buildingNo,
+      addressDetailTh: th.addressDetailTh,
+      province: norm(th.province),
+      district: norm(th.district),
+      subdistrict: norm(th.subdistrict),
+      zipCode: th.zipCode,
+
+      addressDetailEn: en.addressDetailEn,
     };
 
     this.auth.register(payload).subscribe({
-      next: (res: RegisterResponse) => {
-        this.isSubmitting = false;
-
-        // +++ เปลี่ยนจาก alert เป็นการ Navigate ไปยังหน้าใหม่ +++
-        // พร้อมกับส่ง username ไปใน state
-        this.router.navigate(['/register-success'], {
-          state: { username: res.username },
-        });
+      next: () => {
+        alert(
+          `สมัครสำเร็จ! userName ของคุณคือ: ${
+            (fv.email || '').split('@')[0]
+          }\n` +
+            `รหัสผ่านเริ่มต้น = userName (ระบบจะให้ตั้งใหม่เมื่อเข้าสู่ระบบครั้งแรก)`
+        );
+        this.router.navigateByUrl('/register-success');
       },
-      error: (err: any) => {
+      error: (err) => {
         this.isSubmitting = false;
-        const message = err?.error?.msg || 'เกิดข้อผิดพลาด';
-        this.formServerError = message;
+        this.formServerError = err?.error?.message || 'เกิดข้อผิดพลาด';
         console.error('Registration error:', err);
       },
     });
-  }
-
-  public findInvalidControlsRecursive(form: FormGroup): string[] {
-    let invalidControls: string[] = [];
-    Object.keys(form.controls).forEach((key) => {
-      const control = form.get(key);
-      if (control && control.invalid) {
-        invalidControls.push(key);
-      }
-      if (control instanceof FormGroup) {
-        invalidControls = invalidControls.concat(
-          this.findInvalidControlsRecursive(control)
-        );
-      }
-    });
-    return invalidControls;
   }
 }

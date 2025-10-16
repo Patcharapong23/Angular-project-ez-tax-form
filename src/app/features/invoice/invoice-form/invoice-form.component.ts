@@ -25,6 +25,7 @@ export class InvoiceFormComponent implements OnInit {
     { value: '80', viewValue: '80 ใบเพิ่มหนี้' },
     { value: '81', viewValue: '81 ใบลดหนี้' },
   ];
+
   documentTemplates = [
     { value: 'default-a', viewValue: 'แม่แบบ A (ค่าเริ่มต้น)' },
     { value: 'template-b', viewValue: 'แม่แบบ B (สำหรับส่งออก)' },
@@ -39,9 +40,10 @@ export class InvoiceFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getUser();
+    this.currentUser = this.authService.getUser(); // ควรได้โปรไฟล์ล่าสุดหลัง register/login
     this.initForm();
 
+    // edit mode
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
@@ -50,6 +52,8 @@ export class InvoiceFormComponent implements OnInit {
         this.loadInvoiceData(id);
       }
     });
+
+    // new doc w/ query defaults
     if (!this.isEditMode) {
       this.route.queryParams.subscribe((params) => {
         const type = params['type'];
@@ -65,6 +69,9 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   initForm(): void {
+    // เตรียมค่าเริ่มต้นของ seller จาก currentUser (รองรับทั้งสคีมาใหม่/เก่า)
+    const sellerDefaults = this.buildDefaultSellerFromUser(this.currentUser);
+
     this.invoiceForm = this.fb.group({
       documentType: ['', Validators.required],
       documentTemplate: ['default-a', Validators.required],
@@ -72,16 +79,14 @@ export class InvoiceFormComponent implements OnInit {
         new Date().toISOString().substring(0, 10),
         Validators.required,
       ],
+
       seller: this.fb.group({
-        name: [this.currentUser?.companyName || '', Validators.required],
-        taxId: [this.currentUser?.taxId || '', Validators.required],
-        address: [
-          this.currentUser
-            ? this.formatAddress(this.currentUser.addressTh)
-            : '',
-        ],
-        phone: [this.currentUser?.businessPhone || ''],
+        name: [sellerDefaults.name, Validators.required],
+        taxId: [sellerDefaults.taxId, Validators.required],
+        address: [sellerDefaults.address],
+        phone: [sellerDefaults.phone],
       }),
+
       customer: this.fb.group({
         name: ['', Validators.required],
         branchCode: [
@@ -91,7 +96,9 @@ export class InvoiceFormComponent implements OnInit {
         address: [''],
         taxId: ['', Validators.required],
       }),
+
       items: this.fb.array([], Validators.required),
+
       subtotal: [0],
       taxRate: [7],
       taxAmount: [0],
@@ -102,6 +109,7 @@ export class InvoiceFormComponent implements OnInit {
       this.addItem();
     }
 
+    // คำนวณยอดรวมเมื่อรายการเปลี่ยน
     this.invoiceForm.get('items')!.valueChanges.subscribe(() => {
       this.calculateTotals();
     });
@@ -111,7 +119,6 @@ export class InvoiceFormComponent implements OnInit {
     this.invoiceService.getInvoice(id).subscribe((invoice: Invoice) => {
       this.items.clear();
       invoice.items.forEach(() => this.addItem());
-
       this.invoiceForm.patchValue({
         ...invoice,
         issueDate: new Date(invoice.issueDate).toISOString().substring(0, 10),
@@ -119,7 +126,76 @@ export class InvoiceFormComponent implements OnInit {
     });
   }
 
-  // ✅✅✅ === เพิ่มเมธอดที่ขาดหายไปทั้งหมดที่นี่ === ✅✅✅
+  // ===================== Helper: map โปรไฟล์ผู้ใช้เป็น seller =====================
+
+  /**
+   * รองรับสองสคีมา:
+   * - ใหม่ (จากสเปค register): tenantNameTh, tenantTaxId, tenantTel, buildingNo,
+   *   addressDetailTh, province, district, subdistrict, zipCode
+   * - เก่า: companyName, taxId, businessPhone, addressTh{buildingNo, street, subdistrict, district, province, postalCode}
+   */
+  private buildDefaultSellerFromUser(u: AuthUser | null) {
+    const name =
+      (u as any)?.tenantNameTh ||
+      (u as any)?.companyName ||
+      (u as any)?.tenantNameEn ||
+      '';
+
+    const taxId = (u as any)?.tenantTaxId || (u as any)?.taxId || '';
+
+    const phone = (u as any)?.tenantTel || (u as any)?.businessPhone || '';
+
+    // address (ใหม่)
+    const addrNew = this.formatAddressNew(
+      (u as any)?.buildingNo,
+      (u as any)?.addressDetailTh,
+      (u as any)?.subdistrict,
+      (u as any)?.district,
+      (u as any)?.province,
+      (u as any)?.zipCode
+    );
+
+    // address (เก่า)
+    const addrLegacy = this.formatAddressLegacy((u as any)?.addressTh);
+
+    const address = addrNew || addrLegacy || '';
+
+    return { name, taxId, phone, address };
+  }
+
+  private formatAddressNew(
+    buildingNo?: string,
+    addressDetailTh?: string,
+    subdistrict?: string,
+    district?: string,
+    province?: string,
+    zipCode?: string
+  ): string {
+    const parts = [
+      buildingNo,
+      addressDetailTh,
+      subdistrict,
+      district,
+      province,
+      zipCode,
+    ];
+    return parts.filter(Boolean).join(' ').trim();
+  }
+
+  private formatAddressLegacy(address: AuthUser['addressTh']): string {
+    if (!address) return '';
+    const parts = [
+      address.buildingNo,
+      address.street,
+      address.subdistrict,
+      address.district,
+      address.province,
+      address.postalCode,
+    ];
+    return parts.filter(Boolean).join(' ').trim();
+  }
+
+  // ===================== Items =====================
 
   get items(): FormArray {
     return this.invoiceForm.get('items') as FormArray;
@@ -141,56 +217,47 @@ export class InvoiceFormComponent implements OnInit {
 
   removeItem(index: number): void {
     this.items.removeAt(index);
+    this.calculateTotals();
   }
 
   calculateItemAmount(index: number): void {
     const item = this.items.at(index);
-    const quantity = item.get('quantity')!.value || 0;
-    const unitPrice = item.get('unitPrice')!.value || 0;
+    const quantity = Number(item.get('quantity')!.value) || 0;
+    const unitPrice = Number(item.get('unitPrice')!.value) || 0;
     const amount = quantity * unitPrice;
     item.get('amount')!.patchValue(amount, { emitEvent: false });
     this.calculateTotals();
   }
 
+  // ===================== Totals =====================
+
   calculateTotals(): void {
     const items = this.items.getRawValue();
     const subtotal = items.reduce(
-      (acc: number, item: any) => acc + item.quantity * item.unitPrice,
+      (acc: number, it: any) =>
+        acc + Number(it.quantity || 0) * Number(it.unitPrice || 0),
       0
     );
-    const taxRate = this.invoiceForm.get('taxRate')!.value / 100;
+    const taxRate = Number(this.invoiceForm.get('taxRate')!.value) / 100;
     const taxAmount = subtotal * taxRate;
     const grandTotal = subtotal + taxAmount;
 
     this.invoiceForm.patchValue(
       {
-        subtotal: subtotal.toFixed(2),
-        taxAmount: taxAmount.toFixed(2),
-        grandTotal: grandTotal.toFixed(2),
+        subtotal: Number(subtotal.toFixed(2)),
+        taxAmount: Number(taxAmount.toFixed(2)),
+        grandTotal: Number(grandTotal.toFixed(2)),
       },
       { emitEvent: false }
     );
   }
 
-  private formatAddress(address: AuthUser['addressTh']): string {
-    if (!address) return '';
-    const parts = [
-      address.buildingNo,
-      address.street,
-      address.subdistrict,
-      address.district,
-      address.province,
-      address.postalCode,
-    ];
-    return parts.filter(Boolean).join(' ');
-  }
-
-  // =======================================================
+  // ===================== Submit =====================
 
   onSubmit(): void {
     if (this.invoiceForm.invalid) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-      this.invoiceForm.markAllAsTouched(); // แสดงข้อความ error ใต้ field ที่ไม่ถูกต้อง
+      this.invoiceForm.markAllAsTouched();
       return;
     }
 
@@ -206,7 +273,7 @@ export class InvoiceFormComponent implements OnInit {
     } else {
       this.invoiceService.createInvoice(formData).subscribe(() => {
         alert('บันทึกเอกสารสำเร็จ!');
-        // TODO: Open download modal
+        // TODO: เปิด modal ดาวน์โหลด/พิมพ์
         this.router.navigate(['/documentsall']);
       });
     }
