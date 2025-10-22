@@ -69,14 +69,7 @@
   gap: 22px;
 }
 
-.quick-card {
-  background: #fff;
-  border: 1px solid #eceff5;
-  height: 734px;
-  box-shadow: 0 4px 18px 0 rgba(17, 24, 39, 0.04),
-    0 1px 3px rgba(17, 24, 39, 0.06);
-}
-
 .quick-card.placeholder {
-  background: #f9fafb;
+  height: 900px;
+  background: #ffffff;
 }

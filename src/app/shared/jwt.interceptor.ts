@@ -1,51 +1,40 @@
+// src/app/shared/jwt.interceptor.ts
 import { Injectable } from '@angular/core';
 import {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
-  HttpEvent,
-  HTTP_INTERCEPTORS,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
-import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { catchError, throwError } from 'rxjs';
 
-@Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  constructor(private auth: AuthService, private router: Router) {}
+  intercept(req: HttpRequest<any>, next: HttpHandler) {
+    const isApi = req.url.startsWith(environment.apiBase);
+    const isAuth = isApi && req.url.startsWith(`${environment.apiBase}/auth/`);
+    const token = localStorage.getItem('auth.token');
 
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
-    const token = this.auth.token;
-
-    // แนบ Authorization เฉพาะเมื่อมี token
-    let cloned = req;
-    if (token) {
-      cloned = req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` },
-      });
+    if (isApi && !isAuth && token) {
+      req = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
     }
 
-    return next.handle(cloned).pipe(
-      catchError((err: HttpErrorResponse) => {
+    return next.handle(req).pipe(
+      catchError((err) => {
         if (err.status === 401) {
-          // token หมดอายุ/ไม่ถูกต้อง → เคลียร์ session แล้วพาไป login
-          this.auth.logout();
-          this.router.navigate(['/login']);
+          // รองรับข้อความจากแบ็กเอนด์ เช่น SESSION_EXPIRED/INVALID_OR_EXPIRED
+          localStorage.removeItem('auth.token');
+          localStorage.removeItem('auth.user');
+          // กระตุ้น storage event เพื่อเด้งทุกแท็บ
+          localStorage.setItem('logout.broadcast', Date.now().toString());
+          localStorage.removeItem('logout.broadcast');
+          // ไปหน้า login
+          location.assign('/login');
         }
         return throwError(() => err);
       })
     );
   }
 }
-
-/** Provider ใส่ใน app.module.ts */
-export const JwtInterceptorProvider = {
-  provide: HTTP_INTERCEPTORS,
-  useClass: JwtInterceptor,
-  multi: true,
-};

@@ -2,40 +2,33 @@
   <div class="auth-card">
     <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
 
-    <h1 class="title">ล็อกอินเข้าสู่ระบบ</h1>
-    <p class="subtitle">กรุณาใส่ข้อมูลสำหรับการเข้าสู่ระบบ</p>
+    <h1 class="title">เข้าสู่ระบบ</h1>
+    <p class="subtitle">กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งานระบบ</p>
 
-    <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
-      <mat-form-field
-        appearance="outline"
-        class="full-width"
-        [hideRequiredMarker]="true"
-      >
+    <form (ngSubmit)="onSubmit()" #f="ngForm">
+      <!-- userName -->
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>ชื่อผู้ใช้</mat-label>
         <input
           matInput
-          name="username"
-          [(ngModel)]="username"
+          name="userName"
+          [(ngModel)]="userName"
           required
           autocomplete="username"
+          spellcheck="false"
         />
-        <mat-error *ngIf="!username && errorMsg">
-          กรุณากรอกชื่อผู้ใช้
-        </mat-error>
+        <mat-error *ngIf="!userName && errorMsg">กรุณากรอกชื่อผู้ใช้</mat-error>
       </mat-form-field>
 
-      <mat-form-field
-        appearance="outline"
-        class="full-width"
-        [hideRequiredMarker]="true"
-      >
+      <!-- password -->
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>รหัสผ่าน</mat-label>
         <input
           matInput
+          [type]="hidePass ? 'password' : 'text'"
           name="password"
           [(ngModel)]="password"
           required
-          [type]="hidePass ? 'password' : 'text'"
           autocomplete="current-password"
         />
         <button
@@ -43,29 +36,34 @@
           matSuffix
           type="button"
           (click)="hidePass = !hidePass"
-          [attr.aria-label]="'Hide password'"
-          [attr.aria-pressed]="hidePass"
+          [attr.aria-pressed]="!hidePass"
+          title="แสดง/ซ่อนรหัสผ่าน"
         >
           <mat-icon>{{ hidePass ? "visibility_off" : "visibility" }}</mat-icon>
         </button>
-        <mat-error *ngIf="!password && errorMsg"> กรุณากรอกรหัสผ่าน </mat-error>
+        <mat-error *ngIf="!password && errorMsg">กรุณากรอกรหัสผ่าน</mat-error>
       </mat-form-field>
 
-      <div class="form-error" *ngIf="errorMsg">
-        {{ errorMsg }}
+      <!-- ลืมรหัสผ่าน (เปิดใช้ได้ตามต้องการ) -->
+      <div class="forgot-wrapper">
+        <!-- <a class="link" routerLink="/forgot-password">ลืมรหัสผ่าน?</a> -->
       </div>
 
-      <div class="forgot-wrapper">
-        <a class="link forgot" routerLink="/forgot-password">ลืมรหัสผ่าน?</a>
-      </div>
-      <button mat-raised-button class="full-width button" type="submit">
-        เข้าสู่ระบบ
+      <!-- error รวม -->
+      <div class="form-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="button"
+        [disabled]="isSubmitting"
+      >
+        {{ isSubmitting ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ" }}
       </button>
     </form>
 
     <p class="foot-note">
-      ยังไม่มีบัญชีผู้ใช้งาน?
-      <a class="link" routerLink="/register">สมัครบัญชีใหม่</a>
+      ยังไม่มีบัญชี? <a class="link" routerLink="/register">สมัครสมาชิก</a>
     </p>
   </div>
 </div>

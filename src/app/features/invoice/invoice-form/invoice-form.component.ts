@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InvoiceService, Invoice } from '../invoice.service';
 import { AuthService, AuthUser } from '../../../shared/auth.service';
+import { AddressTh } from '../../../shared/auth.service';
 
 @Component({
   selector: 'app-invoice-form',
@@ -182,17 +183,17 @@ export class InvoiceFormComponent implements OnInit {
     return parts.filter(Boolean).join(' ').trim();
   }
 
-  private formatAddressLegacy(address: AuthUser['addressTh']): string {
+  private formatAddressLegacy(address?: AddressTh): string {
     if (!address) return '';
     const parts = [
       address.buildingNo,
-      address.street,
+      address.addressDetailTh,
       address.subdistrict,
       address.district,
       address.province,
-      address.postalCode,
-    ];
-    return parts.filter(Boolean).join(' ').trim();
+      address.zipCode,
+    ].filter(Boolean);
+    return parts.join(' ');
   }
 
   // ===================== Items =====================

@@ -1,174 +1,250 @@
+// src/app/shared/auth.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { tap, map, catchError } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
 
-export interface RegisterResponse {
-  id: string;
-  userName: string; // <-- backend ส่ง userName (N ใหญ่)
+export interface AuthResponse {
+  token: string;
+  refreshToken?: string | null;
+  userName: string;
+  fullName: string;
   email: string;
-  firstName: string; // <-- backend ส่ง firstName
-  mustChangePassword?: boolean;
+  role?: string;
 }
 
-export interface LoginResponse {
-  token: string; // <-- backend ส่ง token เท่านั้น (บวก mustChangePassword ถ้ามี)
-  mustChangePassword?: boolean;
-}
-
-export interface AuthUser {
-  id?: string;
-  userName: string; // <-- canonical
-  username?: string; // compat กับโค้ดเก่า
-  firstName?: string;
-  fullName?: string;
-  email?: string;
-
-  // สคีมาใหม่ (จาก register)
-  tenantNameTh?: string;
-  tenantNameEn?: string;
-  tenantTaxId?: string;
-  tenantTel?: string;
+export type AddressTh = {
   buildingNo?: string;
   addressDetailTh?: string;
   province?: string;
   district?: string;
   subdistrict?: string;
   zipCode?: string;
-  addressDetailEn?: string;
+};
 
-  // legacy สำหรับจุดที่ยังใช้ของเก่า
+export interface AuthUser {
+  userName: string;
+  fullName: string;
+  email: string;
+  role?: string;
+
+  // optional
   companyName?: string;
-  taxId?: string;
-  businessPhone?: string;
-  addressTh?: {
-    buildingNo?: string;
-    street?: string;
-    subdistrict?: string;
-    district?: string;
-    province?: string;
-    postalCode?: string;
-  };
+  tenantNameTh?: string;
+  tenantNameEn?: string;
+  username?: string; // legacy fallback
+  addressTh?: AddressTh;
 }
+
+export interface RegisterDto {
+  password: string;
+  fullName: string;
+  email: string;
+  logoImg?: string | null;
+  logoUrl?: string;
+  tenantNameTh: string;
+  tenantNameEn?: string;
+  tenantTaxId: string;
+  branchCode: string;
+  branchNameTh: string;
+  branchNameEn?: string;
+  tenantTel?: string;
+  buildingNo: string;
+  addressDetailTh?: string;
+  province: string;
+  district: string;
+  subdistrict: string;
+  zipCode: string;
+  addressDetailEn?: string;
+}
+
+const TOKEN_KEY = 'auth.token';
+const REFRESH_KEY = 'auth.refresh';
+const USER_KEY = 'auth.user';
+const LOGOUT_BC = 'logout.broadcast';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly TOKEN_KEY = 'ez_auth_token';
-  private readonly USER_KEY = 'ez_auth_user';
+  private base = environment.apiBase; // http://localhost:8080/api
+  private _user$ = new BehaviorSubject<AuthUser | null>(readUserFromStorage());
+  readonly user$ = this._user$.asObservable();
 
-  private _isAuth$ = new BehaviorSubject<boolean>(
-    !!localStorage.getItem('ez_auth_token')
-  );
-  isAuthenticated$ = this._isAuth$.asObservable();
+  constructor(private http: HttpClient, private router: Router) {
+    // ---- migrate คีย์เก่ามาเป็นคีย์ใหม่ แล้วลบของเก่าให้เกลี้ยง ----
+    const legacy = localStorage.getItem('token');
+    const modern = localStorage.getItem(TOKEN_KEY);
+    if (legacy && !modern) {
+      localStorage.setItem(TOKEN_KEY, legacy);
+    }
+    if (legacy) localStorage.removeItem('token');
 
-  private _currentUser: AuthUser | null = null;
+    // ถ้าแท็บอื่นลบ token ให้แท็บนี้เด้งออกด้วย
+    window.addEventListener('storage', (e) => {
+      if (e.key === TOKEN_KEY && e.newValue === null) {
+        this.clearUser();
+        this.router.navigateByUrl('/login');
+      }
+    });
+  }
 
-  constructor(private http: HttpClient) {
-    const rawUser = localStorage.getItem(this.USER_KEY);
-    if (rawUser) {
-      try {
-        this._currentUser = JSON.parse(rawUser) as AuthUser;
-      } catch {}
+  // ---------- token ----------
+  get token(): string | null {
+    // เผื่อยังมีของเก่า หยิบแบบ fallback ได้
+    return localStorage.getItem(TOKEN_KEY) ?? localStorage.getItem('token');
+  }
+  private setToken(t: string) {
+    localStorage.setItem(TOKEN_KEY, t);
+    localStorage.removeItem('token'); // ล้าง legacy
+  }
+  private clearToken() {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('token'); // เผื่อมีตกค้าง
+  }
+
+  // ---------- user ----------
+  getUser(): AuthUser | null {
+    return this._user$.value ?? readUserFromStorage();
+  }
+  private setUser(u: AuthUser) {
+    localStorage.setItem(USER_KEY, JSON.stringify(u));
+    this._user$.next(u);
+  }
+  private clearUser() {
+    localStorage.removeItem(USER_KEY);
+    this._user$.next(null);
+  }
+
+  serverLogout() {
+    return this.http.post<void>(`${this.base}/auth/logout`, {});
+  }
+
+  // ---------- jwt / login state ----------
+  decodeToken(): any {
+    const t = this.token;
+    if (!t) return null;
+    const parts = t.split('.');
+    if (parts.length < 2) return null;
+    try {
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(json);
+    } catch {
+      return null;
     }
   }
 
-  /** ใช้ใน component อื่น ๆ */
-  getUser(): AuthUser | null {
-    return this._currentUser;
+  isLoggedIn(): boolean {
+    const t = this.token;
+    if (!t) return false;
+    const payload = this.decodeToken();
+    if (!payload?.exp) return true;
+    const nowSec = Math.floor(Date.now() / 1000);
+    return payload.exp > nowSec;
   }
 
-  setUser(u: AuthUser | null) {
-    this._currentUser = u;
-    if (u) localStorage.setItem(this.USER_KEY, JSON.stringify(u));
-    else localStorage.removeItem(this.USER_KEY);
+  logout(broadcast = true): void {
+    this.clearToken();
+    this.clearUser();
+
+    // ✅ broadcast เฉพาะคนกดออกระบบเอง
+    if (broadcast) {
+      localStorage.setItem(LOGOUT_BC, String(Date.now()));
+    }
+
+    // ไปหน้า login
+    this.router.navigateByUrl('/login');
   }
 
-  get token(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+  fetchMe() {
+    return this.http.get<AuthUser>(`${this.base}/auth/me`).pipe(
+      tap((u) => this['setUser'](u)) // เก็บลง localStorage + push ลง BehaviorSubject
+    );
+  }
+  uploadLogo(file: File, tenantTaxId: string) {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('tenantTaxId', tenantTaxId);
+    return this.http.post<{ url: string }>(`${this.base}/files/logo`, form);
   }
 
-  /** Login ด้วย userName / password → ได้ token (และ mustChangePassword ถ้ามี) */
-  login(userName: string, password: string): Observable<LoginResponse> {
+  // ---------- API ----------
+  login(userName: string, password: string): Observable<AuthResponse> {
+    const body = { userName, password };
     return this.http
-      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, {
-        userName,
-        password,
+      .post<AuthResponse>(`${this.base}/auth/login`, body, {
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
       .pipe(
         tap((res) => {
-          localStorage.setItem(this.TOKEN_KEY, res.token);
-          // ถ้าไม่มี user ใน storage ให้บันทึกขั้นต่ำจาก userName ที่ใช้ login
-          if (!this._currentUser) {
-            this.setUser({ userName });
-          } else {
-            // ensure userName sync
-            this.setUser({ ...this._currentUser, userName });
-          }
-          this._isAuth$.next(true);
-        }),
-        catchError((err) => throwError(() => err))
-      );
-  }
-
-  /** Register → backend คืน id, userName, firstName, email,… */
-  register(payload: any): Observable<AuthUser> {
-    return this.http
-      .post<RegisterResponse>(`${environment.apiUrl}/auth/register`, payload)
-      .pipe(
-        map((res) => {
-          const user: AuthUser = {
-            id: res.id,
+          this.setToken(res.token);
+          const claims = this.decodeToken();
+          const role =
+            res.role ??
+            claims?.role ??
+            claims?.roles?.[0] ??
+            claims?.authorities?.[0] ??
+            undefined;
+          const u: AuthUser = {
             userName: res.userName,
-            username: res.userName, // compat
-            firstName: res.firstName,
-            fullName: res.firstName, // สำหรับจุดที่ยัง refer fullName
+            fullName: res.fullName,
             email: res.email,
+            role,
           };
-          this.setUser(user);
-          return user;
-        }),
-        catchError((err) => throwError(() => err))
+          this.setUser(u);
+        })
       );
   }
 
-  /** logout */
-  logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this._currentUser = null;
-    this._isAuth$.next(false);
+  register(payload: RegisterDto): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.base}/auth/register`, payload, {
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+      })
+      .pipe(
+        tap((res) => {
+          this.setToken(res.token);
+          const claims = this.decodeToken();
+          const role =
+            res.role ??
+            claims?.role ??
+            claims?.roles?.[0] ??
+            claims?.authorities?.[0] ??
+            undefined;
+          const u: AuthUser = {
+            userName: res.userName,
+            fullName: res.fullName,
+            email: res.email,
+            tenantNameTh: payload.tenantNameTh,
+            tenantNameEn: payload.tenantNameEn,
+            companyName: payload.tenantNameTh || payload.tenantNameEn,
+            addressTh: {
+              buildingNo: payload.buildingNo,
+              addressDetailTh: payload.addressDetailTh,
+              province: payload.province,
+              district: payload.district,
+              subdistrict: payload.subdistrict,
+              zipCode: payload.zipCode,
+            },
+            role,
+          };
+          this.setUser(u);
+        })
+      );
   }
+}
 
-  // ===== optional: ถอด JWT เฉพาะ client =====
-  decodeToken(): any {
-    const t = this.token;
-    if (!t) return {};
-    try {
-      const p = t.split('.')[1] || '';
-      const pad = '='.repeat((4 - (p.length % 4)) % 4);
-      const base64 = (p + pad).replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(atob(base64));
-    } catch {
-      return {};
-    }
-  }
-  isLoggedIn(): boolean {
-    const token = this.token; // ใช้ getter เดิม
-    if (!token) return false;
-
-    // ถอด JWT payload แล้วเช็ค exp ถ้ามี
-    try {
-      const payload = this.decodeToken?.() || {}; // มีอยู่แล้วในเวอร์ชันก่อนหน้า
-      // ถ้า backend ออก exp มากับ token
-      if (payload && typeof payload.exp === 'number') {
-        // exp เป็นวินาที → เปรียบเทียบกับเวลาปัจจุบัน (ms)
-        return Date.now() < payload.exp * 1000;
-      }
-      // ถ้าไม่มี exp ให้ถือว่าแค่มี token ก็พอ
-      return true;
-    } catch {
-      return false;
-    }
+// ---------- local helpers ----------
+function readUserFromStorage(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
   }
 }

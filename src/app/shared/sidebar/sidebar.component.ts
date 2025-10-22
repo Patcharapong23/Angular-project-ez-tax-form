@@ -9,7 +9,7 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./sidebar.component.css'],
 })
 export class SidebarComponent {
-  isCollapsed = false;
+  isCollapsed = true;
   isLocked = false;
   hoverExpand = false;
 

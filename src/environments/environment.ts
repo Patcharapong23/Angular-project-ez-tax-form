@@ -1,4 +1,7 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8080/api',
+  apiBase: 'http://localhost:8080/api',
+  // useMock: false,
+  // tokenStorageKey: 'auth.token',
+  // userStorageKey: 'auth.user',
 };

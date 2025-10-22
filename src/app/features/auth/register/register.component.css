@@ -1,17 +1,6 @@
-/* ------- Typography ------- */
-
-h1 {
-  text-align: center;
-  margin-top: 2rem;
-  color: var(--1-theme-color-heading-display-text, #5e5873);
-  font-feature-settings: "liga" off, "clig" off;
-  font-size: 32px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
-
-/* ------- Layout ------- */
+/* =========================
+   Typography / Layout base
+   ========================= */
 :host {
   display: block;
 }
@@ -25,212 +14,25 @@ h1 {
 }
 
 .auth-card {
-  width: min(480px, 92vw);
-  background: #fff;
-  border-radius: 16px;
-  padding: clamp(20px, 4vw, 32px);
-  text-align: center;
-}
-
-/* ------- Logo ------- */
-.brand {
-  width: 200px;
-  margin: 8px auto 16px;
-  display: block;
-}
-
-/* ------- Title & Subtitle ------- */
-.title {
-  margin: 0 0 4px;
-  font-size: clamp(22px, 3vw, 32px);
-  font-weight: 400;
-}
-
-/* mat-form-field.full-width {
-  display: block;
-  margin-bottom: 12px;
-} */
-
-/* ------- Links ------- */
-.link {
-  color: #0b57d0;
-  text-decoration: none;
-  font-weight: 400;
-}
-.link:hover {
-  text-decoration: underline;
-}
-
-/* ลืมรหัสผ่าน (ถ้ามีใช้ต่อ) */
-.forgot-wrapper {
-  text-align: right;
-  margin: -4px 0 16px;
-}
-.forgot {
-  font-size: 14px;
-}
-
-/* ------- Buttons ------- */
-.button {
-  height: 44px;
-  width: 100%;
-  border: 0;
-  border-radius: 10px;
-  background: #ffcc00;
-  color: #111;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-}
-
-/* ------- Angular Material Overrides ------- */
-:host ::ng-deep .mdc-notched-outline__notch {
-  overflow: visible !important; /* กันไม้เอก/ไม้โทหาย */
-}
-
-:host ::ng-deep .mat-mdc-form-field {
-  --mdc-outlined-text-field-outline-color: #000;
-  --mdc-outlined-text-field-hover-outline-color: #000;
-  --mdc-outlined-text-field-focus-outline-color: #000;
-  --mdc-outlined-text-field-label-text-color: #000;
-  --mdc-outlined-text-field-focus-label-text-color: #000;
-  --mdc-outlined-text-field-caret-color: #000;
-}
-
-:host ::ng-deep .mat-mdc-text-field-wrapper {
-  border-radius: 8px !important;
-}
-/* แถบสถานะ */
-.pw-meter {
-  height: 8px;
-  border-radius: 4px;
-  background: #e9ecef;
-  overflow: hidden;
-  margin-top: -8px; /* ลดช่องว่างด้านบน */
-  margin-bottom: 8px; /* ระยะห่างด้านล่าง */
-  position: relative;
-}
-/* .pw-meter .bar {
-  height: 100%;
-  width: 0%;
-  transition: width 0.25s ease;
-  background: #198754; /* เขียว */
-/* } */
-.pw-meter .bar {
-  height: 100%;
-  width: 0%;
-  background: #ef4444; /* เริ่มแดง */
-  transition: width 200ms ease, background-color 200ms ease;
-}
-
-/* ครึ่งหนึ่งขึ้นไป ให้เหลือง */
-.pw-meter.warn .bar {
-  background: #f59e0b;
-}
-
-/* ผ่านครบ ให้เขียวล้วน */
-.pw-meter.done .bar {
-  background: #2e7d32;
-}
-
-/* เช็คลิสต์ */
-.pw-req {
-  list-style: none;
-  padding: 0;
-  margin: 6px 0 14px;
-}
-.pw-req li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #2f2f2f;
-  margin: 6px 0;
-}
-.pw-req .ic {
-  font-size: 20px;
-  height: 20px;
-  width: 20px;
-  color: #9e9e9e; /* สีไอคอนตอนยังไม่ผ่าน */
-}
-.pw-req li.ok {
-  color: #1f1f1f;
-}
-.pw-req li.ok .ic {
-  color: #198754;
-} /* เขียวเมื่อผ่าน */
-
-/* ซ่อน/โชว์แบบคง DOM */
-.step {
-  display: none;
-}
-.step.active {
-  display: block;
-}
-
-.auth-card {
-  width: min(800px, 92vw);
-  background: #fff;
-  border-radius: 16px;
-  padding: 32px;
-  text-align: center;
-}
-.brand {
-  width: 180px;
-  margin: 0 auto 16px;
-}
-
-.subtitle {
-  margin: 0 0 20px;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 18px;
-}
-.full-width {
-  width: 100%;
-}
-.button {
-  height: 44px;
-  width: 100%;
-  border-radius: 10px;
-  background: #ffcc00;
-  color: #111;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  margin-top: 12px;
-}
-
-/* ช่อง Material ให้มุมโค้ง/สี */
-.mdc-notched-outline__notch {
-  overflow: visible !important;
-}
-.mat-mdc-text-field-wrapper {
-  border-radius: 8px !important;
-}
-.mat-mdc-form-field {
-  --mdc-outlined-text-field-outline-color: #d7d7d7;
-  --mdc-outlined-text-field-hover-outline-color: #bdbdbd;
-  --mdc-outlined-text-field-focus-outline-color: #000;
-  --mdc-outlined-text-field-label-text-color: rgba(0, 0, 0, 0.6);
-  --mdc-outlined-text-field-focus-label-text-color: #000;
-  --mdc-outlined-text-field-caret-color: #000;
-}
-/* ------- Layout ------- */
-:host {
-  display: block;
-}
-
-.auth-card {
   width: min(720px, 96vw);
   background: #fff;
   border-radius: 20px;
   padding: clamp(24px, 4vw, 40px);
   text-align: left;
-  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); */
 }
 
-/* ------- Header ------- */
 .brand {
   width: 200px;
   margin: 0 auto 16px;
   display: block;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 400;
+  text-align: center;
+  color: #5e5873;
 }
 
 .subtitle {
@@ -240,58 +42,106 @@ h1 {
   text-align: center;
 }
 
-/* ------- Section Headings ------- */
+.link {
+  color: #0b57d0;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
 .section-title {
   margin: 24px 0 12px;
   font-weight: 600;
   font-size: 15px;
   color: #5e5873;
 }
-
-.section-title.required::after {
-  content: " *";
-  color: #d32f2f;
+.section-title .req {
+  color: #ea5455;
+  font-weight: 700;
+  margin-left: 4px;
 }
 
-/* ------- Form Fields ------- */
+.full-width {
+  width: 100%;
+}
+.form-row,
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.foot-note {
+  margin-top: 24px;
+  padding-top: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6e6b7b;
+  text-align: center;
+  border-top: 1px solid #ebe9f1;
+}
+
+/* =========================
+   Angular Material tweaks
+   ========================= */
+:host ::ng-deep .mdc-notched-outline__notch {
+  overflow: visible !important;
+}
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: #d7d7d7;
+  --mdc-outlined-text-field-hover-outline-color: #bdbdbd;
+  --mdc-outlined-text-field-focus-outline-color: #000;
+  --mdc-outlined-text-field-label-text-color: rgba(0, 0, 0, 0.6);
+  --mdc-outlined-text-field-focus-label-text-color: #000;
+  --mdc-outlined-text-field-caret-color: #000;
+}
+
 mat-form-field.full-width {
   width: 100%;
   display: block;
   margin-bottom: 16px;
 }
 
-mat-form-field.half {
-  width: calc(50% - 8px);
-  margin-bottom: 16px;
+mat-checkbox {
+  margin: 16px 0;
+  font-size: 14px;
+  color: #444;
 }
 
-.form-row {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+.mf-relative {
+  position: relative;
+}
+.field-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: transparent;
+  cursor: not-allowed;
+  border-radius: 12px;
+}
+.blocked .mat-mdc-text-field-wrapper {
+  cursor: not-allowed;
 }
 
-/* input มุมโค้งและ hover */
-:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__leading,
-:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__trailing,
-:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__notch {
-  border-radius: 8px;
-  border-color: #ddd;
+mat-form-field {
+  line-height: 1.5;
 }
 
-:host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__leading,
-:host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__trailing,
-:host ::ng-deep .mat-mdc-form-field:hover .mdc-notched-outline__notch {
-  border-color: #111;
-}
-
-/* ------- Upload Box ------- */
-/* ===== Upload box ===== */
+/* =========================
+   Upload box
+   ========================= */
 .upload-box {
   width: 300px;
   height: 300px;
-  background: #f0f0f0; /* พื้นเทา */
-  border: 2px dashed #bbb; /* เส้นปะ */
+  background: #f0f0f0;
+  border: 2px dashed #bbb;
   border-radius: 16px;
   display: grid;
   place-items: center;
@@ -302,32 +152,23 @@ mat-form-field.half {
   transition: background 0.25s ease, border-color 0.25s ease,
     box-shadow 0.25s ease;
 }
-
 .upload-box:hover {
   border-color: #a7a7a7;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
-
-/* มีรูปแล้ว -> เอาพื้นหลัง/เส้นปะออก */
 .upload-box.has-image {
   background: transparent;
   border: none;
 }
-
-/* ซ่อน input file */
 .upload-box input[type="file"] {
   display: none;
 }
-
-/* Preview รูป (scale ให้พอดีกล่อง) */
 .logo-preview {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* ไม่ครอปภาพ */
-  pointer-events: none; /* ให้คลิกทะลุรูปไปที่กล่องได้ */
+  object-fit: contain;
+  pointer-events: none;
 }
-
-/* ปุ่ม overlay ด้านล่างกลาง */
 .upload-trigger {
   position: absolute;
   left: 50%;
@@ -341,17 +182,7 @@ mat-form-field.half {
   letter-spacing: 0.2px;
   backdrop-filter: blur(4px);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  pointer-events: none; /* ไม่บังคลิก */
-}
-
-/* คำอธิบายใต้กล่อง */
-.upload-note {
-  margin: 4px 0 16px;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-}
-.upload-trigger {
+  pointer-events: none;
   opacity: 0.9;
   transition: opacity 0.2s;
 }
@@ -361,15 +192,16 @@ mat-form-field.half {
 .upload-box:hover .upload-trigger {
   opacity: 0.95;
 }
-
-/* ------- Checkbox ------- */
-mat-checkbox {
-  margin: 16px 0;
-  font-size: 14px;
-  color: #444;
+.upload-note {
+  margin: 4px 0 16px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
 }
 
-/* ------- Buttons ------- */
+/* =========================
+   Buttons
+   ========================= */
 .button {
   height: 48px;
   width: 100%;
@@ -383,82 +215,11 @@ mat-checkbox {
   margin-top: 16px;
   transition: all 0.2s ease;
 }
-
 .button:hover {
   background: #f5c000;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* ------- Foot note ------- */
-.foot-note {
-  margin-top: 24px;
-  padding-top: 16px;
-  font-size: 14px;
-  font-weight: 500;
-  font-style: normal;
-  color: #6e6b7b;
-  text-align: center;
-  border-top: 1px solid #ebe9f1;
-}
-
-.link {
-  color: #0b57d0;
-  text-decoration: none;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 600;
-}
-.link:hover {
-  text-decoration: underline;
-}
-
-upload-label {
-  padding: 5.495px 10.989px;
-  align-items: center;
-  gap: 6.593px;
-  border-radius: 4.396px;
-  background: #fff;
-}
-.mat-form-field .mat-input-element[disabled] {
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-/* ให้ mat-form-field วางแผ่นใสได้ */
-.mf-relative {
-  position: relative;
-}
-
-/* แผ่นใส */
-.field-blocker {
-  position: absolute;
-  inset: 0;
-  z-index: 10;
-  background: transparent;
-  cursor: not-allowed; /* ให้รู้สึกว่าใช้ไม่ได้ */
-  border-radius: 12px; /* ให้คลุมตามทรงฟิลด์สวย ๆ */
-}
-
-/* เปลี่ยนเคอร์เซอร์ที่กล่องเวลาล็อก */
-.blocked .mat-mdc-text-field-wrapper {
-  cursor: not-allowed;
-}
-
-.form-row,
-.grid-2 {
-  display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(250px, 1fr)
-  ); /* ทำให้ responsive */
-  gap: 16px;
-}
-
-.section-title .req {
-  color: #ea5455;
-  font-weight: bold;
-  margin-left: 4px;
-}
 .actions {
   margin-top: 24px;
   display: flex;
@@ -473,14 +234,71 @@ button[mat-stroked-button] {
   border: 1px solid #d8d6de;
   color: #6e6b7b;
 }
-
 button[mat-stroked-button]:hover {
   background-color: #f8f8f8;
 }
-mat-form-field {
-  line-height: 1.5;
+
+/* =========================
+   Password strength + checklist
+   ========================= */
+.pwd-strength {
+  margin: 8px 0 12px;
 }
 
-step-panel {
-  background-color: red;
+.strength-bar {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.strength-fill {
+  height: 100%;
+  width: 0;
+  transition: width 0.2s ease;
+}
+.strength-fill.idle {
+  width: 0;
+  background: #cfd8dc;
+}
+.strength-fill.weak {
+  background: #e53935;
+}
+.strength-fill.medium {
+  background: #fbc02d;
+}
+.strength-fill.strong {
+  background: #2e7d32;
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 6px 0;
+}
+.checklist li.ok {
+  color: #2e7d32;
+}
+.checklist mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+/* =========================
+   Tiny error
+   ========================= */
+.tiny-error {
+  color: #e53935;
+  font-size: 12px;
+  margin-top: 4px;
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService, LoginResponse } from '../../../shared/auth.service';
+import { Router } from '@angular/router';
+import { AuthService, AuthResponse } from '../../../shared/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -8,46 +8,27 @@ import { AuthService, LoginResponse } from '../../../shared/auth.service';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
-  // HTML เดิม bind กับ username/password
-  private _userName = '';
+  userName = ''; // ✅ ใช้ userName (ไม่ใช่ username)
   password = '';
-  hidePass = true;
+  hidePass = true; // ✅ ใช้กับปุ่มเปิด/ปิดตา
+  isSubmitting = false;
   errorMsg = '';
-  returnUrl = '/dashboard'; // ค่าเริ่มต้น
 
-  constructor(
-    private auth: AuthService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {}
-
-  get username(): string {
-    return this._userName;
-  }
-  set username(v: string) {
-    this._userName = v ?? '';
-    this.errorMsg = '';
-  }
-
-  ngOnInit() {
-    this.returnUrl =
-      this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
-  }
+  constructor(private auth: AuthService, private router: Router) {}
 
   onSubmit() {
-    if (!this._userName || !this.password) {
-      /* ... */ return;
-    }
-    this.auth.login(this._userName, this.password).subscribe({
-      next: (res) => {
-        if (res?.mustChangePassword) {
-          this.router.navigate(['/force-change-password']);
-          return;
-        }
-        this.router.navigateByUrl(this.returnUrl); // <--
+    if (!this.userName || !this.password || this.isSubmitting) return;
+    this.isSubmitting = true;
+    this.errorMsg = '';
+
+    this.auth.login(this.userName, this.password).subscribe({
+      next: (_res: AuthResponse) => {
+        this.router.navigateByUrl('/dashboard');
       },
-      error: () => {
-        this.errorMsg = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+      error: (err) => {
+        this.isSubmitting = false;
+        this.errorMsg = err?.error?.message || 'เข้าสู่ระบบไม่สำเร็จ';
+        console.error('Login error:', err);
       },
     });
   }

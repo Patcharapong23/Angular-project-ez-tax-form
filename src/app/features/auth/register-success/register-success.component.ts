@@ -7,18 +7,22 @@ import { Router } from '@angular/router';
   styleUrls: ['./register-success.component.css'],
 })
 export class RegisterSuccessComponent implements OnInit {
-  username: string | null = null;
+  userName: string | null = null;
 
   constructor(private router: Router) {
-    // ดึงข้อมูล state ที่ส่งมาตอน navigate
-    const navigation = this.router.getCurrentNavigation();
-    this.username = navigation?.extras?.state?.['username'];
+    const nav = this.router.getCurrentNavigation();
+    this.userName =
+      nav?.extras?.state?.['username'] ||
+      (history.state && history.state['username']) ||
+      sessionStorage.getItem('register.username');
   }
 
   ngOnInit(): void {
-    // ถ้าไม่มี username ถูกส่งมา หรือ user refresh หน้า, ให้กลับไปหน้า login
-    if (!this.username) {
+    if (!this.userName) {
       this.router.navigate(['/login']);
+    } else {
+      // แสดงผลเสร็จแล้วล้างค่า
+      sessionStorage.removeItem('register.username');
     }
   }
 

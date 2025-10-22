@@ -1,33 +1,73 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, AuthUser } from '../../shared/auth.service';
 
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
+  styleUrls: ['./topbar.component.css'],
 })
-export class TopbarComponent implements OnInit {
-  user?: {
-    companyName?: string;
-    firstName?: string;
-    userName?: string;
-    email?: string;
-  };
+export class TopbarComponent {
+  user: AuthUser | null = null;
   isProfileMenuOpen = false;
 
-  constructor(private auth: AuthService, private router: Router) {}
-
-  ngOnInit(): void {
-    this.user = this.buildTopbarUser(
-      this.auth.getUser(),
-      this.auth.decodeToken()
-    );
+  constructor(
+    private el: ElementRef,
+    private auth: AuthService,
+    private router: Router
+  ) {
+    // รับ user ล่าสุดเสมอ
+    this.auth.user$.subscribe((u) => (this.user = u ?? this.auth.getUser()));
+    // ถ้ายังไม่มี role ใน storage ลอง decode จาก token แล้วอัปเดต
+    if (!this.user?.role) {
+      const claims = this.auth.decodeToken();
+      if (claims?.role) {
+        const u = this.auth.getUser();
+        if (u) {
+          u.role = claims.role;
+          // เก็บกลับเข้า storage/stream
+          (this as any).auth['setUser']?.(u);
+        }
+      }
+    }
   }
 
   displayName(): string {
-    const n = (this.user?.firstName || '').trim();
-    if (n) return n;
-    return (this.user?.userName || '').trim();
+    return (
+      this.user?.fullName?.trim() ||
+      this.user?.userName?.trim() ||
+      (this.user?.email ? this.user.email.split('@')[0] : '')
+    );
+  }
+
+  initial(): string {
+    const name = this.displayName();
+    return name ? name.charAt(0).toUpperCase() : 'U';
+  }
+
+  roleLabel(): string {
+    // แปลงให้เหลือรูปแบบเดียว: เอา ROLE_ ออก, แทน - และช่องว่างเป็น _, ตัวพิมพ์ใหญ่
+    const r = (this.user?.role || '')
+      .toUpperCase()
+      .replace(/^ROLE_/, '')
+      .replace(/[-\s]/g, '_');
+
+    switch (r) {
+      case 'HQ_ADMIN':
+        return 'ผู้ดูแลสาขาสำนักงานใหญ่';
+      case 'BRANCH_ADMIN':
+        return 'ผู้ดูแลสาขาย่อย';
+      case 'SYSTEM_ADMIN':
+        return 'ผู้ดูแลระบบ';
+      case 'STAFF':
+        return 'พนักงาน';
+      default:
+        return 'สมาชิก';
+    }
+  }
+
+  toggleMenu(): void {
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
   }
 
   logout(): void {
@@ -35,27 +75,10 @@ export class TopbarComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  private buildTopbarUser(u: AuthUser | null, jwt: any) {
-    if (u) {
-      const companyName =
-        u.tenantNameTh || u.companyName || u.tenantNameEn || '';
-      const firstName = u.firstName || u.fullName || '';
-      const userName =
-        u.userName || u.username || (u.email ? u.email.split('@')[0] : '');
-      return { companyName, firstName, userName, email: u.email };
-    }
-    // fallback จาก JWT
-    const userName = jwt?.userName || jwt?.username || jwt?.sub || '';
-    return { companyName: '', firstName: '', userName, email: '' };
-  }
-
+  // คลิกนอกเมนู เพื่อปิด dropdown
   @HostListener('document:click', ['$event'])
-  onDocumentClick(ev: MouseEvent) {
-    const target = ev.target as HTMLElement;
-    if (
-      !target.closest('.user-profile') &&
-      !target.closest('.profile-dropdown')
-    ) {
+  onDocClick(e: MouseEvent) {
+    if (!this.el.nativeElement.contains(e.target)) {
       this.isProfileMenuOpen = false;
     }
   }

@@ -1,24 +1,33 @@
 <header class="main-header">
-  <div class="company-info" *ngIf="user">
-    <span class="company-name">{{ user.companyName }}</span>
+  <!-- ซ้าย: ชื่อบริษัท (ถ้ามี) -->
+  <div class="company-info" *ngIf="user as u">
+    <span class="company-name">{{ u.companyName }}</span>
   </div>
 
+  <!-- ขวา: ธง + โปรไฟล์ -->
   <div class="header-actions">
-    <!-- trigger dropdown -->
-    <div class="user-profile" (click)="isProfileMenuOpen = !isProfileMenuOpen">
+    <!-- ใช้ไฟล์ธงจาก assets -->
+    <span class="lang-flag" title="ภาษาไทย">
+      <img src="assets/flags/th.svg" alt="TH" />
+    </span>
+
+    <div class="user-profile" (click)="toggleMenu()">
       <div class="avatar">
-        <span class="initial">
-          {{ displayName() || "U" | slice : 0 : 2 }}
-        </span>
+        <span class="initial">{{ initial() }}</span>
+        <span class="online-dot"></span>
       </div>
 
       <div class="user-details">
         <div class="name">{{ displayName() }}</div>
-        <div class="role">ผู้ดูแลระบบ</div>
+        <div class="role">{{ roleLabel() }}</div>
       </div>
+
+      <i
+        class="ti ti-chevron-down profile-arrow"
+        [class.rotate]="isProfileMenuOpen"
+      ></i>
     </div>
 
-    <!-- เมนู dropdown -->
     <div class="profile-dropdown" [class.open]="isProfileMenuOpen">
       <div class="dropdown-item" (click)="logout()">
         <i class="ti ti-logout"></i>

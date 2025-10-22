@@ -18,6 +18,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 /* ===== Components ===== */
 import { SidebarComponent } from './shared/sidebar/sidebar.component';
@@ -30,6 +31,10 @@ import { RegisterSuccessComponent } from './features/auth/register-success/regis
 import { DocumentsallComponent } from './features/documentsall/documentsall.component';
 import { InvoiceFormComponent } from './features/invoice/invoice-form/invoice-form.component';
 import { NewDocumentDialogComponent } from './features/dialogs/new-document-dialog/new-document-dialog.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
+/* ===== Interceptors ===== */
+import { LoadingInterceptor } from './shared/Loding/loading.interceptor';
 import { JwtInterceptor } from './shared/jwt.interceptor';
 
 /* ===== Guards ===== */
@@ -59,6 +64,7 @@ import { AuthGuard } from './auth.guard';
     OverlayModule,
 
     // Material
+    MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
@@ -69,10 +75,20 @@ import { AuthGuard } from './auth.guard';
     MatDialogModule,
     MatCheckboxModule,
     MatSelectModule,
+    MatSnackBarModule,
   ],
   providers: [
     AuthGuard,
-    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoadingInterceptor,
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })

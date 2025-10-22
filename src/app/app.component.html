@@ -1,1 +1,17 @@
 <router-outlet></router-outlet>
+
+<!-- ปุ่มทดสอบ (ชั่วคราว เอาออกได้ตอนโปรดักชัน) -->
+<button class="test-load-btn" (click)="fakeWork()" aria-label="ทดสอบ Loader">
+  ทดสอบโหลด 2 วิ
+</button>
+
+<!-- Overlay ตอนโหลด -->
+<div
+  class="loading-overlay"
+  *ngIf="loading$ | async"
+  role="status"
+  aria-live="polite"
+>
+  <div class="loader" aria-label="กำลังโหลด"></div>
+  <div class="loading-text">กำลังโหลด...</div>
+</div>
