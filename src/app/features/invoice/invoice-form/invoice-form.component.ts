@@ -1,9 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { InvoiceService, Invoice } from '../invoice.service';
-import { AuthService, AuthUser } from '../../../shared/auth.service';
-import { AddressTh } from '../../../shared/auth.service';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  FormArray,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { DocumentService } from '../../documents/document.service';
+import { OrgService } from '../../../shared/services/org.service';
+import { DocumentTypeService, DocumentTypeOption } from '../../../shared/document-type.service';
 
 @Component({
   selector: 'app-invoice-form',
@@ -11,272 +18,273 @@ import { AddressTh } from '../../../shared/auth.service';
   styleUrls: ['./invoice-form.component.css'],
 })
 export class InvoiceFormComponent implements OnInit {
-  invoiceForm!: FormGroup;
-  currentUser: AuthUser | null = null;
-  isEditMode = false;
-  private invoiceId: string | null = null;
+  // ===== forms =====
+  form!: FormGroup;
+  fgHeader!: FormGroup;
+  fgCustomer!: FormGroup;
 
-  documentTypes = [
-    { value: 'T01', viewValue: 'T01 ใบรับ (ใบเสร็จรับเงิน)' },
-    { value: 'T02', viewValue: 'T02 ใบแจ้งหนี้ / ใบกำกับภาษี' },
-    { value: 'T03', viewValue: 'T03 ใบเสร็จรับเงิน / ใบกำกับภาษี' },
-    { value: 'T04', viewValue: 'T04 ใบส่งของ / ใบกำกับภาษี' },
-    { value: '380', viewValue: '380 ใบแจ้งหนี้' },
-    { value: '388', viewValue: '388 ใบกำกับภาษี' },
-    { value: '80', viewValue: '80 ใบเพิ่มหนี้' },
-    { value: '81', viewValue: '81 ใบลดหนี้' },
+  // ===== heading (บนบัตร/หัวเอกสาร) =====
+  docTypeTh = '';
+  docTypeEn = '';
+  docTypeCode = '';
+  docTypeOptions: DocumentTypeOption[] = []; // Added to store document type options
+
+  // ===== seller / header view state =====
+  branches: { code: string; name: string }[] = [
+    { code: '00000', name: 'สำนักงานใหญ่' },
   ];
+  logoUrl = '';
 
-  documentTemplates = [
-    { value: 'default-a', viewValue: 'แม่แบบ A (ค่าเริ่มต้น)' },
-    { value: 'template-b', viewValue: 'แม่แบบ B (สำหรับส่งออก)' },
+  // ===== items / totals state =====
+  use4Decimals = false;
+  editingServiceFee = false;
+  editingShippingFee = false;
+  serviceFee = 0;
+  shippingFee = 0;
+
+  partyTypes = [
+    { value: 'PERSON', label: 'บุคคลธรรมดา' },
+    { value: 'JURISTIC', label: 'นิติบุคคล' },
+    { value: 'FOREIGNER', label: 'ชาวต่างชาติ' },
   ];
 
   constructor(
     private fb: FormBuilder,
-    private invoiceService: InvoiceService,
-    private authService: AuthService,
+    private router: Router,
     private route: ActivatedRoute,
-    private router: Router
+    private docs: DocumentService,
+    private org: OrgService,
+    private documentTypeService: DocumentTypeService // Injected DocumentTypeService
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getUser(); // ควรได้โปรไฟล์ล่าสุดหลัง register/login
-    this.initForm();
-
-    // edit mode
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) {
-        this.isEditMode = true;
-        this.invoiceId = id;
-        this.loadInvoiceData(id);
-      }
+    // ----- build forms -----
+    this.fgHeader = this.fb.group({
+      companyName: [''],
+      taxId: [''],
+      branchCode: ['00000', Validators.required],
+      seller: [''],
+      docNo: [''],
+      issueDate: [this.today(), Validators.required],
+      address: [''],
+      tel: [''],
     });
 
-    // new doc w/ query defaults
-    if (!this.isEditMode) {
-      this.route.queryParams.subscribe((params) => {
-        const type = params['type'];
-        const template = params['template'];
-        if (type && template) {
-          this.invoiceForm.patchValue({
-            documentType: type,
-            documentTemplate: template,
-          });
-        }
+    this.fgCustomer = this.fb.group({
+      partyType: ['PERSON', Validators.required],
+      code: [''],
+      name: ['', Validators.required],
+      taxId: [''],
+      branchCode: [''],
+      passportNo: [''],
+      address: [''],
+      email: [''],
+      tel: [''],
+      zip: [''],
+    });
+
+    this.form = this.fb.group({
+      remark: [''],
+      items: this.fb.array([]),
+      docType: ['', Validators.required], // Added docType to the main form
+    });
+
+    // Fetch document types
+    this.documentTypeService.list().subscribe((options) => {
+      this.docTypeOptions = options;
+    });
+
+    // ----- preload seller/org (ชื่อบริษัท / ภาษี / สาขา / โลโก้ / ที่อยู่) -----
+    this.org.loadSellerProfile().subscribe((p) => {
+      this.logoUrl = p.logoUrl || '';
+      this.branches = p.branches?.length ? p.branches : this.branches;
+      this.fgHeader.patchValue(
+        {
+          companyName: p.companyName,
+          taxId: p.taxId,
+          branchCode: p.branchCode,
+          address: p.address,
+          tel: p.tel,
+        },
+        { emitEvent: false }
+      );
+    });
+
+    // ----- route: สร้างใหม่หรือแก้ไข -----
+    const docNo = this.route.snapshot.paramMap.get('docNo');
+    if (docNo) {
+      // โหมดดู/แก้ไข: โหลดรายละเอียดด้วยเลขเอกสาร
+      this.docs.getByDocNoDetail(docNo).subscribe((d: any) => {
+        this.docTypeCode = d.docTypeCode || '';
+        this.docTypeTh = d.docType || '';
+        this.form.get('docType')?.setValue(this.docTypeCode); // Set selected docType for existing document
+        this.fgHeader.patchValue(
+          {
+            docNo: d.docNo,
+            issueDate: d.issueDate,
+            seller: d.sellerName || '',
+          },
+          { emitEvent: false }
+        );
+
+        this.fgCustomer.patchValue(
+          {
+            partyType: d.customerType || 'PERSON',
+            code: d.customerCode || '',
+            name: d.customerName || '',
+            taxId: d.customerTaxId || '',
+            branchCode: d.customerBranchCode || '',
+            address: d.customerAddress || '',
+            email: d.customerEmail || '',
+            tel: d.customerTel || '',
+            zip: d.customerZip || '',
+            passportNo: d.customerPassportNo || '',
+          },
+          { emitEvent: false }
+        );
+
+        this.itemsFA().clear();
+        (d.items || []).forEach((it: any) => this.addItem(it));
+        this.serviceFee = Number(d.serviceFee || 0);
+        this.shippingFee = Number(d.shippingFee || 0);
       });
-    }
-  }
-
-  initForm(): void {
-    // เตรียมค่าเริ่มต้นของ seller จาก currentUser (รองรับทั้งสคีมาใหม่/เก่า)
-    const sellerDefaults = this.buildDefaultSellerFromUser(this.currentUser);
-
-    this.invoiceForm = this.fb.group({
-      documentType: ['', Validators.required],
-      documentTemplate: ['default-a', Validators.required],
-      issueDate: [
-        new Date().toISOString().substring(0, 10),
-        Validators.required,
-      ],
-
-      seller: this.fb.group({
-        name: [sellerDefaults.name, Validators.required],
-        taxId: [sellerDefaults.taxId, Validators.required],
-        address: [sellerDefaults.address],
-        phone: [sellerDefaults.phone],
-      }),
-
-      customer: this.fb.group({
-        name: ['', Validators.required],
-        branchCode: [
-          '00000',
-          [Validators.required, Validators.pattern(/^\d{5}$/)],
-        ],
-        address: [''],
-        taxId: ['', Validators.required],
-      }),
-
-      items: this.fb.array([], Validators.required),
-
-      subtotal: [0],
-      taxRate: [7],
-      taxAmount: [0],
-      grandTotal: [0],
-    });
-
-    if (!this.isEditMode) {
+    } else {
+      // โหมดสร้าง: ให้มีอย่างน้อย 1 แถว
       this.addItem();
     }
 
-    // คำนวณยอดรวมเมื่อรายการเปลี่ยน
-    this.invoiceForm.get('items')!.valueChanges.subscribe(() => {
-      this.calculateTotals();
+    // Subscribe to docType changes to update heading
+    this.form.get('docType')?.valueChanges.subscribe((selectedCode) => {
+      const selectedDocType = this.docTypeOptions.find(
+        (option) => option.code === selectedCode
+      );
+      if (selectedDocType) {
+        this.docTypeCode = selectedDocType.code;
+        this.docTypeTh = selectedDocType.thName;
+        this.docTypeEn = selectedDocType.enName;
+      } else {
+        this.docTypeCode = '';
+        this.docTypeTh = '';
+        this.docTypeEn = '';
+      }
     });
   }
 
-  loadInvoiceData(id: string): void {
-    this.invoiceService.getInvoice(id).subscribe((invoice: Invoice) => {
-      this.items.clear();
-      invoice.items.forEach(() => this.addItem());
-      this.invoiceForm.patchValue({
-        ...invoice,
-        issueDate: new Date(invoice.issueDate).toISOString().substring(0, 10),
-      });
-    });
+  // ===== utilities =====
+  private today(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${(d.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
   }
 
-  // ===================== Helper: map โปรไฟล์ผู้ใช้เป็น seller =====================
-
-  /**
-   * รองรับสองสคีมา:
-   * - ใหม่ (จากสเปค register): tenantNameTh, tenantTaxId, tenantTel, buildingNo,
-   *   addressDetailTh, province, district, subdistrict, zipCode
-   * - เก่า: companyName, taxId, businessPhone, addressTh{buildingNo, street, subdistrict, district, province, postalCode}
-   */
-  private buildDefaultSellerFromUser(u: AuthUser | null) {
-    const name =
-      (u as any)?.tenantNameTh ||
-      (u as any)?.companyName ||
-      (u as any)?.tenantNameEn ||
-      '';
-
-    const taxId = (u as any)?.tenantTaxId || (u as any)?.taxId || '';
-
-    const phone = (u as any)?.tenantTel || (u as any)?.businessPhone || '';
-
-    // address (ใหม่)
-    const addrNew = this.formatAddressNew(
-      (u as any)?.buildingNo,
-      (u as any)?.addressDetailTh,
-      (u as any)?.subdistrict,
-      (u as any)?.district,
-      (u as any)?.province,
-      (u as any)?.zipCode
-    );
-
-    // address (เก่า)
-    const addrLegacy = this.formatAddressLegacy((u as any)?.addressTh);
-
-    const address = addrNew || addrLegacy || '';
-
-    return { name, taxId, phone, address };
+  itemsFA(): FormArray {
+    return this.form.get('items') as FormArray;
   }
 
-  private formatAddressNew(
-    buildingNo?: string,
-    addressDetailTh?: string,
-    subdistrict?: string,
-    district?: string,
-    province?: string,
-    zipCode?: string
-  ): string {
-    const parts = [
-      buildingNo,
-      addressDetailTh,
-      subdistrict,
-      district,
-      province,
-      zipCode,
-    ];
-    return parts.filter(Boolean).join(' ').trim();
+  get itemForms(): FormGroup[] {
+    return this.itemsFA().controls as FormGroup[];
   }
 
-  private formatAddressLegacy(address?: AddressTh): string {
-    if (!address) return '';
-    const parts = [
-      address.buildingNo,
-      address.addressDetailTh,
-      address.subdistrict,
-      address.district,
-      address.province,
-      address.zipCode,
-    ].filter(Boolean);
-    return parts.join(' ');
-  }
-
-  // ===================== Items =====================
-
-  get items(): FormArray {
-    return this.invoiceForm.get('items') as FormArray;
-  }
-
-  createItem(): FormGroup {
-    return this.fb.group({
-      description: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      unit: [''],
-      unitPrice: [0, [Validators.required, Validators.min(0)]],
+  addItem(init?: any) {
+    const fg = this.fb.group({
+      sku: [init?.sku || ''],
+      name: [init?.name || ''],
+      qty: [init?.qty ?? 1],
+      price: [init?.price ?? 0],
+      discount: [init?.discount ?? 0],
+      vatRate: [init?.vatRate ?? 7],
       amount: [{ value: 0, disabled: true }],
     });
+
+    // autocalc amount
+    fg.valueChanges.subscribe((v) => {
+      const amount =
+        (Number(v.qty) || 0) * (Number(v.price) || 0) -
+        (Number(v.discount) || 0);
+      fg.get('amount')?.setValue(this.round(amount), { emitEvent: false });
+    });
+
+    this.itemsFA().push(fg);
   }
 
-  addItem(): void {
-    this.items.push(this.createItem());
+  removeItem(i: number) {
+    this.itemsFA().removeAt(i);
   }
 
-  removeItem(index: number): void {
-    this.items.removeAt(index);
-    this.calculateTotals();
+  trackByIdx(i: number) {
+    return i;
   }
 
-  calculateItemAmount(index: number): void {
-    const item = this.items.at(index);
-    const quantity = Number(item.get('quantity')!.value) || 0;
-    const unitPrice = Number(item.get('unitPrice')!.value) || 0;
-    const amount = quantity * unitPrice;
-    item.get('amount')!.patchValue(amount, { emitEvent: false });
-    this.calculateTotals();
-  }
-
-  // ===================== Totals =====================
-
-  calculateTotals(): void {
-    const items = this.items.getRawValue();
-    const subtotal = items.reduce(
-      (acc: number, it: any) =>
-        acc + Number(it.quantity || 0) * Number(it.unitPrice || 0),
+  // ===== totals (getter ให้เทมเพลตเรียกใช้) =====
+  get totals() {
+    const rows = this.itemForms.map((f) => f.getRawValue());
+    const subtotal = rows.reduce(
+      (s, r) => s + Number(r.qty || 0) * Number(r.price || 0),
       0
     );
-    const taxRate = Number(this.invoiceForm.get('taxRate')!.value) / 100;
-    const taxAmount = subtotal * taxRate;
-    const grandTotal = subtotal + taxAmount;
+    const discount = rows.reduce((s, r) => s + Number(r.discount || 0), 0);
+    const netAfterDiscount = subtotal - discount;
+    const vat = rows.reduce((s, r) => {
+      const base =
+        Number(r.qty || 0) * Number(r.price || 0) - Number(r.discount || 0);
+      return s + base * (Number(r.vatRate || 0) / 100);
+    }, 0);
+    const grand = netAfterDiscount + this.serviceFee + this.shippingFee + vat;
 
-    this.invoiceForm.patchValue(
-      {
-        subtotal: Number(subtotal.toFixed(2)),
-        taxAmount: Number(taxAmount.toFixed(2)),
-        grandTotal: Number(grandTotal.toFixed(2)),
-      },
-      { emitEvent: false }
-    );
+    return {
+      subtotal: this.round(subtotal),
+      discount: this.round(discount),
+      netAfterDiscount: this.round(netAfterDiscount),
+      vat: this.round(vat),
+      grand: this.round(grand),
+    };
   }
 
-  // ===================== Submit =====================
+  fmt(v: number) {
+    return this.use4Decimals ? this.fix(v, 4) : this.fix(v, 2);
+  }
+  private round(v: number) {
+    return this.use4Decimals ? Number(v.toFixed(4)) : Number(v.toFixed(2));
+  }
+  private fix(v: number, d: number) {
+    return (Number.isFinite(v) ? v : 0).toFixed(d);
+  }
 
-  onSubmit(): void {
-    if (this.invoiceForm.invalid) {
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-      this.invoiceForm.markAllAsTouched();
-      return;
-    }
+  // ===== events (ให้ซิกเนเจอร์รับ $event ได้ เพื่อไม่ต้องแก้ HTML) =====
+  toggleDecimals(_: any = null) {
+    this.use4Decimals = !this.use4Decimals;
+  }
+  startEditServiceFee() {
+    this.editingServiceFee = true;
+  }
+  stopEditServiceFee() {
+    this.editingServiceFee = false;
+  }
+  onServiceFeeInput(e: Event) {
+    this.serviceFee = Number((e.target as HTMLInputElement).value || 0);
+  }
+  startEditShippingFee() {
+    this.editingShippingFee = true;
+  }
+  stopEditShippingFee() {
+    this.editingShippingFee = false;
+  }
+  onShippingFeeInput(e: Event) {
+    this.shippingFee = Number((e.target as HTMLInputElement).value || 0);
+  }
 
-    const formData = this.invoiceForm.getRawValue() as Invoice;
-
-    if (this.isEditMode && this.invoiceId) {
-      this.invoiceService
-        .updateInvoice(this.invoiceId, formData)
-        .subscribe(() => {
-          alert('อัปเดตเอกสารสำเร็จ!');
-          this.router.navigate(['/documentsall']);
-        });
-    } else {
-      this.invoiceService.createInvoice(formData).subscribe(() => {
-        alert('บันทึกเอกสารสำเร็จ!');
-        // TODO: เปิด modal ดาวน์โหลด/พิมพ์
-        this.router.navigate(['/documentsall']);
-      });
-    }
+  onSubmit() {
+    // TODO: post ข้อมูลไปยัง API ถ้าพร้อมใช้งาน
+    console.log('submit', {
+      header: this.fgHeader.value,
+      customer: this.fgCustomer.value,
+      items: this.itemForms.map((f) => f.getRawValue()),
+      remark: this.form.value.remark,
+      docType: this.form.value.docType, // Include selected docType in submission
+      totals: this.totals,
+      serviceFee: this.serviceFee,
+      shippingFee: this.shippingFee,
+    });
   }
 }

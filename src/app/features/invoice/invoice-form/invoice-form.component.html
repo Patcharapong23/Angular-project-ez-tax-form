@@ -123,11 +123,6 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label">Customer ID</label>
-          <input class="form-control" type="text" formControlName="customerId" />
-        </div>
-
-        <div class="form-field">
           <label class="form-label"
             >ประเภทผู้เสียภาษี <span class="req">*</span></label
           >
@@ -145,30 +140,18 @@
             <input class="form-control" type="text" formControlName="code" />
           </div>
 
-                    <div class="form-field">
+          <div class="form-field">
+            <label class="form-label"
+              >ชื่อลูกค้า <span class="req">*</span></label
+            >
+            <input class="form-control" type="text" formControlName="name" />
+          </div>
 
-                      <label class="form-label">
-
-                        ชื่อลูกค้า <span class="req">*</span></label
-
-                      >
-
-                      <input class="form-control" type="text" formControlName="name" />
-
-                    </div>
-
-          
-
-                    <div class="form-group">
-            <div class="form-field">
-              <label class="form-label"
-                >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
-              >
-              <input class="form-control" type="text" formControlName="taxId" appNumbersOnly maxlength="13" pattern="[0-9]{13}" />
-              <div *ngIf="fgCustomer.get('taxId')?.invalid && (fgCustomer.get('taxId')?.dirty || fgCustomer.get('taxId')?.touched)" class="invalid-feedback">
-                กรุณากรอกเลขประจำตัวผู้เสียภาษี 13 หลัก
-              </div>
-            </div>
+          <div class="form-field">
+            <label class="form-label"
+              >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
+            >
+            <input class="form-control" type="text" formControlName="taxId" />
           </div>
 
           <div class="form-field">
@@ -207,16 +190,11 @@
             <input class="form-control" type="text" formControlName="name" />
           </div>
 
-          <div class="form-group">
-            <div class="form-field">
-              <label class="form-label"
-                >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
-              >
-              <input class="form-control" type="text" formControlName="taxId" appNumbersOnly maxlength="13" pattern="[0-9]{13}" />
-              <div *ngIf="fgCustomer.get('taxId')?.invalid && (fgCustomer.get('taxId')?.dirty || fgCustomer.get('taxId')?.touched)" class="invalid-feedback">
-                กรุณากรอกเลขประจำตัวผู้เสียภาษี 13 หลัก
-              </div>
-            </div>
+          <div class="form-field">
+            <label class="form-label"
+              >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
+            >
+            <input class="form-control" type="text" formControlName="taxId" />
           </div>
 
           <div class="form-field">
@@ -331,6 +309,16 @@
         </div>
 
         <div class="form-field">
+          <label class="form-label">ประเภทเอกสาร <span class="req">*</span></label>
+          <select class="form-control" formControlName="docType">
+            <option value="" disabled>เลือกประเภทเอกสาร</option>
+            <option *ngFor="let option of docTypeOptions" [value]="option.code">
+              {{ option.thName }} ({{ option.code }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-field">
           <label class="form-label">เลขที่เอกสาร</label>
           <input class="form-control" type="text" formControlName="docNo" />
         </div>
@@ -340,17 +328,6 @@
             >วันที่ออกเอกสาร <span class="req">*</span></label
           >
           <input class="form-control" type="date" formControlName="issueDate" />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">สกุลเงิน</label>
-          <select class="form-control" formControlName="currency">
-            <option value="THB">THB</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="JPY">JPY</option>
-            <option value="GBP">GBP</option>
-          </select>
         </div>
 
         <div class="form-field">
@@ -365,16 +342,6 @@
 
   <!-- ========== รายการสินค้า / รวมเงิน ========== -->
   <section class="lines-and-totals">
-    <div class="vat-type-selector">
-      <label class="vat-radio-label">
-        <input type="radio" formControlName="vatType" value="EXCLUDE_VAT">
-        <span>ราคาไม่รวมภาษี (Exclude VAT)</span>
-      </label>
-      <label class="vat-radio-label">
-        <input type="radio" formControlName="vatType" value="INCLUDE_VAT">
-        <span>ราคารวมภาษี (Include VAT)</span>
-      </label>
-    </div>
     <div class="items">
       <!-- head -->
       <div class="items-header">
@@ -396,27 +363,28 @@
       >
         <input class="cell-input col-sku" formControlName="sku" type="text" />
         <input class="cell-input col-name" formControlName="name" type="text" />
-        <input class="cell-input col-qty" formControlName="qty" type="number" appNumbersOnly />
+        <input class="cell-input col-qty" formControlName="qty" type="number" />
         <input
           class="cell-input col-price"
-          formControlName="unitPrice"
-          type="text"
-          appNumberFormat
+          formControlName="price"
+          type="number"
         />
         <input
           class="cell-input col-disc"
           formControlName="discount"
-          type="text"
-          appNumberFormat
+          type="number"
         />
-        <select class="cell-input col-vat" formControlName="taxRate">
-          <option *ngFor="let tax of taxRates" [value]="tax.value">
-            {{ tax.label }}
-          </option>
-        </select>
-        <div class="cell-input col-amt readonly-cell">
-          {{ fmt(it.get("amount")!.value) }}
-        </div>
+        <input
+          class="cell-input col-vat"
+          formControlName="vatRate"
+          type="number"
+        />
+        <input
+          class="cell-input col-amt"
+          formControlName="amount"
+          type="number"
+          readonly
+        />
 
         <button
           type="button"
@@ -490,7 +458,6 @@
                 type="number"
                 [value]="serviceFee"
                 (input)="onServiceFeeInput($event)"
-                appNumbersOnly
               />
               <button
                 type="button"
@@ -525,7 +492,6 @@
                 type="number"
                 [value]="shippingFee"
                 (input)="onShippingFeeInput($event)"
-                appNumbersOnly
               />
               <button
                 type="button"
@@ -539,38 +505,6 @@
             </div>
           </div>
 
-          <!-- Charges -->
-          <div class="sum-row clickable">
-            <button type="button" class="sum-action" (click)="addCharge()">
-              <i class="ti ti-plus"></i>
-              <span>เพิ่มค่าใช้จ่ายอื่น ๆ</span>
-            </button>
-          </div>
-          <ng-container *ngFor="let charge of chargeForms; let i = index">
-            <div class="sum-row fee-edit-row">
-              <div class="sum-label">
-<input class="fee-input" type="text" [formControl]="charge.get('name')! as FormControl" placeholder="ชื่อค่าใช้จ่าย" />
-              </div>
-              <div class="fee-input-wrap">
-                <input
-                  class="fee-input"
-                  type="number"
-                  [formControl]="charge.get('amount')! as FormControl"
-                  appNumbersOnly
-                />
-                <button
-                  type="button"
-                  class="fee-cancel-btn"
-                  (click)="removeCharge(i)"
-                  aria-label="ลบค่าใช้จ่าย"
-                  title="ลบ"
-                >
-                  <i class="ti ti-x"></i>
-                </button>
-              </div>
-            </div>
-          </ng-container>
-
           <div class="sum-row">
             <div class="sum-label">จำนวนภาษีมูลค่าเพิ่ม</div>
             <div class="sum-value">{{ fmt(totals.vat) }}</div>
@@ -580,38 +514,6 @@
             <div class="sum-label">จำนวนเงินรวมทั้งสิ้น</div>
             <div class="sum-value">{{ fmt(totals.grand) }}</div>
           </div>
-
-          <!-- Payments -->
-          <div class="sum-row clickable">
-            <button type="button" class="sum-action" (click)="addPayment()">
-              <i class="ti ti-plus"></i>
-              <span>เพิ่มรายการชำระเงิน</span>
-            </button>
-          </div>
-          <ng-container *ngFor="let payment of paymentForms; let i = index">
-            <div class="sum-row fee-edit-row">
-              <div class="sum-label">
-                <input class="fee-input" type="text" [formControl]="payment.get('method')! as FormControl" placeholder="วิธีการชำระเงิน" />
-              </div>
-              <div class="fee-input-wrap">
-                <input
-                  class="fee-input"
-                  type="number"
-                  [formControl]="payment.get('amount')! as FormControl"
-                  appNumbersOnly
-                />
-                <button
-                  type="button"
-                  class="fee-cancel-btn"
-                  (click)="removePayment(i)"
-                  aria-label="ลบรายการชำระเงิน"
-                  title="ลบ"
-                >
-                  <i class="ti ti-x"></i>
-                </button>
-              </div>
-            </div>
-          </ng-container>
 
           <div class="decimals-row">
             <label class="decimals-check">
