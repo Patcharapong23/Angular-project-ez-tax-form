@@ -10,6 +10,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../shared/auth.service';
 import { firstValueFrom } from 'rxjs';
+import { thaiTaxIdValidator } from '../../../shared/validators/thai-taxid.validator';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 interface Province {
   code: string;
@@ -39,6 +41,7 @@ export class RegisterComponent implements OnInit {
   isSubmitting = false;
   formServerError = '';
   logoPreview: string | null = null;
+  selectedLogoFile: File | null = null;
 
   // ---------------------- Limits ----------------------
   fullNameMaxLen = 120;
@@ -68,6 +71,7 @@ export class RegisterComponent implements OnInit {
   districtByCode = new Map<string, District>();
   districtsByProvince = new Map<string, District[]>();
   subdistrictsByDistrict = new Map<string, Subdistrict[]>();
+  subdistrictByCode = new Map<string, Subdistrict>();
   filteredProvinces: Province[] = [];
   filteredDistricts: District[] = [];
   filteredSubdistricts: Subdistrict[] = [];
@@ -89,11 +93,10 @@ export class RegisterComponent implements OnInit {
     confirmPassword: ['', [Validators.required]],
 
     company: this.fb.group({
-      logoImg: [''],
-      tenantNameTh: ['', [Validators.required]],
-      tenantNameEn: [''],
+      sellerNameTh: ['', [Validators.required]],
+      sellerNameEn: [''],
       branchCode: [
-        '',
+        '00000',
         [
           Validators.required,
           Validators.minLength(5),
@@ -101,25 +104,26 @@ export class RegisterComponent implements OnInit {
           Validators.pattern(/^\d+$/),
         ],
       ],
-      branchNameTh: ['', [Validators.required]],
-      branchNameEn: [''],
-      tenantTaxId: [
+      branchNameTh: ['สำนักงานใหญ่', [Validators.required]],
+      branchNameEn: ['Head office'],
+      sellerTaxId: [
         '',
         [
           Validators.required,
           Validators.minLength(13),
           Validators.maxLength(13),
           Validators.pattern(/^\d+$/),
+          thaiTaxIdValidator,
         ],
       ],
-      tenantTel: ['', [Validators.pattern(/^\d*$/)]],
+      sellerPhoneNumber: ['', [Validators.pattern(/^\d*$/)]],
       addressTh: this.fb.group({
         buildingNo: ['', [Validators.required]],
         addressDetailTh: [''],
-        province: [null as Province | null, Validators.required],
-        district: [null as District | null, Validators.required],
-        subdistrict: [null as Subdistrict | null, Validators.required],
-        zipCode: [
+        provinceId: [null as string | null, Validators.required],
+        districtId: [null as string | null, Validators.required],
+        subdistrictId: [null as string | null, Validators.required],
+        postalCode: [
           '',
           [
             Validators.required,
@@ -188,9 +192,9 @@ export class RegisterComponent implements OnInit {
     const pw = (this.password?.value || '').toString();
     const cf = (this.confirmPassword?.value || '').toString();
 
-    this.rules.minLen = pw.length >= 14 && /[A-Za-z]/.test(pw);
+    this.rules.minLen = pw.length >= 8 && /[A-Za-z]/.test(pw);
     this.rules.hasDigit = /\d/.test(pw);
-    this.rules.hasSpecial = /[!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~]/.test(pw);
+    this.rules.hasSpecial = /[!@.#$*&\-_]/.test(pw);
     this.rules.match = !!pw && pw === cf;
 
     // คิดคะแนน 0..1
@@ -245,10 +249,12 @@ export class RegisterComponent implements OnInit {
           zip: (s.zip || '').toString().padStart(5, '0'),
         }));
         this.subdistrictsByDistrict.clear();
+        this.subdistrictByCode.clear(); // Clear the map before populating
         for (const s of this.subdistricts) {
           const arr = this.subdistrictsByDistrict.get(s.parent_code) || [];
           arr.push(s);
           this.subdistrictsByDistrict.set(s.parent_code, arr);
+          this.subdistrictByCode.set(s.code, s); // Populate the new map
         }
       });
   }
@@ -286,20 +292,74 @@ export class RegisterComponent implements OnInit {
       ? this.provinces.slice()
       : this.provinces.filter((p) => p.name_th.toLowerCase().includes(v));
   }
-  fixProvinceDisplay() {}
+  fixProvinceDisplay() {
+    const provinceControl = this.addressTh.get('provinceId');
+    const typedValue = provinceControl?.value;
+
+    if (typedValue && typeof typedValue === 'string') {
+      const matchedProvince = this.provinces.find(p => p.name_th === typedValue);
+      if (matchedProvince) {
+        provinceControl.patchValue(matchedProvince.code, { emitEvent: false });
+        this.isDistrictLocked = false;
+        const ds = (this.districtsByProvince.get(matchedProvince.code) || []).slice();
+        ds.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+        this.filteredDistricts = ds;
+      } else {
+        // Clear invalid input and reset dependent fields
+        provinceControl.patchValue(null, { emitEvent: false });
+        this.addressTh.patchValue(
+          { districtId: null, subdistrictId: null, postalCode: '' },
+          { emitEvent: false }
+        );
+        this.isDistrictLocked = true;
+        this.isSubdistrictLocked = true;
+        this.filteredDistricts = [];
+        this.filteredSubdistricts = [];
+      }
+    } else if (provinceControl?.value === null) {
+      // If province was cleared or never set, lock districts and subdistricts
+      this.addressTh.patchValue(
+        { districtId: null, subdistrictId: null, postalCode: '' },
+        { emitEvent: false }
+      );
+      this.isDistrictLocked = true;
+      this.isSubdistrictLocked = true;
+      this.filteredDistricts = [];
+      this.filteredSubdistricts = [];
+    }
+    this.zipMessage = '';
+  }
   displayProvince(v: Province | string | null): string {
-    return v && typeof v === 'object' ? v.name_th : v ?? '';
+    if (v && typeof v === 'object') return v.name_th;
+    if (v && typeof v === 'string')
+      return this.provinceByCode.get(v)?.name_th ?? v;
+    return '';
   }
   displayDistrict(v: District | string | null): string {
-    return v && typeof v === 'object' ? v.name_th : v ?? '';
+    if (v && typeof v === 'object') return v.name_th;
+    if (v && typeof v === 'string')
+      return this.districtByCode.get(v)?.name_th ?? v;
+    return '';
   }
   displaySubdistrict(v: Subdistrict | string | null): string {
-    return v && typeof v === 'object' ? v.name_th : v ?? '';
+    if (v && typeof v === 'object') return v.name_th;
+    if (v && typeof v === 'string')
+      return this.subdistrictByCode.get(v)?.name_th ?? v;
+    return '';
   }
 
-  onProvinceSelected(p: Province) {
+  onProvinceSelected(event: MatAutocompleteSelectedEvent) {
+    if (!event.option || !event.option.value) {
+      return;
+    }
+    const p = event.option.value as Province;
     this.addressTh.patchValue(
-      { province: p, district: null, subdistrict: null, zipCode: '' },
+      {
+        provinceId: p.code,
+        districtId: null,
+        subdistrictId: null,
+        postalCode: '',
+      },
       { emitEvent: false }
     );
     const ds = (this.districtsByProvince.get(p.code) || []).slice();
@@ -309,30 +369,14 @@ export class RegisterComponent implements OnInit {
     this.isDistrictLocked = false;
     this.isSubdistrictLocked = true;
     this.zipMessage = '';
+    console.log('onProvinceSelected: isDistrictLocked =', this.isDistrictLocked);
+    console.log('onProvinceSelected: filteredDistricts =', this.filteredDistricts);
   }
 
-  onDistrictFocus(trigger?: any) {
-    const p = this.addressTh.get('province')?.value as Province | null;
-    const base = p ? this.districtsByProvince.get(p.code) || [] : [];
-    this.filteredDistricts = base
-      .slice()
-      .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
-    if (trigger?.openPanel) trigger.openPanel();
-  }
-  onDistrictType(q: string) {
-    const p = this.addressTh.get('province')?.value as Province | null;
-    const base = p ? this.districtsByProvince.get(p.code) || [] : [];
-    const v = (q || '').trim().toLowerCase();
-    this.filteredDistricts = !v
-      ? base.slice().sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'))
-      : base
-          .filter((d) => d.name_th.toLowerCase().includes(v))
-          .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
-  }
-  fixDistrictDisplay() {}
-  onDistrictSelected(d: District) {
+  onDistrictSelected(event: MatAutocompleteSelectedEvent) {
+    const d = event.option.value as District;
     this.addressTh.patchValue(
-      { district: d, subdistrict: null, zipCode: '' },
+      { districtId: d.code, subdistrictId: null, postalCode: '' },
       { emitEvent: false }
     );
     const subs = (this.subdistrictsByDistrict.get(d.code) || []).slice();
@@ -340,19 +384,107 @@ export class RegisterComponent implements OnInit {
     this.filteredSubdistricts = subs;
     this.isSubdistrictLocked = false;
     this.zipMessage = '';
+    console.log('onDistrictSelected: isSubdistrictLocked =', this.isSubdistrictLocked);
+    console.log('onDistrictSelected: filteredSubdistricts =', this.filteredSubdistricts);
+  }
+
+  onSubdistrictSelected(event: MatAutocompleteSelectedEvent) {
+    const s = event.option.value as Subdistrict;
+    this.addressTh.patchValue(
+      { subdistrictId: s.code, postalCode: s.zip },
+      { emitEvent: false }
+    );
+    this.zipMessage = '';
+    console.log('onSubdistrictSelected: zip =', s.zip);
+  }
+
+  onDistrictFocus(trigger?: any) {
+    const p = this.addressTh.get('provinceId')?.value as string | null;
+    const base = p ? this.districtsByProvince.get(p) || [] : [];
+    this.filteredDistricts = base
+      .slice()
+      .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+    if (trigger?.openPanel) trigger.openPanel();
+    console.log('onDistrictFocus: isDistrictLocked =', this.isDistrictLocked);
+    console.log('onDistrictFocus: filteredDistricts count =', this.filteredDistricts.length);
+  }
+  onDistrictType(q: string) {
+    const p = this.addressTh.get('provinceId')?.value as string | null;
+    const base = p ? this.districtsByProvince.get(p) || [] : [];
+    const v = (q || '').trim().toLowerCase();
+    this.filteredDistricts = !v
+      ? base.slice().sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'))
+      : base
+          .filter((d) => d.name_th.toLowerCase().includes(v))
+          .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+  }
+  fixDistrictDisplay() {
+    const districtControl = this.addressTh.get('districtId');
+    const typedValue = districtControl?.value;
+    const provinceCode = this.addressTh.get('provinceId')?.value;
+
+    if (!provinceCode) {
+      // If no province is selected, district should be locked and cleared
+      districtControl?.patchValue(null, { emitEvent: false });
+      this.addressTh.patchValue(
+        { subdistrictId: null, postalCode: '' },
+        { emitEvent: false }
+      );
+      this.isSubdistrictLocked = true;
+      this.filteredSubdistricts = [];
+      console.log('fixDistrictDisplay: No provinceCode, isSubdistrictLocked =', this.isSubdistrictLocked);
+      return;
+    }
+
+    if (typedValue && typeof typedValue === 'string') {
+      const baseDistricts = this.districtsByProvince.get(provinceCode) || [];
+      const matchedDistrict = baseDistricts.find(d => d.name_th === typedValue);
+
+      if (matchedDistrict) {
+        districtControl.patchValue(matchedDistrict.code, { emitEvent: false });
+        this.isSubdistrictLocked = false;
+        const subs = (this.subdistrictsByDistrict.get(matchedDistrict.code) || []).slice();
+        subs.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+        this.filteredSubdistricts = subs;
+        console.log('fixDistrictDisplay: Matched district, isSubdistrictLocked =', this.isSubdistrictLocked);
+        console.log('fixDistrictDisplay: filteredSubdistricts =', this.filteredSubdistricts);
+      } else {
+        // Clear invalid input and reset dependent fields
+        districtControl.patchValue(null, { emitEvent: false });
+        this.addressTh.patchValue(
+          { subdistrictId: null, postalCode: '' },
+          { emitEvent: false }
+        );
+        this.isSubdistrictLocked = true;
+        this.filteredSubdistricts = [];
+        console.log('fixDistrictDisplay: No matched district, isSubdistrictLocked =', this.isSubdistrictLocked);
+      }
+    } else if (districtControl?.value === null) {
+      // If district was cleared or never set, lock subdistricts
+      this.addressTh.patchValue(
+        { subdistrictId: null, postalCode: '' },
+        { emitEvent: false }
+      );
+      this.isSubdistrictLocked = true;
+      this.filteredSubdistricts = [];
+      console.log('fixDistrictDisplay: districtControl is null, isSubdistrictLocked =', this.isSubdistrictLocked);
+    }
+    this.zipMessage = '';
   }
 
   onSubdistrictFocus(trigger?: any) {
-    const d = this.addressTh.get('district')?.value as District | null;
-    const base = d ? this.subdistrictsByDistrict.get(d.code) || [] : [];
+    const d = this.addressTh.get('districtId')?.value as string | null;
+    const base = d ? this.subdistrictsByDistrict.get(d) || [] : [];
     this.filteredSubdistricts = base
       .slice()
       .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
     if (trigger?.openPanel) trigger.openPanel();
+    console.log('onSubdistrictFocus: isSubdistrictLocked =', this.isSubdistrictLocked);
+    console.log('onSubdistrictFocus: filteredSubdistricts count =', this.filteredSubdistricts.length);
   }
   onSubdistrictType(q: string) {
-    const d = this.addressTh.get('district')?.value as District | null;
-    const base = d ? this.subdistrictsByDistrict.get(d.code) || [] : [];
+    const d = this.addressTh.get('districtId')?.value as string | null;
+    const base = d ? this.subdistrictsByDistrict.get(d) || [] : [];
     const v = (q || '').trim().toLowerCase();
     this.filteredSubdistricts = !v
       ? base.slice().sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'))
@@ -360,12 +492,35 @@ export class RegisterComponent implements OnInit {
           .filter((s) => s.name_th.toLowerCase().includes(v))
           .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
   }
-  fixSubdistrictDisplay() {}
-  onSubdistrictSelected(s: Subdistrict) {
-    this.addressTh.patchValue(
-      { subdistrict: s, zipCode: s.zip },
-      { emitEvent: false }
-    );
+  fixSubdistrictDisplay() {
+    const subdistrictControl = this.addressTh.get('subdistrictId');
+    const postalCodeControl = this.addressTh.get('postalCode');
+    const typedValue = subdistrictControl?.value;
+    const districtCode = this.addressTh.get('districtId')?.value;
+
+    if (!districtCode) {
+      // If no district is selected, subdistrict should be locked and cleared
+      subdistrictControl?.patchValue(null, { emitEvent: false });
+      postalCodeControl?.patchValue('', { emitEvent: false });
+      return;
+    }
+
+    if (typedValue && typeof typedValue === 'string') {
+      const baseSubdistricts = this.subdistrictsByDistrict.get(districtCode) || [];
+      const matchedSubdistrict = baseSubdistricts.find(s => s.name_th === typedValue);
+
+      if (matchedSubdistrict) {
+        subdistrictControl.patchValue(matchedSubdistrict.code, { emitEvent: false });
+        postalCodeControl?.patchValue(matchedSubdistrict.zip, { emitEvent: false });
+      } else {
+        // Clear invalid input
+        subdistrictControl.patchValue(null, { emitEvent: false });
+        postalCodeControl?.patchValue('', { emitEvent: false });
+      }
+    } else if (subdistrictControl?.value === null) {
+      // If subdistrict was cleared or never set
+      postalCodeControl?.patchValue('', { emitEvent: false });
+    }
     this.zipMessage = '';
   }
 
@@ -374,8 +529,10 @@ export class RegisterComponent implements OnInit {
     this.zipMessage = '';
   }
   onZipEnter(): void {
-    const raw = (this.addressTh.get('zipCode')?.value || '').toString().trim();
-    this.addressTh.patchValue({ subdistrict: null }, { emitEvent: false });
+    const raw = (this.addressTh.get('postalCode')?.value || '')
+      .toString()
+      .trim();
+    this.addressTh.patchValue({ subdistrictId: null }, { emitEvent: false });
     this.isSubdistrictLocked = true;
     this.zipMessage = '';
     if (!/^\d{5}$/.test(raw)) {
@@ -386,7 +543,12 @@ export class RegisterComponent implements OnInit {
     const subs = this.subdistricts.filter((s) => s.zip === raw);
     if (!subs.length) {
       this.addressTh.patchValue(
-        { province: null, district: null, subdistrict: null, zipCode: '' },
+        {
+          provinceId: null,
+          districtId: null,
+          subdistrictId: null,
+          postalCode: '',
+        },
         { emitEvent: false }
       );
       this.filteredProvinces = this.provinces.slice();
@@ -408,14 +570,17 @@ export class RegisterComponent implements OnInit {
       .filter(Boolean) as Province[];
 
     if (ps.length === 1) {
-      this.addressTh.patchValue({ province: ps[0] }, { emitEvent: false });
+      this.addressTh.patchValue(
+        { provinceId: ps[0].code },
+        { emitEvent: false }
+      );
       this.isDistrictLocked = false;
       const dsInProv = (this.districtsByProvince.get(ps[0].code) || []).slice();
       this.filteredDistricts = dsInProv.sort((a, b) =>
         a.name_th.localeCompare(b.name_th, 'th')
       );
     } else {
-      this.addressTh.patchValue({ province: null }, { emitEvent: false });
+      this.addressTh.patchValue({ provinceId: null }, { emitEvent: false });
       this.filteredProvinces = ps
         .slice()
         .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
@@ -424,7 +589,10 @@ export class RegisterComponent implements OnInit {
     }
 
     if (ps.length === 1 && ds.length === 1) {
-      this.addressTh.patchValue({ district: ds[0] }, { emitEvent: false });
+      this.addressTh.patchValue(
+        { districtId: ds[0].code },
+        { emitEvent: false }
+      );
       this.isSubdistrictLocked = false;
       const subsInDist = (
         this.subdistrictsByDistrict.get(ds[0].code) || []
@@ -438,7 +606,7 @@ export class RegisterComponent implements OnInit {
       this.filteredDistricts = dsInProv
         .filter((d) => ds.find((x) => x.code === d.code))
         .sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
-      this.addressTh.patchValue({ district: null }, { emitEvent: false });
+      this.addressTh.patchValue({ districtId: null }, { emitEvent: false });
       this.isDistrictLocked = false;
       this.isSubdistrictLocked = true;
     }
@@ -449,7 +617,7 @@ export class RegisterComponent implements OnInit {
       ).filter((s) => s.zip === raw);
       if (inOneDist.length === 1) {
         this.addressTh.patchValue(
-          { subdistrict: inOneDist[0] },
+          { subdistrictId: inOneDist[0].code },
           { emitEvent: false }
         );
       } else {
@@ -460,7 +628,7 @@ export class RegisterComponent implements OnInit {
       }
     }
 
-    this.addressTh.patchValue({ zipCode: raw }, { emitEvent: false });
+    this.addressTh.patchValue({ postalCode: raw }, { emitEvent: false });
   }
 
   private notifyZipNotFound(zip: string) {
@@ -503,73 +671,123 @@ export class RegisterComponent implements OnInit {
     if (/[\u0E00-\u0E7F]/.test(e.key)) e.preventDefault();
   }
 
+  get sellerTaxIdCtrl(): AbstractControl | null {
+    return this.company.get('sellerTaxId');
+  }
+
+  getSellerTaxIdError(): string {
+    const c = this.sellerTaxIdCtrl;
+    if (!c) return '';
+
+    if (!(c.touched || this.step2Submitted)) return ''; // ยังไม่เคยแตะ/ยังไม่พยายาม submit
+
+    const errors = c.errors;
+    if (!errors) return '';
+
+    if (errors['required']) {
+      return 'กรุณากรอกเลขประจำตัวผู้เสียภาษีอากร';
+    }
+    if (errors['minlength'] || errors['maxlength']) {
+      return 'เลขประจำตัวผู้เสียภาษีต้องมีความยาว 13 หลัก';
+    }
+    if (errors['pattern']) {
+      return 'กรอกได้เฉพาะตัวเลข 0–9 เท่านั้น';
+    }
+    if (errors['thaiTaxId']) {
+      // error จาก thaiTaxIdValidator
+      return 'เลขประจำตัวผู้เสียภาษีไม่ถูกต้องตามรูปแบบที่กำหนด';
+    }
+
+    return 'ข้อมูลไม่ถูกต้อง';
+  }
+
   // ========================== Logo upload ==========================
   onLogoSelected(evt: Event) {
     const input = evt.target as HTMLInputElement;
     const file = input?.files?.[0];
-    if (!file) return;
+    if (!file) {
+      this.selectedLogoFile = null;
+      this.logoPreview = null;
+      return;
+    }
+    this.selectedLogoFile = file;
     const reader = new FileReader();
     reader.onload = () => {
       this.logoPreview = reader.result as string;
-      this.company.patchValue({ logoImg: this.logoPreview });
     };
     reader.readAsDataURL(file);
   }
 
   // ============================ Submit ============================
   onSubmit() {
-    this.step2Submitted = true;
-    if (this.form.invalid || this.isSubmitting) return;
+    this.step2Submitted = true; // Keep this for UI state
+    if (this.form.invalid || this.isSubmitting) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
-    const fv = this.form.getRawValue();
+    this.isSubmitting = true; // Set submitting state
+    this.formServerError = ''; // Clear previous errors
+
+    const fv = this.form.getRawValue(); // Get all form values
+
+    // Derive userName from email as per existing logic
     const userName = (fv.email || '').split('@')[0];
     if (!userName) {
       alert('อีเมลไม่ถูกต้อง ไม่สามารถสร้างชื่อผู้ใช้ได้');
+      this.isSubmitting = false;
       return;
     }
     if (fv.password !== fv.confirmPassword) {
       alert('รหัสผ่านไม่ตรงกัน');
+      this.isSubmitting = false;
       return;
     }
 
-    this.isSubmitting = true;
-    this.formServerError = '';
-
-    const c = fv.company;
-    const th = c.addressTh || {};
-    const en = c.addressEn || {};
-    const norm = (v: any) =>
-      v && typeof v === 'object' ? v.name_th ?? '' : v ?? '';
-
-    const payload = {
-      // ฟิลด์ตามหน้าบ้าน (หลังบ้าน map เป็น full_name)
-      fullName: fv.fullName,
-      email: fv.email,
-      userName: userName,
+    // --- map form -> DTO ตรงชื่อคีย์หลังบ้าน ---
+    const dto = {
+      userName: userName, // Use derived userName
       password: fv.password,
+      confirmPassword: fv.confirmPassword,
+      email: fv.email,
+      fullName: fv.fullName,
 
-      logoImg: c.logoImg || null,
-      tenantNameTh: c.tenantNameTh,
-      tenantNameEn: c.tenantNameEn,
-      tenantTaxId: c.tenantTaxId,
-      branchCode: c.branchCode,
-      branchNameTh: c.branchNameTh,
-      branchNameEn: c.branchNameEn,
-      tenantTel: c.tenantTel,
+      sellerNameTh: fv.company.sellerNameTh || '',
+      sellerNameEn: fv.company.sellerNameEn || '',
+      sellerTaxId: fv.company.sellerTaxId,
+      sellerPhoneNumber: fv.company.sellerPhoneNumber || '',
 
-      buildingNo: th.buildingNo,
-      addressDetailTh: th.addressDetailTh,
-      province: norm(th.province),
-      district: norm(th.district),
-      subdistrict: norm(th.subdistrict),
-      zipCode: th.zipCode,
+      branchCode: fv.company.branchCode, // ต้อง 5 หลัก เช่น "00000"
+      branchNameTh: fv.company.branchNameTh || '',
+      branchNameEn: fv.company.branchNameEn || '',
 
-      addressDetailEn: en.addressDetailEn,
+      buildingNo: fv.company.addressTh.buildingNo || '',
+      addressDetailTh: fv.company.addressTh.addressDetailTh || '',
+      addressDetailEn: fv.company.addressEn.addressDetailEn || '', // From addressEn
+
+      provinceId: String(fv.company.addressTh.provinceId),
+      districtId: String(fv.company.addressTh.districtId),
+      subdistrictId: String(fv.company.addressTh.subdistrictId),
+      zipCode: fv.company.addressTh.postalCode, // Use postalCode from addressTh
+
+      acceptTos: !!fv.company.acceptTos,
     };
 
-    this.auth.register(payload).subscribe({
+    // --- สร้าง FormData ตามสัญญา API ---
+    const fd = new FormData();
+    fd.append('registerDto', JSON.stringify(dto)); // <-- ต้องเป็นชื่อ registerDto แบบนี้
+
+    // ถ้ามีโลโก้ที่ผู้ใช้เลือก (File หรือ Blob)
+    if (this.selectedLogoFile) {
+      // Use this.selectedLogoFile
+      // ชื่อ field ต้องเป็น 'logo' เท่านั้นสำหรับ endpoint สมัคร
+      const fileName = this.selectedLogoFile.name || 'logo.webp';
+      fd.append('logo', this.selectedLogoFile, fileName);
+    }
+
+    this.auth.register(fd).subscribe({
       next: (res) => {
-        const generatedUser = res.userName;
+        const generatedUser = res.user.username;
         sessionStorage.setItem('register.username', generatedUser);
         this.router.navigate(['/register-success'], {
           state: { username: generatedUser },
@@ -579,7 +797,6 @@ export class RegisterComponent implements OnInit {
         this.isSubmitting = false;
 
         if (err.status === 409) {
-          // backend จะส่ง code ไว้ใน message / error / code (เผื่อกรณีต่าง ๆ)
           const code =
             err.error?.message || err.error?.error || err.error?.code;
           let msg = 'ข้อมูลซ้ำ';
@@ -594,10 +811,12 @@ export class RegisterComponent implements OnInit {
             case 'TENANT_TAX_ID_TAKEN':
               msg = 'เลขประจำตัวผู้เสียภาษีซ้ำ';
               break;
+            case 'BRANCH_CODE_TAKEN': // Added based on common backend errors for branchCode
+              msg = 'รหัสสาขาซ้ำ';
+              break;
           }
 
-          this.formServerError = msg; // แสดงใต้ฟอร์ม
-          // หรือ alert(msg);                // ถ้าอยากเด้งแจ้งเตือน
+          this.formServerError = msg;
           return;
         }
 
@@ -606,7 +825,6 @@ export class RegisterComponent implements OnInit {
           return;
         }
 
-        // อื่น ๆ
         this.formServerError = err?.error?.message || 'เกิดข้อผิดพลาดในระบบ';
         console.error('Registration error:', err);
       },
