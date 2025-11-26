@@ -1,62 +1,117 @@
 // src/app/shared/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  tap,
+  switchMap,
+  map,
+  forkJoin,
+  catchError,
+  throwError,
+  of, // Import 'of'
+} from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import {
+  UserProfile,
+  SellerInfo,
+  BranchInfo,
+} from '../shared/models/user.models';
 
 export interface AuthResponse {
-  token: string;
-  refreshToken?: string | null;
-  userName: string;
-  fullName: string;
-  email: string;
-  role?: string;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: {
+    userId: string;
+    username: string;
+    fullName: string;
+    email: string;
+    password?: string;
+    branchId?: string;
+    sellerId?: string;
+    enableFlag?: boolean;
+    createBy?: string;
+    createDate?: string;
+    updateBy?: string;
+    updateDate?: string;
+    roles: { roleCode: string; roleName: string }[];
+    permissions: string[];
+  };
+  seller: {
+    sellerId: string;
+    sellerTaxId: string;
+    sellerNameTh: string;
+    sellerNameEn?: string;
+    sellerPhoneNumber?: string;
+    sellerTypeTax?: string | null;
+    logoUrl?: string;
+  };
+  defaultBranch: {
+    branchId: string;
+    branchCode: string;
+    branchNameTh?: string;
+    branchNameEn?: string;
+    addressDetailTh?: string;
+    addressDetailEn?: string;
+    buildingNo?: string;
+    subdistrictId?: string;
+    districtId?: string;
+    provinceId?: string;
+    zipCode?: string;
+  };
 }
 
-export type AddressTh = {
+export type SellerAddress = {
   buildingNo?: string;
   addressDetailTh?: string;
-  province?: string;
-  district?: string;
-  subdistrict?: string;
-  zipCode?: string;
+  addressDetailEn?: string;
+  provinceId?: string;
+  districtId?: string;
+  subdistrictId?: string;
+  postalCode?: string;
 };
 
 export interface AuthUser {
+  userId: string;
   userName: string;
   fullName: string;
   email: string;
   role?: string;
 
-  // optional
-  companyName?: string;
-  tenantNameTh?: string;
-  tenantNameEn?: string;
-  username?: string; // legacy fallback
-  addressTh?: AddressTh;
+  sellerNameTh?: string;
+  sellerNameEn?: string;
+  sellerTaxId?: string;
+  sellerPhoneNumber?: string;
+  logoUrl?: string;
+  branchCode?: string;
+  branchNameTh?: string;
+  branchNameEn?: string;
+  sellerAddress?: SellerAddress;
 }
 
 export interface RegisterDto {
   password: string;
   fullName: string;
   email: string;
-  logoImg?: string | null;
-  logoUrl?: string;
-  tenantNameTh: string;
-  tenantNameEn?: string;
-  tenantTaxId: string;
+  sellerNameTh: string;
+  sellerNameEn?: string;
+  sellerTaxId: string;
+  sellerPhoneNumber?: string;
   branchCode: string;
   branchNameTh: string;
   branchNameEn?: string;
-  tenantTel?: string;
   buildingNo: string;
   addressDetailTh?: string;
-  province: string;
-  district: string;
-  subdistrict: string;
-  zipCode: string;
   addressDetailEn?: string;
+  provinceId: string;
+  districtId: string;
+  subdistrictId: string;
+  postalCode: string;
+  acceptTos: boolean;
 }
 
 const TOKEN_KEY = 'auth.token';
@@ -71,7 +126,6 @@ export class AuthService {
   readonly user$ = this._user$.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {
-    // ---- migrate คีย์เก่ามาเป็นคีย์ใหม่ แล้วลบของเก่าให้เกลี้ยง ----
     const legacy = localStorage.getItem('token');
     const modern = localStorage.getItem(TOKEN_KEY);
     if (legacy && !modern) {
@@ -79,7 +133,6 @@ export class AuthService {
     }
     if (legacy) localStorage.removeItem('token');
 
-    // ถ้าแท็บอื่นลบ token ให้แท็บนี้เด้งออกด้วย
     window.addEventListener('storage', (e) => {
       if (e.key === TOKEN_KEY && e.newValue === null) {
         this.clearUser();
@@ -90,33 +143,58 @@ export class AuthService {
 
   // ---------- token ----------
   get token(): string | null {
-    // เผื่อยังมีของเก่า หยิบแบบ fallback ได้
-    return localStorage.getItem(TOKEN_KEY) ?? localStorage.getItem('token');
-  }
-  private setToken(t: string) {
-    localStorage.setItem(TOKEN_KEY, t);
-    localStorage.removeItem('token'); // ล้าง legacy
-  }
-  private clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem('token'); // เผื่อมีตกค้าง
+    const tokenObj = this.getTokenObject();
+    return tokenObj ? tokenObj.accessToken : null;
   }
 
-  // ---------- user ----------
-  getUser(): AuthUser | null {
-    return this._user$.value ?? readUserFromStorage();
+  get refreshToken(): string | null {
+    const tokenObj = this.getTokenObject();
+    return tokenObj ? tokenObj.refreshToken : null;
   }
-  private setUser(u: AuthUser) {
+
+  private getTokenObject(): {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    expiresIn: number;
+  } | null {
+    const raw = localStorage.getItem(TOKEN_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  private setToken(tokenObj: {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    expiresIn: number;
+  }) {
+    localStorage.setItem(TOKEN_KEY, JSON.stringify(tokenObj));
+    localStorage.removeItem('token');
+  }
+
+  public clearToken() {
+    console.log('AuthService: clearToken() called');
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('token');
+    localStorage.removeItem(REFRESH_KEY);
+  }
+
+  // ---------- user in memory + localStorage ----------
+  public setUser(u: AuthUser) {
+    console.log('AuthService: setUser() called with', u);
     localStorage.setItem(USER_KEY, JSON.stringify(u));
     this._user$.next(u);
   }
-  private clearUser() {
+
+  public clearUser() {
+    console.log('AuthService: clearUser() called');
     localStorage.removeItem(USER_KEY);
     this._user$.next(null);
-  }
-
-  serverLogout() {
-    return this.http.post<void>(`${this.base}/auth/logout`, {});
   }
 
   // ---------- jwt / login state ----------
@@ -143,7 +221,8 @@ export class AuthService {
     const t = this.token;
     if (!t) return false;
     const payload = this.decodeToken();
-    if (!payload?.exp) return true;
+    if (!payload || !payload.exp) return false;
+
     const nowSec = Math.floor(Date.now() / 1000);
     return payload.exp > nowSec;
   }
@@ -152,20 +231,99 @@ export class AuthService {
     this.clearToken();
     this.clearUser();
 
-    // ✅ broadcast เฉพาะคนกดออกระบบเอง
     if (broadcast) {
       localStorage.setItem(LOGOUT_BC, String(Date.now()));
     }
-
-    // ไปหน้า login
     this.router.navigateByUrl('/login');
   }
 
-  fetchMe() {
-    return this.http.get<AuthUser>(`${this.base}/auth/me`).pipe(
-      tap((u) => this['setUser'](u)) // เก็บลง localStorage + push ลง BehaviorSubject
+  public logoutToLogin(): void {
+    this.logout(false);
+    this.router.navigateByUrl('/login');
+  }
+
+  // ---------- New granular API calls (ยังใช้ได้ ถ้าคุณอยากใช้ภายหลัง) ----------
+  getMyProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.base}/users/me/profile`);
+  }
+
+  getMySeller(): Observable<SellerInfo> {
+    return this.http.get<SellerInfo>(`${this.base}/users/me/seller`);
+  }
+
+  getMyDefaultBranch(): Observable<BranchInfo> {
+    return this.http.get<BranchInfo>(`${this.base}/users/me/branch/default`);
+  }
+
+  fetchMe(): Observable<void> {
+    return forkJoin([
+      this.getMyProfile().pipe(
+        catchError((error) => {
+          console.error('fetchMe: Error fetching user profile', error);
+          return throwError(() => new Error('Failed to fetch user profile')); // Profile is essential, re-throw
+        })
+      ),
+      this.getMySeller().pipe(
+        catchError((error) => {
+          console.warn('fetchMe: Error fetching seller info, proceeding without it', error);
+          return of(null); // Allow to proceed even if seller info fails
+        })
+      ),
+      this.getMyDefaultBranch().pipe(
+        catchError((error) => {
+          console.warn('fetchMe: Error fetching branch info, proceeding without it', error);
+          return of(null); // Allow to proceed even if branch info fails
+        })
+      ),
+    ]).pipe(
+      tap(([profile, seller, branch]) => {
+        console.log('fetchMe: Profile', profile);
+        console.log('fetchMe: Seller', seller);
+        console.log('fetchMe: Branch', branch);
+
+        // If profile is null (shouldn't happen with the above catchError, but for safety)
+        if (!profile) {
+          console.error('fetchMe: Profile data is missing after successful forkJoin.');
+          this.clearUser();
+          return;
+        }
+
+        const u: AuthUser = {
+          userId: profile.userId,
+          userName: profile.username,
+          fullName: profile.fullName,
+          email: profile.email,
+          role: profile.primaryRole,
+          sellerNameTh: seller?.sellerNameTh,
+          sellerNameEn: seller?.sellerNameEn,
+          sellerTaxId: seller?.sellerTaxId,
+          sellerPhoneNumber: seller?.sellerPhoneNumber,
+          logoUrl: seller?.logoUrl,
+          branchCode: branch?.branchCode,
+          branchNameTh: branch?.branchNameTh,
+          branchNameEn: branch?.branchNameEn,
+          sellerAddress: {
+            buildingNo: branch?.buildingNo,
+            addressDetailTh: branch?.addressDetailTh,
+            addressDetailEn: branch?.addressDetailEn,
+            provinceId: branch?.provinceId,
+            districtId: branch?.districtId,
+            subdistrictId: branch?.subdistrictId,
+            postalCode: branch?.zipCode,
+          },
+        };
+        this.setUser(u);
+      }),
+      catchError((error: any) => {
+        // This catchError will only be reached if getMyProfile() re-throws an error
+        console.error('fetchMe: Critical error during user data fetching, clearing user', error);
+        this.clearUser();
+        return throwError(() => new Error('Failed to fetch user details'));
+      }),
+      map(() => void 0)
     );
   }
+
   uploadLogo(file: File, tenantTaxId: string) {
     const form = new FormData();
     form.append('file', file);
@@ -173,67 +331,66 @@ export class AuthService {
     return this.http.post<{ url: string }>(`${this.base}/files/logo`, form);
   }
 
-  // ---------- API ----------
-  login(userName: string, password: string): Observable<AuthResponse> {
+  // ---------- API : LOGIN (ใช้ response ตั้งค่า user ทันที) ----------
+  login(userName: string, password: string): Observable<void> {
     const body = { userName, password };
+
     return this.http
-      .post<AuthResponse>(`${this.base}/auth/login`, body, {
+      .post<any>(`${this.base}/auth/login`, body, {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
       })
       .pipe(
         tap((res) => {
-          this.setToken(res.token);
-          const claims = this.decodeToken();
-          const role =
-            res.role ??
-            claims?.role ??
-            claims?.roles?.[0] ??
-            claims?.authorities?.[0] ??
-            undefined;
+          // 1) เก็บ token
+          this.setToken({
+            accessToken: res.token,
+            refreshToken: res.refreshToken || '',
+            tokenType: res.tokenType || 'Bearer',
+            expiresIn: res.expiresIn || 0,
+          });
+
+          // 2) map response -> AuthUser
+          const seller = res.seller;
+          const branch = res.defaultBranch;
+
           const u: AuthUser = {
-            userName: res.userName,
-            fullName: res.fullName,
-            email: res.email,
-            role,
+            userId: res.user.userId,
+            userName: res.user.username,
+            fullName: res.user.fullName,
+            email: res.user.email,
+            role: res.user.roles?.[0]?.roleCode,
+            sellerNameTh: seller?.sellerNameTh,
+            sellerNameEn: seller?.sellerNameEn ?? undefined,
+            sellerTaxId: seller?.sellerTaxId,
+            sellerPhoneNumber: seller?.sellerPhoneNumber,
+            logoUrl: seller?.logoUrl,
+            branchCode: branch?.branchCode,
+            branchNameTh: branch?.branchNameTh,
+            branchNameEn: branch?.branchNameEn,
+            sellerAddress: {
+              buildingNo: branch?.buildingNo,
+              addressDetailTh: branch?.addressDetailTh,
+              addressDetailEn: branch?.addressDetailEn,
+              provinceId: branch?.provinceId,
+              districtId: branch?.districtId,
+              subdistrictId: branch?.subdistrictId,
+              postalCode: branch?.zipCode,
+            },
           };
+
+          // 3) เก็บ user ลง localStorage + BehaviorSubject
           this.setUser(u);
-        })
+        }),
+        map(() => void 0)
       );
   }
 
-  register(payload: RegisterDto): Observable<AuthResponse> {
+  register(formData: FormData): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${this.base}/auth/register`, payload, {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-      })
+      .post<AuthResponse>(`${this.base}/auth/register`, formData)
       .pipe(
         tap((res) => {
-          this.setToken(res.token);
-          const claims = this.decodeToken();
-          const role =
-            res.role ??
-            claims?.role ??
-            claims?.roles?.[0] ??
-            claims?.authorities?.[0] ??
-            undefined;
-          const u: AuthUser = {
-            userName: res.userName,
-            fullName: res.fullName,
-            email: res.email,
-            tenantNameTh: payload.tenantNameTh,
-            tenantNameEn: payload.tenantNameEn,
-            companyName: payload.tenantNameTh || payload.tenantNameEn,
-            addressTh: {
-              buildingNo: payload.buildingNo,
-              addressDetailTh: payload.addressDetailTh,
-              province: payload.province,
-              district: payload.district,
-              subdistrict: payload.subdistrict,
-              zipCode: payload.zipCode,
-            },
-            role,
-          };
-          this.setUser(u);
+          // ไม่ต้อง setToken/setUser หลัง register ตามที่ตกลงไว้
         })
       );
   }
