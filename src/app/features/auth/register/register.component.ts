@@ -294,10 +294,22 @@ export class RegisterComponent implements OnInit {
   }
   fixProvinceDisplay() {
     const provinceControl = this.addressTh.get('provinceId');
-    const typedValue = provinceControl?.value;
+    const currentValue = provinceControl?.value;
 
-    if (typedValue && typeof typedValue === 'string') {
-      const matchedProvince = this.provinces.find(p => p.name_th === typedValue);
+    // Case 1: Value is already a valid code (after selection from autocomplete)
+    if (currentValue && typeof currentValue === 'string' && this.provinceByCode.has(currentValue)) {
+      // The value is a valid code, no need to do anything, just ensure dependents are set up
+      this.isDistrictLocked = false;
+      const ds = (this.districtsByProvince.get(currentValue) || []).slice();
+      ds.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+      this.filteredDistricts = ds;
+      this.zipMessage = '';
+      return; // No further processing needed
+    }
+
+    // Case 2: User typed a partial/full name or an invalid code
+    if (currentValue && typeof currentValue === 'string') {
+      const matchedProvince = this.provinces.find(p => p.name_th === currentValue);
       if (matchedProvince) {
         provinceControl.patchValue(matchedProvince.code, { emitEvent: false });
         this.isDistrictLocked = false;
@@ -316,7 +328,7 @@ export class RegisterComponent implements OnInit {
         this.filteredDistricts = [];
         this.filteredSubdistricts = [];
       }
-    } else if (provinceControl?.value === null) {
+    } else if (currentValue === null) {
       // If province was cleared or never set, lock districts and subdistricts
       this.addressTh.patchValue(
         { districtId: null, subdistrictId: null, postalCode: '' },
@@ -420,11 +432,11 @@ export class RegisterComponent implements OnInit {
   }
   fixDistrictDisplay() {
     const districtControl = this.addressTh.get('districtId');
-    const typedValue = districtControl?.value;
+    const postalCodeControl = this.addressTh.get('postalCode');
+    const currentValue = districtControl?.value;
     const provinceCode = this.addressTh.get('provinceId')?.value;
 
     if (!provinceCode) {
-      // If no province is selected, district should be locked and cleared
       districtControl?.patchValue(null, { emitEvent: false });
       this.addressTh.patchValue(
         { subdistrictId: null, postalCode: '' },
@@ -433,12 +445,25 @@ export class RegisterComponent implements OnInit {
       this.isSubdistrictLocked = true;
       this.filteredSubdistricts = [];
       console.log('fixDistrictDisplay: No provinceCode, isSubdistrictLocked =', this.isSubdistrictLocked);
+      this.zipMessage = '';
       return;
     }
 
-    if (typedValue && typeof typedValue === 'string') {
+    // Case 1: Value is already a valid code (after selection from autocomplete)
+    if (currentValue && typeof currentValue === 'string' && this.districtByCode.has(currentValue)) {
+      // The value is a valid code, no need to do anything, just ensure dependents are set up
+      this.isSubdistrictLocked = false;
+      const subs = (this.subdistrictsByDistrict.get(currentValue) || []).slice();
+      subs.sort((a, b) => a.name_th.localeCompare(b.name_th, 'th'));
+      this.filteredSubdistricts = subs;
+      this.zipMessage = '';
+      return; // No further processing needed
+    }
+
+    // Case 2: User typed a partial/full name or an invalid code
+    if (currentValue && typeof currentValue === 'string') {
       const baseDistricts = this.districtsByProvince.get(provinceCode) || [];
-      const matchedDistrict = baseDistricts.find(d => d.name_th === typedValue);
+      const matchedDistrict = baseDistricts.find(d => d.name_th === currentValue);
 
       if (matchedDistrict) {
         districtControl.patchValue(matchedDistrict.code, { emitEvent: false });
@@ -459,7 +484,7 @@ export class RegisterComponent implements OnInit {
         this.filteredSubdistricts = [];
         console.log('fixDistrictDisplay: No matched district, isSubdistrictLocked =', this.isSubdistrictLocked);
       }
-    } else if (districtControl?.value === null) {
+    } else if (currentValue === null) {
       // If district was cleared or never set, lock subdistricts
       this.addressTh.patchValue(
         { subdistrictId: null, postalCode: '' },
