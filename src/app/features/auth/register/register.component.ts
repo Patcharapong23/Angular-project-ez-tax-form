@@ -520,19 +520,36 @@ export class RegisterComponent implements OnInit {
   fixSubdistrictDisplay() {
     const subdistrictControl = this.addressTh.get('subdistrictId');
     const postalCodeControl = this.addressTh.get('postalCode');
-    const typedValue = subdistrictControl?.value;
+    const currentValue = subdistrictControl?.value;
     const districtCode = this.addressTh.get('districtId')?.value;
 
     if (!districtCode) {
       // If no district is selected, subdistrict should be locked and cleared
       subdistrictControl?.patchValue(null, { emitEvent: false });
       postalCodeControl?.patchValue('', { emitEvent: false });
+      this.zipMessage = ''; // Ensure zipMessage is cleared
       return;
     }
 
-    if (typedValue && typeof typedValue === 'string') {
+    // Case 1: Value is already a valid code (after selection from autocomplete)
+    if (currentValue && typeof currentValue === 'string' && this.subdistrictByCode.has(currentValue)) {
+      // The value is a valid code, ensure postal code is correctly set
+      const matchedSubdistrict = this.subdistrictByCode.get(currentValue);
+      if (matchedSubdistrict) {
+        postalCodeControl?.patchValue(matchedSubdistrict.zip, { emitEvent: false });
+      } else {
+        // Fallback: If code is somehow in control but not in map, clear it.
+        subdistrictControl.patchValue(null, { emitEvent: false });
+        postalCodeControl?.patchValue('', { emitEvent: false });
+      }
+      this.zipMessage = '';
+      return; // No further processing needed
+    }
+
+    // Case 2: User typed a partial/full name or an invalid code
+    if (currentValue && typeof currentValue === 'string') {
       const baseSubdistricts = this.subdistrictsByDistrict.get(districtCode) || [];
-      const matchedSubdistrict = baseSubdistricts.find(s => s.name_th === typedValue);
+      const matchedSubdistrict = baseSubdistricts.find(s => s.name_th === currentValue);
 
       if (matchedSubdistrict) {
         subdistrictControl.patchValue(matchedSubdistrict.code, { emitEvent: false });
@@ -542,7 +559,7 @@ export class RegisterComponent implements OnInit {
         subdistrictControl.patchValue(null, { emitEvent: false });
         postalCodeControl?.patchValue('', { emitEvent: false });
       }
-    } else if (subdistrictControl?.value === null) {
+    } else if (currentValue === null) {
       // If subdistrict was cleared or never set
       postalCodeControl?.patchValue('', { emitEvent: false });
     }
