@@ -12,51 +12,28 @@
   padding: clamp(16px, 4vw, 32px);
   background: #fff;
 }
-
-.auth-card {
-  width: min(720px, 96vw);
-  background: #fff;
-  border-radius: 20px;
-  padding: clamp(24px, 4vw, 40px);
-  text-align: left;
-}
-
 .brand {
   width: 200px;
-  margin: 0 auto 16px;
+  max-width: 80%;
+  margin: 8px auto 16px;
   display: block;
 }
 
-.title {
-  margin: 0 0 4px;
-  font-size: clamp(22px, 3vw, 32px);
-  font-weight: 400;
-  text-align: center;
-  color: #5e5873;
+.auth-card {
+  max-width: 720px;
+  width: min(480px, 92vw);
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 32px);
+  text-align: left;
 }
-
-.subtitle {
-  margin: 0 0 24px;
-  color: rgba(0, 0, 0, 0.65);
-  font-size: 18px;
-  text-align: center;
-}
-
-.link {
-  color: #0b57d0;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 15px;
-}
-.link:hover {
-  text-decoration: underline;
-}
-
 .section-title {
   margin: 24px 0 12px;
   font-weight: 600;
   font-size: 15px;
   color: #5e5873;
+  text-align: left;
 }
 .section-title .req {
   color: #ea5455;
@@ -64,16 +41,22 @@
   margin-left: 4px;
 }
 
+.tiny-hint {
+  font-size: clamp(12px, 2vw, 14px);
+  color: #6e6b7b;
+  /* margin-top: -8px; */
+  margin-bottom: 16px;
+  text-align: center;
+}
+
 .full-width {
   width: 100%;
 }
-.form-row,
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
 }
-
 .foot-note {
   margin-top: 24px;
   padding-top: 16px;
@@ -82,6 +65,19 @@
   color: #6e6b7b;
   text-align: center;
   border-top: 1px solid #ebe9f1;
+}
+
+.link {
+  color: var(--Components-Accordion-Active-Item-Header-Text-Color, #0c63e4);
+  font-feature-settings: "liga" off, "clig" off;
+  text-decoration: none;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+.link:hover {
+  text-decoration: underline;
 }
 
 /* =========================
@@ -101,18 +97,43 @@
   --mdc-outlined-text-field-label-text-color: rgba(0, 0, 0, 0.6);
   --mdc-outlined-text-field-focus-label-text-color: #000;
   --mdc-outlined-text-field-caret-color: #000;
+
+  .mat-mdc-form-field-label {
+    font-size: clamp(
+      14px,
+      2.5vw,
+      16px
+    ) !important; /* Responsive label font size */
+  }
+
+  .mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-error {
+    font-size: clamp(
+      12px,
+      2vw,
+      13px
+    ) !important; /* Responsive error font size */
+    white-space: normal;
+    min-height: 20px;
+  }
 }
 
 mat-form-field.full-width {
   width: 100%;
   display: block;
-  margin-bottom: 16px;
 }
 
 mat-checkbox {
   margin: 16px 0;
   font-size: 14px;
   color: #444;
+  display: flex; /* Make it a flex container */
+}
+
+/* Target the label text within the mat-checkbox */
+mat-checkbox ::ng-deep .mat-checkbox-layout .mat-checkbox-label {
+  text-align: left;
+  /* This ensures the text itself aligns left if it wraps to multiple lines */
+  white-space: normal; /* Allow text to wrap */
 }
 
 .mf-relative {
@@ -138,8 +159,8 @@ mat-form-field {
    Upload box
    ========================= */
 .upload-box {
-  width: 300px;
-  height: 300px;
+  width: min(300px, 80vw);
+  height: min(300px, 80vw);
   background: #f0f0f0;
   border: 2px dashed #bbb;
   border-radius: 16px;
@@ -227,6 +248,41 @@ mat-form-field {
   gap: 12px;
 }
 
+.tiny-hint {
+  text-align: left;
+}
+
+.auth-card {
+  max-width: 720px;
+  width: 96vw;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  padding: clamp(24px, 4vw, 40px);
+  text-align: center;
+}
+.title {
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  font-feature-settings: "liga" off, "clig" off;
+  line-height: normal;
+  color: var(--1-theme-color-heading-display-text, #5e5873);
+  text-align: center;
+  margin: 0 0 0;
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  font-feature-settings: "liga" off, "clig" off;
+  color: var(--Light-Typography-Color-Heading-Text, #4b465c);
+}
+
 button[mat-stroked-button] {
   height: 48px;
   border-radius: 8px;
@@ -302,3 +358,24 @@ button[mat-stroked-button]:hover {
   font-size: 12px;
   margin-top: 4px;
 }
+
+@media (max-width: 600px) {
+  mat-form-field.full-width {
+    margin-bottom: 12px; /* Reduced margin on smaller screens */
+  }
+}
+
+mat-checkbox ::ng-deep .mat-checkbox-background {
+  border-radius: 8px !important;
+}
+
+/* Custom styles for mat-checkbox checked state */
+mat-checkbox.mat-checkbox-checked ::ng-deep .mat-checkbox-background {
+  background-color: #20C997 !important;
+  border-radius: 8px !important;
+}
+
+mat-checkbox.mat-checkbox-checked ::ng-deep .mat-checkbox-checkmark-path {
+  stroke: #fff !important; /* Ensure the checkmark is white for contrast */
+}
+
