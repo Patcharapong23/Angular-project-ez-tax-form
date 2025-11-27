@@ -1,0 +1,19 @@
+<div class="save-success-wrapper">
+  <button class="close-btn" (click)="closeOnly()" aria-label="ปิด">✕</button>
+
+  <div class="icon-circle">
+    <i class="ti ti-check"></i>
+  </div>
+
+  <h2 class="title">บันทึกสำเร็จ</h2>
+  <p class="sub">
+    เลขที่เอกสารของคุณคือ <b>{{ data.docNo }}</b
+    ><br />
+    ต้องการดาวน์โหลดเอกสารนี้หรือไม่?
+  </p>
+
+  <div class="actions">
+    <button class="outline-btn" (click)="closeOnly()">ปิด</button>
+    <button class="primary-btn" (click)="goDownload()">ดาวน์โหลดเอกสาร</button>
+  </div>
+</div>

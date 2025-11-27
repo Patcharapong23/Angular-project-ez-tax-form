@@ -51,13 +51,22 @@ export class RegisterComponent implements OnInit {
   showPassword = false;
   showConfirm = false;
 
-  rules = { minLen: false, hasDigit: false, hasSpecial: false, match: false };
+  rules = {
+    minLen: false,
+    hasDigit: false,
+    hasSpecial: false,
+    hasUpper: false,
+    hasLower: false,
+    match: false,
+  };
   passwordScore = 0; // 0..1
   get allOk(): boolean {
     return (
       this.rules.minLen &&
       this.rules.hasDigit &&
       this.rules.hasSpecial &&
+      this.rules.hasUpper &&
+      this.rules.hasLower &&
       this.rules.match
     );
   }
@@ -89,7 +98,14 @@ export class RegisterComponent implements OnInit {
       '',
       [Validators.required, Validators.email, Validators.maxLength(120)],
     ],
-    password: ['', [Validators.required]],
+    password: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@.#$*&\-_]).{8,}$/),
+      ],
+    ],
     confirmPassword: ['', [Validators.required]],
 
     company: this.fb.group({
@@ -192,24 +208,28 @@ export class RegisterComponent implements OnInit {
     const pw = (this.password?.value || '').toString();
     const cf = (this.confirmPassword?.value || '').toString();
 
-    this.rules.minLen = pw.length >= 8 && /[A-Za-z]/.test(pw);
+    this.rules.minLen = pw.length >= 8; // Only checks length now
     this.rules.hasDigit = /\d/.test(pw);
     this.rules.hasSpecial = /[!@.#$*&\-_]/.test(pw);
+    this.rules.hasUpper = /[A-Z]/.test(pw); // New rule for uppercase
+    this.rules.hasLower = /[a-z]/.test(pw); // New rule for lowercase
     this.rules.match = !!pw && pw === cf;
 
-    // คิดคะแนน 0..1
+    // คิดคะแนน 0..1 (0.2 for each of the 5 criteria)
     let score = 0;
-    if (this.rules.minLen) score += 0.4;
-    if (this.rules.hasDigit) score += 0.3;
-    if (this.rules.hasSpecial) score += 0.3;
+    if (this.rules.minLen) score += 0.2;
+    if (this.rules.hasDigit) score += 0.2;
+    if (this.rules.hasSpecial) score += 0.2;
+    if (this.rules.hasUpper) score += 0.2;
+    if (this.rules.hasLower) score += 0.2;
     this.passwordScore = Math.min(1, score);
 
     // จัดระดับสีให้ตรงกับ CSS (.idle / .weak / .medium / .strong)
     if (!pw) {
       this.strengthClass = 'idle';
-    } else if (this.passwordScore < 0.5) {
+    } else if (this.passwordScore < 0.4) { // Adjusted thresholds for new scoring
       this.strengthClass = 'weak';
-    } else if (this.passwordScore < 0.9) {
+    } else if (this.passwordScore < 0.8) { // Adjusted thresholds for new scoring
       this.strengthClass = 'medium';
     } else {
       this.strengthClass = 'strong';

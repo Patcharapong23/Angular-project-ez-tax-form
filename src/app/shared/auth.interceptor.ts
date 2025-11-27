@@ -37,24 +37,26 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment'; // Import environment
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  intercept(
-    req: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
-    // ข้าม header สำหรับ endpoint auth
-    if (req.url.includes('/auth/login') || req.url.includes('/auth/register')) {
-      return next.handle(req);
-    }
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const tokenString = localStorage.getItem('auth.token');
+    const isApi = req.url.startsWith(environment.apiBase);
 
-    const token = localStorage.getItem('auth.token');
-    if (token) {
-      const cloned = req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` },
-      });
-      return next.handle(cloned);
+    if (tokenString && isApi) {
+      try {
+        const tokenObj = JSON.parse(tokenString);
+        const accessToken = tokenObj.accessToken;
+        if (accessToken) {
+          req = req.clone({
+            setHeaders: { Authorization: `Bearer ${accessToken}` },
+          });
+        }
+      } catch (e) {
+        console.error('Could not parse auth token:', e);
+      }
     }
     return next.handle(req);
   }

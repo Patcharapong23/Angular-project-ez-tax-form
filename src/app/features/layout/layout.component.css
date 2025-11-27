@@ -6,6 +6,37 @@
   margin-left: 80px;
 }
 
+/* Adjust main content for mobile when sidebar is open */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0; /* No margin when mobile menu is open */
+  }
+  .main-content.mobile-menu-open {
+    /* This class is added to main-content when the mobile sidebar is open.
+       We don't want to shift the main content, as the sidebar is an overlay. */
+    margin-left: 0 !important;
+  }
+}
+
+/* === MOBILE / TABLET MODE === */
+@media (max-width: 1024px) {
+  /* ซ่อน sidebar แบบ slide ออก และไม่เว้นช่องด้านซ้ายแล้ว */
+  .sidebar {
+    width: 260px;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* เอา margin-left ออกทั้งตอนปกติและตอน collapsed */
+  .main-content,
+  .main-content.collapsed {
+    margin-left: 0 !important;
+  }
+}
+
 /* --- (*** เพิ่ม/แก้ไขส่วนนี้ทั้งหมด ***) --- */
 /* --- Header (Navbar) --- */
 .main-header {
@@ -65,27 +96,6 @@
   --sidebar-collapsed: 80px;
   --topbar-h: 64px;
   --bg-soft: #f6f7fb; /* พื้นหลังเทาอ่อน */
-}
-
-/* โครงแอป */
-.app-shell {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg-soft);
-}
-
-/* พื้นที่ขวา (ไม่นับ Sidebar) */
-.main {
-  flex: 1;
-  margin-left: var(--sidebar-open);
-  display: flex;
-  flex-direction: column;
-  transition: margin-left 0.3s ease;
-}
-
-/* ถ้า Sidebar พับ */
-.app-shell.collapsed .main {
-  margin-left: var(--sidebar-collapsed);
 }
 
 /* Section เนื้อหา */

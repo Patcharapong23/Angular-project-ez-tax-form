@@ -83,11 +83,9 @@
           <mat-error *ngIf="password?.hasError('required')"
             >กรุณากรอกรหัสผ่าน</mat-error
           >
-          <mat-error *ngIf="password?.hasError('minlength')"
-            >ต้องยาวอย่างน้อย 14 ตัวอักษร</mat-error
-          >
-          <mat-error *ngIf="password?.hasError('pattern')">
-            ต้องมีตัวเลขอย่างน้อย 1 ตัว และมีอักขระพิเศษอย่างน้อย 1 ตัว (!@#$)
+          <mat-error *ngIf="password?.hasError('minlength')"></mat-error>
+          <mat-error *ngIf="password?.hasError('pattern')"
+            >กรุณากรอกข้อมูลตามเงื่อนไขด้านล่าง
           </mat-error>
         </mat-form-field>
         <!-- Password meter + checklist (ตรงกับ CSS เดิมของคุณ) -->
@@ -105,7 +103,19 @@
               <mat-icon>{{
                 rules.minLen ? "check_circle" : "radio_button_unchecked"
               }}</mat-icon>
-              ตัวอักษรภาษาอังกฤษอย่างน้อย 14 ตัวอักษร
+              ตัวอักษรภาษาอังกฤษอย่างน้อย 8 ตัวอักษร
+            </li>
+            <li [class.ok]="rules.hasUpper">
+              <mat-icon>{{
+                rules.hasUpper ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              ตัวพิมพ์ใหญ่อย่างน้อย 1 ตัวอักษร เช่น A-Z
+            </li>
+            <li [class.ok]="rules.hasLower">
+              <mat-icon>{{
+                rules.hasLower ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              ตัวพิมพ์เล็กอย่างน้อย 1 ตัวอักษร เช่น a-z
             </li>
             <li [class.ok]="rules.hasDigit">
               <mat-icon>{{
@@ -117,7 +127,13 @@
               <mat-icon>{{
                 rules.hasSpecial ? "check_circle" : "radio_button_unchecked"
               }}</mat-icon>
-              อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น !@#$
+              อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น ! @ . # $ * & - _
+            </li>
+            <li [class.ok]="rules.match">
+              <mat-icon>{{
+                rules.match ? "check_circle" : "radio_button_unchecked"
+              }}</mat-icon>
+              รหัสผ่านตรงกัน
             </li>
           </ul>
         </div>
@@ -145,7 +161,7 @@
           <mat-error *ngIf="confirmPassword?.hasError('required')"
             >กรุณายืนยันรหัสผ่าน</mat-error
           >
-          <mat-error *ngIf="confirmPassword?.hasError('mismatch')"
+          <mat-error *ngIf="!rules.match && confirmPassword?.dirty"
             >รหัสผ่านไม่ตรงกัน</mat-error
           >
         </mat-form-field>
@@ -193,20 +209,20 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อบริษัท (ภาษาไทย)</mat-label>
-          <input matInput formControlName="tenantNameTh" />
-          <mat-error *ngIf="company.get('tenantNameTh')?.hasError('required')">
+          <input matInput formControlName="sellerNameTh" />
+          <mat-error *ngIf="company.get('sellerNameTh')?.hasError('required')">
             กรุณากรอกชื่อบริษัท (ภาษาไทย)
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อบริษัท (ภาษาอังกฤษ)</mat-label>
-          <input matInput formControlName="tenantNameEn" />
+          <input matInput formControlName="sellerNameEn" />
         </mat-form-field>
 
         <div class="grid-2">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>รหัสสาขา 5 หลัก</mat-label>
+            <mat-label>รหัสสาขา</mat-label>
             <input
               matInput
               maxlength="5"
@@ -249,21 +265,24 @@
           <input
             matInput
             maxlength="13"
-            formControlName="tenantTaxId"
+            formControlName="sellerTaxId"
             inputmode="numeric"
             (keydown)="onlyDigitsKeydown($event)"
-            (input)="sanitizeDigits($event, company.get('tenantTaxId'))"
+            (input)="sanitizeDigits($event, company.get('sellerTaxId'))"
           />
-          <mat-error *ngIf="company.get('tenantTaxId')?.hasError('required')">
+          <mat-error *ngIf="company.get('sellerTaxId')?.hasError('required')">
             กรุณากรอกเลขประจำตัวผู้เสียภาษีอากร
           </mat-error>
           <mat-error
             *ngIf="
-              company.get('tenantTaxId')?.hasError('minlength') ||
-              company.get('tenantTaxId')?.hasError('maxlength')
+              company.get('sellerTaxId')?.hasError('minlength') ||
+              company.get('sellerTaxId')?.hasError('maxlength')
             "
           >
             ต้องเป็นตัวเลข 13 หลัก
+          </mat-error>
+          <mat-error *ngIf="company.get('sellerTaxId')?.hasError('thaiTaxId')">
+            เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง
           </mat-error>
         </mat-form-field>
 
@@ -271,10 +290,10 @@
           <mat-label>เบอร์ติดต่อธุรกิจ</mat-label>
           <input
             matInput
-            formControlName="tenantTel"
+            formControlName="sellerPhoneNumber"
             inputmode="numeric"
             (keydown)="onlyDigitsKeydown($event)"
-            (input)="sanitizeDigits($event, company.get('tenantTel'))"
+            (input)="sanitizeDigits($event, company.get('sellerPhoneNumber'))"
           />
         </mat-form-field>
 
@@ -302,7 +321,7 @@
             <input
               matInput
               type="text"
-              formControlName="province"
+              formControlName="provinceId"
               [matAutocomplete]="autoProv"
               #provTrig="matAutocompleteTrigger"
               (focus)="onProvinceFocus(provTrig)"
@@ -313,13 +332,13 @@
               #autoProv="matAutocomplete"
               [displayWith]="displayProvince.bind(this)"
               autoActiveFirstOption
-              (optionSelected)="onProvinceSelected($event.option.value)"
+              (optionSelected)="onProvinceSelected($event)"
             >
               <mat-option *ngFor="let p of filteredProvinces" [value]="p">{{
                 p.name_th
               }}</mat-option>
             </mat-autocomplete>
-            <mat-error *ngIf="addressTh.get('province')?.hasError('required')"
+            <mat-error *ngIf="addressTh.get('provinceId')?.hasError('required')"
               >กรุณาเลือกจังหวัด</mat-error
             >
           </mat-form-field>
@@ -340,7 +359,7 @@
               <input
                 matInput
                 type="text"
-                formControlName="district"
+                formControlName="districtId"
                 [matAutocomplete]="autoDist"
                 #distTrig="matAutocompleteTrigger"
                 [readonly]="isDistrictLocked"
@@ -354,13 +373,14 @@
                 #autoDist="matAutocomplete"
                 [displayWith]="displayDistrict.bind(this)"
                 autoActiveFirstOption
-                (optionSelected)="onDistrictSelected($event.option.value)"
+                (optionSelected)="onDistrictSelected($event)"
               >
                 <mat-option *ngFor="let d of filteredDistricts" [value]="d">{{
                   d.name_th
                 }}</mat-option>
               </mat-autocomplete>
-              <mat-error *ngIf="addressTh.get('district')?.hasError('required')"
+              <mat-error
+                *ngIf="addressTh.get('districtId')?.hasError('required')"
                 >กรุณาเลือกเขต/อำเภอ</mat-error
               >
             </mat-form-field>
@@ -380,7 +400,7 @@
               <input
                 matInput
                 type="text"
-                formControlName="subdistrict"
+                formControlName="subdistrictId"
                 [matAutocomplete]="autoSub"
                 #subTrig="matAutocompleteTrigger"
                 [readonly]="isSubdistrictLocked"
@@ -394,7 +414,7 @@
                 #autoSub="matAutocomplete"
                 [displayWith]="displaySubdistrict.bind(this)"
                 autoActiveFirstOption
-                (optionSelected)="onSubdistrictSelected($event.option.value)"
+                (optionSelected)="onSubdistrictSelected($event)"
               >
                 <mat-option
                   *ngFor="let s of filteredSubdistricts"
@@ -403,7 +423,7 @@
                 >
               </mat-autocomplete>
               <mat-error
-                *ngIf="addressTh.get('subdistrict')?.hasError('required')"
+                *ngIf="addressTh.get('subdistrictId')?.hasError('required')"
                 >กรุณาเลือกแขวง/ตำบล</mat-error
               >
             </mat-form-field>
@@ -414,20 +434,20 @@
             <mat-label>รหัสไปรษณีย์</mat-label>
             <input
               matInput
-              formControlName="zipCode"
+              formControlName="postalCode"
               maxlength="5"
               inputmode="numeric"
               [readonly]="isZipReadOnly"
               (focus)="onZipFocus()"
               (keydown)="onlyDigitsKeydown($event)"
-              (input)="sanitizeDigits($event, addressTh.get('zipCode'))"
+              (input)="sanitizeDigits($event, addressTh.get('postalCode'))"
               (keyup.enter)="onZipEnter()"
             />
             <mat-hint>
               ใส่ให้ครบ 5 หลักหรือกด Enter → ระบบจะพยายามเติม จังหวัด/อำเภอ/ตำบล
               ให้อัตโนมัติ
             </mat-hint>
-            <mat-error *ngIf="addressTh.get('zipCode')?.hasError('required')"
+            <mat-error *ngIf="addressTh.get('postalCode')?.hasError('required')"
               >กรุณากรอกรหัสไปรษณีย์</mat-error
             >
           </mat-form-field>

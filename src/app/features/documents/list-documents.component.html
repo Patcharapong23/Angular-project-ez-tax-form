@@ -1,0 +1,28 @@
+<!-- src/app/features/documents/list-documents.component.html -->
+<div *ngIf="loading">กำลังโหลด...</div>
+<table *ngIf="!loading" class="table">
+  <thead>
+    <tr>
+      <th>เลขที่</th>
+      <th>ประเภท</th>
+      <th>วันที่</th>
+      <th>ผู้ขาย</th>
+      <th>ผู้ซื้อ</th>
+      <th style="text-align: right">ยอดรวม</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let r of rows">
+      <td>{{ r.docNo }}</td>
+      <td>{{ r.docTypeCode }}</td>
+      <td>{{ r.issueDate }}</td>
+      <td>{{ r.sellerName }}</td>
+      <td>{{ r.buyerName }}</td>
+      <td style="text-align: right">{{ r.grandTotal }}</td>
+      <td>
+        <button mat-button color="primary" (click)="exportPdf(r.docUuid)">Export PDF</button>
+      </td>
+    </tr>
+  </tbody>
+</table>

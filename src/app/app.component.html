@@ -1,5 +1,12 @@
 <router-outlet></router-outlet>
 
+<!-- Mobile overlay (visible when menu is open on small screens) -->
+<div
+  class="mobile-overlay"
+  [class.visible]="isMobileMenuOpen$ | async"
+  (click)="closeMobileMenu()"
+></div>
+
 <!-- ปุ่มทดสอบ (ชั่วคราว เอาออกได้ตอนโปรดักชัน) -->
 <button class="test-load-btn" (click)="fakeWork()" aria-label="ทดสอบ Loader">
   ทดสอบโหลด 2 วิ

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -32,6 +33,7 @@ import { DocumentsallComponent } from './features/documentsall/documentsall.comp
 import { InvoiceFormComponent } from './features/invoice/invoice-form/invoice-form.component';
 import { NewDocumentDialogComponent } from './features/dialogs/new-document-dialog/new-document-dialog.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SharedModule } from './shared/shared.module';
 
 /* ===== Interceptors ===== */
 import { LoadingInterceptor } from './shared/Loding/loading.interceptor';
@@ -39,6 +41,9 @@ import { JwtInterceptor } from './shared/jwt.interceptor';
 
 /* ===== Guards ===== */
 import { AuthGuard } from './auth.guard';
+import { PlaceholderComponent } from './features/placeholder/placeholder.component';
+import { ViewDocumentComponent } from './features/documents/view-document/view-document.component';
+import { EditDocumentComponent } from './features/documents/edit-document/edit-document.component';
 
 @NgModule({
   declarations: [
@@ -53,29 +58,16 @@ import { AuthGuard } from './auth.guard';
     DocumentsallComponent,
     InvoiceFormComponent,
     NewDocumentDialogComponent,
+    PlaceholderComponent,
+    ViewDocumentComponent,
+    EditDocumentComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    FormsModule,
-    ReactiveFormsModule,
     HttpClientModule,
-    OverlayModule,
-
-    // Material
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatAutocompleteModule,
-    MatOptionModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatDialogModule,
-    MatCheckboxModule,
-    MatSelectModule,
-    MatSnackBarModule,
+    SharedModule, // Import SharedModule here
   ],
   providers: [
     AuthGuard,

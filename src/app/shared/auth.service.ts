@@ -21,10 +21,7 @@ import {
 } from '../shared/models/user.models';
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
+  token: string;
   user: {
     userId: string;
     username: string;
@@ -38,8 +35,8 @@ export interface AuthResponse {
     createDate?: string;
     updateBy?: string;
     updateDate?: string;
-    roles: { roleCode: string; roleName: string }[];
-    permissions: string[];
+    authorities: { authority: string }[];
+    permissions?: string[];
   };
   seller: {
     sellerId: string;
@@ -49,7 +46,7 @@ export interface AuthResponse {
     sellerPhoneNumber?: string;
     sellerTypeTax?: string | null;
     logoUrl?: string;
-  };
+  } | null;
   defaultBranch: {
     branchId: string;
     branchCode: string;
@@ -62,7 +59,7 @@ export interface AuthResponse {
     districtId?: string;
     provinceId?: string;
     zipCode?: string;
-  };
+  } | null;
 }
 
 export type SellerAddress = {
@@ -143,37 +140,15 @@ export class AuthService {
 
   // ---------- token ----------
   get token(): string | null {
-    const tokenObj = this.getTokenObject();
-    return tokenObj ? tokenObj.accessToken : null;
+    return localStorage.getItem(TOKEN_KEY);
   }
 
-  get refreshToken(): string | null {
-    const tokenObj = this.getTokenObject();
-    return tokenObj ? tokenObj.refreshToken : null;
-  }
+  // refreshToken getter removed as it's no longer stored
+  // getTokenObject method is no longer needed in this form
 
-  private getTokenObject(): {
-    accessToken: string;
-    refreshToken: string;
-    tokenType: string;
-    expiresIn: number;
-  } | null {
-    const raw = localStorage.getItem(TOKEN_KEY);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return null;
-    }
-  }
 
-  private setToken(tokenObj: {
-    accessToken: string;
-    refreshToken: string;
-    tokenType: string;
-    expiresIn: number;
-  }) {
-    localStorage.setItem(TOKEN_KEY, JSON.stringify(tokenObj));
+  private setToken(accessToken: string) {
+    localStorage.setItem(TOKEN_KEY, accessToken);
     localStorage.removeItem('token');
   }
 
@@ -265,14 +240,14 @@ export class AuthService {
       ),
       this.getMySeller().pipe(
         catchError((error) => {
-          console.warn('fetchMe: Error fetching seller info, proceeding without it', error);
-          return of(null); // Allow to proceed even if seller info fails
+          console.error('fetchMe: Error fetching seller info', error);
+          return throwError(() => new Error('Failed to fetch seller info')); // Re-throw error as seller info is essential
         })
       ),
       this.getMyDefaultBranch().pipe(
         catchError((error) => {
-          console.warn('fetchMe: Error fetching branch info, proceeding without it', error);
-          return of(null); // Allow to proceed even if branch info fails
+          console.error('fetchMe: Error fetching branch info', error);
+          return throwError(() => new Error('Failed to fetch branch info')); // Re-throw error as branch info is essential
         })
       ),
     ]).pipe(
@@ -342,12 +317,7 @@ export class AuthService {
       .pipe(
         tap((res) => {
           // 1) เก็บ token
-          this.setToken({
-            accessToken: res.token,
-            refreshToken: res.refreshToken || '',
-            tokenType: res.tokenType || 'Bearer',
-            expiresIn: res.expiresIn || 0,
-          });
+          this.setToken(res.token);
 
           // 2) map response -> AuthUser
           const seller = res.seller;
@@ -358,7 +328,7 @@ export class AuthService {
             userName: res.user.username,
             fullName: res.user.fullName,
             email: res.user.email,
-            role: res.user.roles?.[0]?.roleCode,
+            role: res.user.authorities?.[0]?.authority,
             sellerNameTh: seller?.sellerNameTh,
             sellerNameEn: seller?.sellerNameEn ?? undefined,
             sellerTaxId: seller?.sellerTaxId,

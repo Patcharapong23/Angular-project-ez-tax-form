@@ -9,6 +9,45 @@
   box-shadow: 0 2px 4px 0 rgba(17, 24, 39, 0.04);
 }
 
+/* Hamburger Menu Button */
+.hamburger-menu-button {
+  display: none; /* Hidden by default on desktop */
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 24px;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-right: 16px; /* Add some space between button and company info */
+}
+
+/* Mobile Overlay */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999; /* Below sidebar, above content */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (max-width: 768px) {
+  .hamburger-menu-button {
+    display: block; /* Show on small screens */
+  }
+}
+
 .company-info {
   font-size: 16px;
   font-weight: 600;

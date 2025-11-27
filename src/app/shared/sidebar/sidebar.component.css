@@ -5,8 +5,8 @@
   box-shadow: 1px 0px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  position: fixed;
+  height: 100% !important;
+  position: fixed !important;
   top: 0;
   left: 0;
   z-index: 1000;
@@ -29,21 +29,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative; /* [UPDATED] ให้ปุ่ม pin วาง absolute ได้สบาย */
 }
+
+/* โลโก้ก่อนแก้: มัน animate ด้วย height -> กระชาก */
+/* โลโก้หลังแก้: คงขนาดจริงไว้ แล้วใช้ scale เวลา collapse */
 .sidebar-header .brand-logo {
   height: 80px;
   width: auto;
   max-width: 220px;
-  transition: all 0.3s ease-in-out;
+  /* [UPDATED] ใช้ transform + opacity แทนการเปลี่ยน height */
+  transform-origin: center center;
+  transform: scale(1);
+  opacity: 1;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
 /* ---- Nav ---- */
 .sidebar-nav {
   flex-grow: 1;
-  padding: 16px 0;
+  padding: 16px 0px 0;
   overflow-y: auto;
   background-color: #ffffff;
+
+  /* [ADDED] scrollbar (Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: #cfcfcf transparent;
 }
+/* [ADDED] scrollbar (Chrome/Edge/Safari) */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: #cfcfcf;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: #a9a9a9;
+}
+
 .sidebar-nav ul {
   list-style: none;
   padding: 0;
@@ -53,8 +81,8 @@
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
-  margin: 4px 10px;
+  padding: 12px 16px; /* เดิม 12px 20px */
+  margin: 4px 4px;
   border-radius: 8px;
   cursor: pointer;
   text-decoration: none;
@@ -62,15 +90,27 @@
   white-space: nowrap;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
+
 .nav-item:hover {
   background-color: #f5f5f5;
   color: #292927;
 }
+
 .nav-item.active {
   background-color: #ffc107;
   color: #292927;
   font-weight: 500;
 }
+
+/* ไอคอนเมนูหลัก */
+.nav-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  margin-right: 12px; /* เดิม 16px ลดลงหน่อยให้ห่าง scrollbar มากขึ้น */
+  /* หมายเหตุ: padding-left ของ .nav-item คือ 16px
+     เพราะฉะนั้น ไอคอนจะเริ่มที่ระยะ 16px จากขอบซ้าย sidebar */
+}
+
 .nav-icon {
   font-size: 22px;
   flex-shrink: 0;
@@ -107,6 +147,7 @@
 .sub-menu.open {
   max-height: 300px;
 }
+/* [UPDATED] จัดตำแหน่ง bullet ให้ตรงคอลัมน์เดียวกับไอคอนเมนูหลัก */
 .sub-menu li::before {
   content: "";
   width: 6px;
@@ -114,15 +155,16 @@
   border-radius: 50%;
   background: #2b2f33; /* สีจุด */
   position: absolute;
-  left: 38px; /* ปรับจาก 28px → 44px ให้ตรงกับ icon หลัก */
+  left: 28px; /* เดิม 38px -> 28px ให้ตรงศูนย์กลางคอลัมน์ไอคอน */
   top: 50%;
   transform: translateY(-50%);
   opacity: 0.9;
 }
 
+/* [UPDATED] padding-left ของข้อความย่อยให้ตรงคอลัมน์ข้อความเมนูหลัก */
 .sub-menu a {
   display: block;
-  padding: 10px 20px 10px 68px; /* +14px จากเดิม เพื่อชดเชยที่จุดถูกเลื่อน */
+  padding: 10px 20px 10px 52px; /* เดิม 10px 20px 10px 68px */
   color: #555;
   text-decoration: none;
 }
@@ -136,32 +178,25 @@
   color: #292927;
 }
 
-/* (ออปชั่น) ถ้ามีสถานะ active ของรายการย่อย */
+/* active ของรายการย่อย */
 .sub-menu a.active {
   background: #ffc107;
   color: #292927;
 }
-/* .sub-menu a.active ~ * {
-} */
+
 .sidebar-nav .nav-item,
 .sidebar .sub-menu a {
-  margin: 4px 10px; /* <<< เหมือน .nav-item */
+  margin: 4px 10px;
   border-radius: 8px;
   box-sizing: border-box;
 }
 
-/* พื้นที่คลิกและระยะห่างของ sub item */
-.sidebar .sub-menu {
-  padding: 4px 0;
-}
 .sidebar .sub-menu a {
   display: block;
-  padding: 10px 20px 10px 68px; /* เผื่อช่องไอคอน/จุด */
+  padding: 10px 20px 10px 52px; /* ให้สอดคล้องกับด้านบน */
   color: #555;
   text-decoration: none;
 }
-
-/* จุดนำหน้าให้ตรงกับไอคอนของเมนูหลัก */
 .sidebar .sub-menu li {
   position: relative;
 }
@@ -169,7 +204,7 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: 38px; /* ปรับให้ตรงกับแนว icon เมนูหลัก */
+  left: 28px; /* ให้ตรงกับด้านบน */
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -178,7 +213,6 @@
   opacity: 0.9;
 }
 
-/* สถานะ active ของรายการย่อย ให้กรอบพอดีขอบเหมือนหัวข้อหลัก */
 .sidebar .sub-menu a.active {
   background: #ffc107;
   color: #292927;
@@ -190,29 +224,26 @@
   color: #292927;
   font-weight: 600;
 }
-
-/* หัวข้อหลักของกลุ่มที่กำลังดูอยู่ */
 .nav-item.selected {
-  background-color: #ffc107; /* เหลืองอ่อน */
+  background: #ffc107;
   color: #292927;
   font-weight: 600;
 }
-
-/* รายการย่อยที่ active */
 .sub-menu a.active-sub {
   background: #ffc107;
   color: #292927;
   font-weight: 600;
 }
-/* ---- Toggle Button (วงกลมเล็กลง) ---- */
+
+/* ---- Toggle Button (ปุ่มวงกลม pin) ---- */
 .circle-toggle {
   position: absolute;
-  top: 14px; /* ขยับให้ชิดด้านบน */
-  right: 8px; /* ขยับให้ชิดด้านขวา */
-  width: 24px; /* ปรับเล็กลงจาก 32px → 24px */
-  height: 24px; /* ปรับเล็กลง */
+  top: 14px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 1.5px solid #6c757d; /* ขอบบางลง */
+  border: 1.5px solid #6c757d;
   background: #fff;
   display: flex;
   align-items: center;
@@ -225,22 +256,18 @@
   border-color: #ffc107;
   background-color: #fffbea;
 }
-
-/* จุดกลาง: ซ่อนเสมอ เว้นแต่เข้าสู่สถานะ "locked" */
 .circle-toggle .dot {
-  width: 6px; /* ลดลงจาก 8px → 6px */
+  width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #6c757d;
-  display: none; /* ซ่อนปกติ */
+  display: none;
   transition: transform 0.2s ease, background-color 0.2s ease;
 }
-
-/* แสดงจุดเฉพาะตอนล็อก (คลิกแล้ว) */
 .circle-toggle.locked .dot {
   display: block;
   transform: scale(1.15);
-  background: #394049; /* เข้มขึ้นเล็กน้อย */
+  background: #394049;
 }
 
 /* ---- Collapsed tweaks ---- */
@@ -248,9 +275,16 @@
   height: 80px;
   padding: 0;
 }
+
+/* ก่อน: เราเคยลด height โลโก้เหลือ 40px ตอน collapsed
+   หลังแก้: เราไม่ไปยุ่ง height แล้ว เรา "scale" แทน */
 .sidebar.collapsed .sidebar-header .brand-logo {
-  height: 40px;
+  /* [UPDATED] ย่อด้วย scale ให้ลื่นขึ้น */
+  transform: scale(0.5);
+  opacity: 0.95; /* เบลอความรู้สึกกระแทกนิดหน่อย */
+  /* ไม่ต้องตั้ง height:40px แล้ว */
 }
+
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .sub-arrow {
   display: none;
@@ -265,10 +299,85 @@
 .sidebar.collapsed .nav-icon {
   margin-right: 0;
 }
-
-/* ซ่อนปุ่มวงกลมตอน Sidebar ปิด */
 .sidebar.collapsed .circle-toggle {
   display: none !important;
   pointer-events: none;
   visibility: hidden;
+}
+
+/* ===========================
+   RESPONSIVE SIDEBAR BEHAVIOR
+   =========================== */
+/* <1023px = โหมด drawer มือถือ/แท็บเล็ต */
+@media (max-width: 1023px) {
+  .sidebar {
+    width: 260px;
+    height: 100vh;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+
+    transform: translateX(-100%);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    z-index: 1100;
+  }
+
+  /* โหมดมือถือเริ่มซ่อน */
+  .sidebar.mobile-mode {
+  }
+
+  /* ถ้า mobile-open = true ให้เลื่อนเข้ามา */
+  .sidebar.mobile-mode.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* มือถือไม่ต้องมีปุ่มล็อก/hover-expand */
+  .sidebar.mobile-mode .circle-toggle {
+    display: none !important;
+  }
+
+  .sidebar.hover-expand {
+    width: 260px !important;
+  }
+
+  .sidebar.mobile-mode .nav-label,
+  .sidebar.mobile-mode .sub-arrow {
+    display: inline-block;
+  }
+
+  .sidebar.mobile-mode .nav-item {
+    justify-content: flex-start;
+    padding: 12px 20px;
+  }
+
+  .sidebar.mobile-mode .nav-icon {
+    margin-right: 16px;
+  }
+
+  /* มือถือเวลายุบ ไม่มี hover-expand เหมือน desktop
+     โลโก้ให้กลับมาเต็มตอน drawer เปิด */
+  .sidebar.mobile-mode .sidebar-header .brand-logo {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Backdrop ตอน sidebar mobile เปิด */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  animation: backdropFade 0.2s ease both;
+}
+@keyframes backdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

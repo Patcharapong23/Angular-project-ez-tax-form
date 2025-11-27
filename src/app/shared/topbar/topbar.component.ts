@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, AuthUser } from '../../shared/auth.service';
+import { SidebarService } from '../services/sidebar.service'; // Import SidebarService
 
 @Component({
   selector: 'app-topbar',
@@ -14,19 +15,20 @@ export class TopbarComponent {
   constructor(
     private el: ElementRef,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private sidebarService: SidebarService // Inject SidebarService
   ) {
     // รับ user ล่าสุดเสมอ
-    this.auth.user$.subscribe((u) => (this.user = u ?? this.auth.getUser()));
+    this.auth.user$.subscribe((u) => (this.user = u));
     // ถ้ายังไม่มี role ใน storage ลอง decode จาก token แล้วอัปเดต
     if (!this.user?.role) {
       const claims = this.auth.decodeToken();
       if (claims?.role) {
-        const u = this.auth.getUser();
+        const u = this.user; // Use this.user directly
         if (u) {
           u.role = claims.role;
           // เก็บกลับเข้า storage/stream
-          (this as any).auth['setUser']?.(u);
+          // (this as any).auth['setUser']?.(u); // Temporarily commented out
         }
       }
     }
@@ -73,6 +75,10 @@ export class TopbarComponent {
   logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+  }
+
+  toggleMobileMenu(): void {
+    this.sidebarService.toggleMobileMenu();
   }
 
   // คลิกนอกเมนู เพื่อปิด dropdown

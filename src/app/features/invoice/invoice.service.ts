@@ -22,7 +22,7 @@ export interface Invoice {
     address: string;
     phone: string;
   };
-  customer: {
+  buyer: {
     name: string;
     branchCode: string;
     address: string;

@@ -1,0 +1,50 @@
+<div class="export-wrap">
+  <button class="close-x" (click)="close()" aria-label="ปิด">✕</button>
+
+  <div class="big-icon">
+    <div class="circle">
+      <i class="ti ti-download"></i>
+    </div>
+  </div>
+
+  <h2 class="title">เลือกไฟล์ที่ต้องการดาวน์โหลด</h2>
+  <p class="hint">เมื่อเลือกไฟล์ที่ต้องการดาวน์โหลดแล้วกด “ดาวน์โหลดเอกสาร”</p>
+
+  <div class="file-grid">
+    <!-- PDF -->
+    <div class="file-col">
+      <div class="file-icon pdf">
+        <span class="ext">PDF</span>
+      </div>
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="wantPdf" />
+      </label>
+    </div>
+
+    <!-- XML -->
+    <div class="file-col">
+      <div class="file-icon xml">
+        <span class="ext">XML</span>
+      </div>
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="wantXml" />
+      </label>
+    </div>
+
+    <!-- CSV -->
+    <div class="file-col">
+      <div class="file-icon csv">
+        <span class="ext">CSV</span>
+      </div>
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="wantCsv" />
+      </label>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <button class="download-btn" (click)="downloadAll()" [disabled]="isLoading">
+      {{ isLoading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดเอกสาร" }}
+    </button>
+  </div>
+</div>

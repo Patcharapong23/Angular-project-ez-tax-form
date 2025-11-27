@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SidebarService } from '../../shared/services/sidebar.service'; // Import SidebarService
 
 @Component({
   selector: 'app-layout',
@@ -6,13 +7,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./layout.component.css'],
 })
 export class LayoutComponent {
-  //   isSidebarCollapsed = false;
-  isCollapsed = true; // ให้เริ่มพับไว้ก่อนเพื่อพื้นที่ content มากขึ้น
+  isCollapsed = true;
+  isMobileMenuOpen$ = this.sidebarService.isMobileMenuOpen$; // Expose observable
+
+  constructor(private sidebarService: SidebarService) {} // Inject SidebarService
 
   onSidebarToggle(isCollapsed: boolean): void {
     this.isCollapsed = isCollapsed;
   }
-  //   onSidebarToggle(collapsed: boolean) {
-  //     this.isCollapsed = collapsed;
-  //   }
 }

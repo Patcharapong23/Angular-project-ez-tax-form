@@ -1,7 +1,16 @@
 <header class="main-header">
+  <!-- Hamburger menu button (visible on small screens) -->
+  <button
+    class="hamburger-menu-button mobile-only"
+    (click)="toggleMobileMenu()"
+    aria-label="Toggle menu"
+  >
+    <i class="ti ti-menu-2"></i>
+  </button>
+
   <!-- ซ้าย: ชื่อบริษัท (ถ้ามี) -->
   <div class="company-info" *ngIf="user as u">
-    <span class="company-name">{{ u.companyName }}</span>
+    <span class="company-name">{{ u.sellerNameTh }}</span>
   </div>
 
   <!-- ขวา: ธง + โปรไฟล์ -->

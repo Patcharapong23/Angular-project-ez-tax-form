@@ -19,520 +19,629 @@
   </button>
   <h1 class="page-title">สร้างเอกสารใหม่</h1>
 </div>
-<form class="invoice-form" [formGroup]="form" (ngSubmit)="onSubmit()">
-  <!-- Header bar / ชื่อหน้า -->
 
-  <!-- ชื่อเอกสาร / ประเภทที่เลือก -->
-  <div class="doc-heading" *ngIf="docTypeTh || docTypeEn || docTypeCode">
-    <div class="th">
-      {{ docTypeTh || " " }}
-      <span *ngIf="docTypeCode">({{ docTypeCode }})</span>
-    </div>
-    <div class="en" *ngIf="docTypeEn">{{ docTypeEn }}</div>
-  </div>
+<ng-container *ngIf="!creationSuccess; else successView">
+  <form class="invoice-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- Header bar / ชื่อหน้า -->
 
-  <!-- ========== CARD: ข้อมูลบริษัท/ผู้ขาย ========== -->
-  <section class="header-block" [formGroup]="fgHeader">
-    <div class="logo-box">
-      <img *ngIf="logoUrl; else placeholderLogo" [src]="logoUrl" alt="logo" />
-      <ng-template #placeholderLogo>
-        <div class="logo-placeholder">LOGO</div>
-      </ng-template>
-      <p class="logo-hint">ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB</p>
+    <!-- ชื่อเอกสาร / ประเภทที่เลือก -->
+    <div class="doc-heading" *ngIf="docTypeTh || docTypeEn || docTypeCode">
+      <div class="th">
+        {{ docTypeTh || " " }}
+        <!-- <span *ngIf="docTypeCode">({{ docTypeCode }})</span> -->
+      </div>
+      <div class="en" *ngIf="docTypeEn">{{ docTypeEn }}</div>
     </div>
 
-    <div class="company-fields">
-      <!-- row1 -->
-      <div class="form-field">
-        <label class="form-label">ชื่อผู้ขาย <span class="req">*</span></label>
-        <input
-          class="form-control"
-          type="text"
-          formControlName="companyName"
-          [readonly]="true"
-        />
+    <!-- ========== CARD: ข้อมูลบริษัท/ผู้ขาย ========== -->
+    <section class="header-block" [formGroup]="fgHeader">
+      <div class="logo-box">
+        <img *ngIf="logoUrl; else placeholderLogo" [src]="logoUrl" alt="logo" />
+        <ng-template #placeholderLogo>
+          <div class="logo-placeholder">LOGO</div>
+        </ng-template>
+        <p class="logo-hint">ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB</p>
       </div>
 
-      <div class="form-field">
-        <label class="form-label"
-          >เลขประจำตัวผู้เสียภาษีอากร <span class="req">*</span></label
-        >
-        <input
-          class="form-control"
-          type="text"
-          formControlName="taxId"
-          [readonly]="true"
-        />
-      </div>
-
-      <!-- row2 -->
-      <div class="form-field">
-        <label class="form-label"
-          >รหัสสาขา 5 หลัก <span class="req">*</span></label
-        >
-        <input
-          class="form-control"
-          type="text"
-          [value]="fgHeader.get('branchCode')?.value"
-          readonly
-        />
-      </div>
-
-      <div class="form-field">
-        <label class="form-label">ชื่อสาขา <span class="req">*</span></label>
-        <select class="form-control" formControlName="branchCode">
-          <option *ngFor="let b of branches" [value]="b.code">
-            {{ b.name || "สำนักงานใหญ่" }}
-          </option>
-        </select>
-      </div>
-
-      <!-- row3 -->
-      <div class="form-field">
-        <label class="form-label">เบอร์โทรศัพท์</label>
-        <input
-          class="form-control"
-          type="text"
-          formControlName="tel"
-          [readonly]="true"
-        />
-      </div>
-
-      <div class="form-field address-field">
-        <label class="form-label"
-          >รายละเอียดที่อยู่ <span class="req">*</span></label
-        >
-        <textarea
-          class="form-control address-control"
-          formControlName="address"
-          rows="2"
-          [readonly]="true"
-        ></textarea>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== สองคอลัมน์: ลูกค้า / เอกสาร ========== -->
-  <section class="two-col">
-    <!-- ซ้าย: ลูกค้า -->
-    <div class="panel" [formGroup]="fgCustomer">
-      <div class="section-card">
-        <div class="section-title">
-          <span class="yellow-bar"></span>
-          ข้อมูลลูกค้า
+      <div class="company-fields">
+        <!-- row1 -->
+        <div class="form-field">
+          <label class="form-label">ชื่อผู้ขาย <span class="req">*</span></label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="companyName"
+            [readonly]="true"
+          />
         </div>
 
         <div class="form-field">
           <label class="form-label"
-            >ประเภทผู้เสียภาษี <span class="req">*</span></label
+            >เลขประจำตัวผู้เสียภาษีอากร <span class="req">*</span></label
           >
-          <select class="form-control" formControlName="partyType">
-            <option *ngFor="let t of partyTypes" [value]="t.value">
-              {{ t.label }}
+          <input
+            class="form-control"
+            type="text"
+            formControlName="taxId"
+            [readonly]="true"
+          />
+        </div>
+
+        <!-- row2 -->
+        <div class="form-field">
+          <label class="form-label"
+            >รหัสสาขา 5 หลัก <span class="req">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            [value]="fgHeader.get('branchCode')?.value"
+            readonly
+          />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">ชื่อสาขา <span class="req">*</span></label>
+          <select class="form-control" formControlName="branchCode">
+            <option *ngFor="let b of branches" [value]="b.code">
+              {{ b.name }}
             </option>
           </select>
         </div>
 
-        <!-- บุคคลธรรมดา -->
-        <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'PERSON'">
-          <div class="form-field">
-            <label class="form-label">รหัสลูกค้า</label>
-            <input class="form-control" type="text" formControlName="code" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ชื่อลูกค้า <span class="req">*</span></label
-            >
-            <input class="form-control" type="text" formControlName="name" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
-            >
-            <input class="form-control" type="text" formControlName="taxId" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ที่อยู่ลูกค้า <span class="req">*</span></label
-            >
-            <textarea
-              class="form-control address-control"
-              rows="3"
-              formControlName="address"
-            ></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">อีเมล</label>
-            <input class="form-control" type="email" formControlName="email" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">เบอร์โทรศัพท์</label>
-            <input class="form-control" type="text" formControlName="tel" />
-          </div>
-        </ng-container>
-
-        <!-- นิติบุคคล -->
-        <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'JURISTIC'">
-          <div class="form-field">
-            <label class="form-label">รหัสลูกค้า</label>
-            <input class="form-control" type="text" formControlName="code" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ชื่อลูกค้า (ชื่อบริษัท) <span class="req">*</span></label
-            >
-            <input class="form-control" type="text" formControlName="name" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
-            >
-            <input class="form-control" type="text" formControlName="taxId" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >รหัสสาขา <span class="req">*</span></label
-            >
-            <input
-              class="form-control"
-              type="text"
-              formControlName="branchCode"
-            />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ชื่อสาขา <span class="req">*</span></label
-            >
-            <input
-              class="form-control"
-              type="text"
-              placeholder="สำนักงานใหญ่"
-              readonly
-            />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ที่อยู่ลูกค้า <span class="req">*</span></label
-            >
-            <textarea
-              class="form-control address-control"
-              rows="3"
-              formControlName="address"
-            ></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">อีเมล</label>
-            <input class="form-control" type="email" formControlName="email" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">เบอร์โทรศัพท์</label>
-            <input class="form-control" type="text" formControlName="tel" />
-          </div>
-        </ng-container>
-
-        <!-- ชาวต่างชาติ -->
-        <ng-container
-          *ngIf="fgCustomer.get('partyType')!.value === 'FOREIGNER'"
-        >
-          <div class="form-field">
-            <label class="form-label">รหัสลูกค้า</label>
-            <input class="form-control" type="text" formControlName="code" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ชื่อลูกค้า <span class="req">*</span></label
-            >
-            <input class="form-control" type="text" formControlName="name" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >เลขหนังสือเดินทาง (Passport) <span class="req">*</span></label
-            >
-            <input
-              class="form-control"
-              type="text"
-              formControlName="passportNo"
-            />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >ที่อยู่ลูกค้า <span class="req">*</span></label
-            >
-            <textarea
-              class="form-control address-control"
-              rows="3"
-              formControlName="address"
-            ></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label"
-              >รหัสไปรษณีย์ <span class="req">*</span></label
-            >
-            <input class="form-control" type="text" formControlName="zip" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">อีเมล</label>
-            <input class="form-control" type="email" formControlName="email" />
-          </div>
-
-          <div class="form-field">
-            <label class="form-label">เบอร์โทรศัพท์</label>
-            <input class="form-control" type="text" formControlName="tel" />
-          </div>
-        </ng-container>
-      </div>
-    </div>
-
-    <!-- ขวา: ข้อมูลเอกสาร -->
-    <div class="panel" [formGroup]="fgHeader">
-      <div class="section-card">
-        <div class="section-title">
-          <span class="yellow-bar"></span>
-          ข้อมูลเอกสาร
+        <!-- row3 -->
+        <div class="form-field">
+          <label class="form-label">เบอร์โทรศัพท์</label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="tel"
+            [readonly]="true"
+          />
         </div>
 
-        <div class="form-field">
-          <label class="form-label">ประเภทเอกสาร <span class="req">*</span></label>
-          <select class="form-control" formControlName="docType">
-            <option value="" disabled>เลือกประเภทเอกสาร</option>
-            <option *ngFor="let option of docTypeOptions" [value]="option.code">
-              {{ option.thName }} ({{ option.code }})
-            </option>
+        <div class="form-field address-field">
+          <label class="form-label"
+            >รายละเอียดที่อยู่ <span class="req">*</span></label
+          >
+          <textarea
+            class="form-control address-control"
+            formControlName="address"
+            rows="2"
+            [readonly]="true"
+          ></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== สองคอลัมน์: ลูกค้า / เอกสาร ========== -->
+    <section class="two-col">
+      <!-- ซ้าย: ลูกค้า -->
+      <div class="panel" [formGroup]="fgCustomer">
+        <div class="section-card">
+          <div class="section-title">
+            <span class="yellow-bar"></span>
+            ข้อมูลลูกค้า
+          </div>
+
+          <div class="form-field">
+            <label class="form-label"
+              >ประเภทผู้เสียภาษี <span class="req">*</span></label
+            >
+            <select class="form-control" formControlName="partyType">
+              <option *ngFor="let t of partyTypes" [value]="t.value">
+                {{ t.label }}
+              </option>
+            </select>
+          </div>
+
+          <!-- บุคคลธรรมดา -->
+          <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'PERSON'">
+            <div class="form-field">
+              <label class="form-label">รหัสลูกค้า</label>
+              <input class="form-control" type="text" formControlName="code" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label"
+                >ชื่อลูกค้า <span class="req">*</span></label
+              >
+              <input class="form-control" type="text" formControlName="name" />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label"
+                >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
+              >
+              <input class="form-control" type="text" formControlName="taxId" maxlength="13" />
+              <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('invalidThaiTaxId') && fgCustomer.get('taxId')?.touched">
+                เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง
+              </div>
+              <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('required') && fgCustomer.get('taxId')?.touched">
+                กรุณากรอกเลขประจำตัวผู้เสียภาษี
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label"
+                >ที่อยู่ลูกค้า <span class="req">*</span></label
+              >
+              <textarea
+                class="form-control address-control"
+                rows="3"
+                formControlName="address"
+              ></textarea>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label">อีเมล</label>
+              <input class="form-control" type="email" formControlName="email" />
+            </div>
+
+                      <div class="form-field">
+                        <label class="form-label">เบอร์โทรศัพท์</label>
+                        <input class="form-control" type="text" formControlName="tel" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-check">
+                          <input type="checkbox" formControlName="saveToMaster" />
+                          <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
+                        </label>
+                      </div>
+                    </ng-container>
+            
+                    <!-- นิติบุคคล -->
+                    <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'JURISTIC'">
+                      <div class="form-field">
+                        <label class="form-label">รหัสลูกค้า</label>
+                        <input class="form-control" type="text" formControlName="code" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >ชื่อลูกค้า (ชื่อบริษัท) <span class="req">*</span></label
+                        >
+                        <input class="form-control" type="text" formControlName="name" />
+                      </div>
+            
+                                  <div class="form-field">
+                                    <label class="form-label"
+                                      >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
+                                    >
+                                    <input class="form-control" type="text" formControlName="taxId" maxlength="13" />
+                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('invalidThaiTaxId') && fgCustomer.get('taxId')?.touched">
+                                      เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง
+                                    </div>
+                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('required') && fgCustomer.get('taxId')?.touched">
+                                      กรุณากรอกเลขประจำตัวผู้เสียภาษี
+                                    </div>
+                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('minlength') && fgCustomer.get('taxId')?.touched">
+                                      เลขประจำตัวผู้เสียภาษีต้องมีความยาว 13 หลัก
+                                    </div>
+                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('maxlength') && fgCustomer.get('taxId')?.touched">
+                                      เลขประจำตัวผู้เสียภาษีต้องมีความยาว 13 หลัก
+                                    </div>
+                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('pattern') && fgCustomer.get('taxId')?.touched">
+                                      กรอกได้เฉพาะตัวเลข 0–9 เท่านั้น
+                                    </div>
+                                  </div>            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >รหัสสาขา <span class="req">*</span></label
+                        >
+                        <input
+                          class="form-control"
+                          type="text"
+                          formControlName="branchCode"
+                        />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >ชื่อสาขา <span class="req">*</span></label
+                        >
+                        <input
+                          class="form-control"
+                          type="text"
+                          placeholder="สำนักงานใหญ่"
+                          readonly
+                        />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >ที่อยู่ลูกค้า <span class="req">*</span></label
+                        >
+                        <textarea
+                          class="form-control address-control"
+                          rows="3"
+                          formControlName="address"
+                        ></textarea>
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label">อีเมล</label>
+                        <input class="form-control" type="email" formControlName="email" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label">เบอร์โทรศัพท์</label>
+                        <input class="form-control" type="text" formControlName="tel" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-check">
+                          <input type="checkbox" formControlName="saveToMaster" />
+                          <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
+                        </label>
+                      </div>
+                    </ng-container>
+            
+                    <!-- ชาวต่างชาติ -->
+                    <ng-container
+                      *ngIf="fgCustomer.get('partyType')!.value === 'FOREIGNER'"
+                    >
+                      <div class="form-field">
+                        <label class="form-label">รหัสลูกค้า</label>
+                        <input class="form-control" type="text" formControlName="code" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >ชื่อลูกค้า <span class="req">*</span></label
+                        >
+                        <input class="form-control" type="text" formControlName="name" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >เลขหนังสือเดินทาง (Passport) <span class="req">*</span></label
+                        >
+                        <input
+                          class="form-control"
+                          type="text"
+                          formControlName="passportNo"
+                        />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >ที่อยู่ลูกค้า <span class="req">*</span></label
+                        >
+                        <textarea
+                          class="form-control address-control"
+                          rows="3"
+                          formControlName="address"
+                        ></textarea>
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label"
+                          >รหัสไปรษณีย์ <span class="req">*</span></label
+                        >
+                        <input class="form-control" type="text" formControlName="zip" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label">อีเมล</label>
+                        <input class="form-control" type="email" formControlName="email" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-label">เบอร์โทรศัพท์</label>
+                        <input class="form-control" type="text" formControlName="tel" />
+                      </div>
+            
+                      <div class="form-field">
+                        <label class="form-check">
+                          <input type="checkbox" formControlName="saveToMaster" />
+                          <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
+                        </label>
+                      </div>
+                    </ng-container>        </div>
+      </div>
+
+      <!-- ขวา: ข้อมูลเอกสาร -->
+      <div class="panel" [formGroup]="fgHeader">
+        <div class="section-card">
+          <div class="section-title">
+            <span class="yellow-bar"></span>
+            ข้อมูลเอกสาร
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">เลขที่เอกสาร</label>
+            <input class="form-control" type="text" formControlName="docNo" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label"
+              >วันที่ออกเอกสาร <span class="req">*</span></label
+            >
+            <input class="form-control" type="date" formControlName="issueDate" />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label"
+              >พนักงานขาย <span class="req">*</span></label
+            >
+            <input class="form-control" type="text" formControlName="seller" />
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="vat-section">
+      <label class="vat-radio">
+        <input type="radio" formControlName="vatType" value="include" />
+        <span class="radio-custom" aria-hidden="true"></span>
+        <span class="radio-label">ราคารวมภาษีมูลค่าเพิ่ม</span>
+      </label>
+
+      <label class="vat-radio">
+        <input type="radio" formControlName="vatType" value="exclude" />
+        <span class="radio-custom" aria-hidden="true"></span>
+        <span class="radio-label">ราคาไม่รวมภาษีมูลค่าเพิ่ม</span>
+      </label>
+    </section>
+
+    <!-- ========== รายการสินค้า / รวมเงิน ========== -->
+    <style>
+      .vat-section {
+        display: flex;
+        margin-top: 32px;
+        gap: 2rem;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .vat-radio {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px; /* Adjusted to match form labels */
+      }
+      .vat-radio .radio-label {
+        margin-left: 0.5rem; /* 8px */
+      }
+      .vat-radio input[type="radio"] {
+        display: none; /* Hide the default radio button */
+      }
+      .vat-radio .radio-custom {
+        display: inline-block;
+        width: 16px; /* Smaller control */
+        height: 16px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        position: relative;
+        transition: border-color 0.2s;
+      }
+      .vat-radio input[type="radio"]:checked + .radio-custom {
+        border-color: #ffcc00; /* Theme yellow color */
+        background-color: #ffcc00;
+        box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.25);
+      }
+    </style>
+    <section class="lines-and-totals">
+      <div class="items">
+        <!-- head -->
+        <div class="items-header">
+          <div class="col-sku">รหัสสินค้า</div>
+          <div class="col-name">รายการ</div>
+          <div class="col-qty">จำนวน</div>
+          <div class="col-price">ราคา/หน่วย</div>
+          <div class="col-disc">ส่วนลด</div>
+          <div class="col-tax">อัตราภาษี %</div>
+          <div class="col-amt">จำนวนเงิน</div>
+          <div class="col-del"></div>
+        </div>
+
+        <!-- rows -->
+        <div
+          class="item-row"
+          *ngFor="let it of itemForms; let i = index; trackBy: trackByIdx"
+          [formGroup]="it"
+        >
+          <input class="cell-input col-sku" formControlName="sku" type="text" />
+          <input class="cell-input col-name" formControlName="name" type="text" />
+          <input class="cell-input col-qty" formControlName="qty" type="text" [numberInputFormatter]="'integer'" />
+          <input
+            class="cell-input col-price"
+            formControlName="price"
+            type="text"
+            numberInputFormatter
+          />
+          <input
+            class="cell-input col-disc"
+            formControlName="discount"
+            type="text"
+            numberInputFormatter
+          />
+          <!-- ใหม่ -->
+          <select class="cell-input col-tax" formControlName="taxRate">
+            <option [ngValue]="0">0%</option>
+            <option [ngValue]="7">7%</option>
+            <option [ngValue]="14">14%</option>
           </select>
-        </div>
 
-        <div class="form-field">
-          <label class="form-label">เลขที่เอกสาร</label>
-          <input class="form-control" type="text" formControlName="docNo" />
-        </div>
+          <input
+            class="cell-input col-amt"
+            formControlName="amount"
+            type="text"
+            readonly
+            numberInputFormatter
+          />
 
-        <div class="form-field">
-          <label class="form-label"
-            >วันที่ออกเอกสาร <span class="req">*</span></label
+          <button
+            type="button"
+            class="del col-del"
+            (click)="removeItem(i)"
+            aria-label="ลบรายการ"
+            title="ลบรายการ"
           >
-          <input class="form-control" type="date" formControlName="issueDate" />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label"
-            >พนักงานขาย <span class="req">*</span></label
-          >
-          <input class="form-control" type="text" formControlName="seller" />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== รายการสินค้า / รวมเงิน ========== -->
-  <section class="lines-and-totals">
-    <div class="items">
-      <!-- head -->
-      <div class="items-header">
-        <div class="col-sku">รหัสสินค้า</div>
-        <div class="col-name">รายการ</div>
-        <div class="col-qty">จำนวน</div>
-        <div class="col-price">ราคา/หน่วย</div>
-        <div class="col-disc">ส่วนลด</div>
-        <div class="col-vat">อัตราภาษี %</div>
-        <div class="col-amt">จำนวนเงิน</div>
-        <div class="col-del"></div>
-      </div>
-
-      <!-- rows -->
-      <div
-        class="item-row"
-        *ngFor="let it of itemForms; let i = index; trackBy: trackByIdx"
-        [formGroup]="it"
-      >
-        <input class="cell-input col-sku" formControlName="sku" type="text" />
-        <input class="cell-input col-name" formControlName="name" type="text" />
-        <input class="cell-input col-qty" formControlName="qty" type="number" />
-        <input
-          class="cell-input col-price"
-          formControlName="price"
-          type="number"
-        />
-        <input
-          class="cell-input col-disc"
-          formControlName="discount"
-          type="number"
-        />
-        <input
-          class="cell-input col-vat"
-          formControlName="vatRate"
-          type="number"
-        />
-        <input
-          class="cell-input col-amt"
-          formControlName="amount"
-          type="number"
-          readonly
-        />
-
-        <button
-          type="button"
-          class="del col-del"
-          (click)="removeItem(i)"
-          aria-label="ลบรายการ"
-          title="ลบรายการ"
-        >
-          <i class="ti ti-trash-filled"></i>
-        </button>
-      </div>
-
-      <div class="table-sep"></div>
-
-      <!-- footer: ซ้าย/ขวา -->
-      <div class="footer-grid">
-        <!-- ซ้าย -->
-        <div class="left-col">
-          <button type="button" class="btn-add-row" (click)="addItem()">
-            <i class="ti ti-plus"></i>
-            <span>เพิ่มรายการ</span>
+            <i class="ti ti-trash-filled"></i>
           </button>
-
-          <div class="note-block">
-            <label class="note-label">หมายเหตุ</label>
-            <textarea
-              rows="3"
-              class="note-textarea"
-              formControlName="remark"
-            ></textarea>
-          </div>
         </div>
 
-        <!-- ขวา -->
-        <div class="right-col">
-          <div class="sum-row">
-            <div class="sum-label">จำนวนเงินรวม</div>
-            <div class="sum-value">{{ fmt(totals.subtotal) }}</div>
-          </div>
+        <div class="table-sep"></div>
 
-          <div class="sum-row">
-            <div class="sum-label">รวมส่วนลดทั้งหมด</div>
-            <div class="sum-value">{{ fmt(totals.discount) }}</div>
-          </div>
+        <!-- footer: ซ้าย/ขวา -->
+        <div class="footer-grid">
+          <!-- ซ้าย -->
+          <div class="left-col">
+            <button type="button" class="btn-add-row" (click)="addItem()">
+              <i class="ti ti-plus"></i>
+              <span>เพิ่มรายการ</span>
+            </button>
 
-          <div class="sum-row">
-            <div class="sum-label">จำนวนเงินหลังหักส่วนลด</div>
-            <div class="sum-value">
-              {{ fmt(totals.netAfterDiscount) }}
+            <div class="note-block">
+              <label class="note-label">หมายเหตุ</label>
+              <textarea
+                rows="3"
+                class="note-textarea"
+                formControlName="remark"
+              ></textarea>
             </div>
           </div>
 
-          <!-- ค่าบริการ -->
-          <div class="sum-row clickable" *ngIf="!editingServiceFee">
-            <button
-              type="button"
-              class="sum-action"
-              (click)="startEditServiceFee()"
-            >
-              <i class="ti ti-plus"></i>
-              <span>ค่าบริการ</span>
-            </button>
-            <div class="sum-value">{{ fmt(serviceFee) }}</div>
-          </div>
+          <!-- ขวา -->
+          <div class="right-col">
+            <div class="sum-row">
+              <div class="sum-label">จำนวนเงินรวม</div>
+              <div class="sum-value">{{ fmt(totals.subtotal) }}</div>
+            </div>
 
-          <div class="sum-row fee-edit-row" *ngIf="editingServiceFee">
-            <div class="sum-label">ค่าบริการ</div>
-            <div class="fee-input-wrap">
-              <input
-                class="fee-input"
-                type="number"
-                [value]="serviceFee"
-                (input)="onServiceFeeInput($event)"
-              />
+            <div class="sum-row">
+              <div class="sum-label">รวมส่วนลดทั้งหมด</div>
+              <div class="sum-value">{{ fmt(totals.discount) }}</div>
+            </div>
+
+            <div class="sum-row">
+              <div class="sum-label">จำนวนเงินหลังหักส่วนลด</div>
+              <div class="sum-value">
+                {{ fmt(totals.netAfterDiscount) }}
+              </div>
+            </div>
+
+            <!-- ค่าบริการ -->
+            <div class="sum-row clickable" *ngIf="!editingServiceFee">
               <button
                 type="button"
-                class="fee-cancel-btn"
-                (click)="stopEditServiceFee()"
-                aria-label="ยกเลิกค่าบริการ"
-                title="ยกเลิก"
+                class="sum-action"
+                (click)="startEditServiceFee()"
               >
-                <i class="ti ti-x"></i>
+                <i class="ti ti-plus"></i>
+                <span>ค่าบริการ</span>
               </button>
+              <div class="sum-value">{{ fmt(serviceFee) }}</div>
             </div>
-          </div>
 
-          <!-- ค่าขนส่ง -->
-          <div class="sum-row clickable" *ngIf="!editingShippingFee">
-            <button
-              type="button"
-              class="sum-action"
-              (click)="startEditShippingFee()"
-            >
-              <i class="ti ti-plus"></i>
-              <span>ค่าขนส่ง</span>
-            </button>
-            <div class="sum-value">{{ fmt(shippingFee) }}</div>
-          </div>
+            <div class="sum-row fee-edit-row" *ngIf="editingServiceFee">
+              <div class="sum-label">ค่าบริการ</div>
+              <div class="fee-input-wrap">
+                <input
+                  class="fee-input"
+                  type="text"
+                  numberInputFormatter
+                  [value]="serviceFee"
+                  (input)="onServiceFeeInput($event)"
+                />
+                <button
+                  type="button"
+                  class="fee-cancel-btn"
+                  (click)="cancelServiceFee()"
+                  aria-label="ยกเลิกค่าบริการ"
+                  title="ยกเลิก"
+                >
+                  <i class="ti ti-x"></i>
+                </button>
+              </div>
+            </div>
 
-          <div class="sum-row fee-edit-row" *ngIf="editingShippingFee">
-            <div class="sum-label">ค่าขนส่ง</div>
-            <div class="fee-input-wrap">
-              <input
-                class="fee-input"
-                type="number"
-                [value]="shippingFee"
-                (input)="onShippingFeeInput($event)"
-              />
+            <!-- ค่าขนส่ง -->
+            <div class="sum-row clickable" *ngIf="!editingShippingFee">
               <button
                 type="button"
-                class="fee-cancel-btn"
-                (click)="stopEditShippingFee()"
-                aria-label="ยกเลิกค่าขนส่ง"
-                title="ยกเลิก"
+                class="sum-action"
+                (click)="startEditShippingFee()"
               >
-                <i class="ti ti-x"></i>
+                <i class="ti ti-plus"></i>
+                <span>ค่าขนส่ง</span>
               </button>
+              <div class="sum-value">{{ fmt(shippingFee) }}</div>
             </div>
-          </div>
 
-          <div class="sum-row">
-            <div class="sum-label">จำนวนภาษีมูลค่าเพิ่ม</div>
-            <div class="sum-value">{{ fmt(totals.vat) }}</div>
-          </div>
+            <div class="sum-row fee-edit-row" *ngIf="editingShippingFee">
+              <div class="sum-label">ค่าขนส่ง</div>
+              <div class="fee-input-wrap">
+                <input
+                  class="fee-input"
+                  type="text"
+                  numberInputFormatter
+                  [value]="shippingFee"
+                  (input)="onShippingFeeInput($event)"
+                />
+                <button
+                  type="button"
+                  class="fee-cancel-btn"
+                  (click)="cancelShippingFee()"
+                  aria-label="ยกเลิกค่าขนส่ง"
+                  title="ยกเลิก"
+                >
+                  <i class="ti ti-x"></i>
+                </button>
+              </div>
+            </div>
 
-          <div class="sum-row total">
-            <div class="sum-label">จำนวนเงินรวมทั้งสิ้น</div>
-            <div class="sum-value">{{ fmt(totals.grand) }}</div>
-          </div>
+            <div class="sum-row">
+              <div class="sum-label">จำนวนภาษีมูลค่าเพิ่ม</div>
+              <div class="sum-value">{{ fmt(totals.vat) }}</div>
+            </div>
 
-          <div class="decimals-row">
-            <label class="decimals-check">
-              <input
-                type="checkbox"
-                [checked]="use4Decimals"
-                (change)="toggleDecimals($event)"
-              />
-              ใช้ทศนิยม 4 ตำแหน่ง
-            </label>
+            <div class="sum-row total">
+              <div class="sum-label">จำนวนเงินรวมทั้งสิ้น</div>
+              <div class="sum-value">{{ fmt(totals.grand) }}</div>
+            </div>
+
+            <div class="decimals-row">
+              <label class="decimals-check">
+                <input
+                  type="checkbox"
+                  [checked]="use4Decimals"
+                  (change)="toggleDecimals($event)"
+                />
+                ใช้ทศนิยม 4 ตำแหน่ง
+              </label>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ปุ่มด้านล่าง -->
-  <div class="bottom-actions">
-    <button type="button" class="ghost">บันทึกแบบร่างข้อมูล</button>
-    <button type="submit" class="primary">บันทึก</button>
+    <!-- ปุ่มด้านล่าง -->
+    <div class="bottom-actions">
+      <button type="button" class="ghost" [disabled]="isSaving">บันทึกแบบร่างข้อมูล</button>
+      <button type="submit" class="primary" [disabled]="isSaving">
+        <span *ngIf="!isSaving">บันทึก</span>
+        <span *ngIf="isSaving">กำลังบันทึก...</span>
+      </button>
+    </div>
+  </form>
+</ng-container>
+
+<ng-template #successView>
+  <div class="success-container">
+    <h2>สร้างเอกสารสำเร็จ!</h2>
+    <p>เอกสารของคุณถูกสร้างเรียบร้อยแล้ว</p>
+    <div class="success-actions">
+      <button type="button" class="primary" (click)="exportPdf(createdDocument?.docUuid || null)">
+        Export PDF
+      </button>
+      <button type="button" class="secondary" (click)="resetForm()">
+        สร้างเอกสารใหม่
+      </button>
+      <button type="button" class="ghost" routerLink="/documentsall">
+        ดูเอกสารทั้งหมด
+      </button>
+    </div>
   </div>
-</form>
+</ng-template>

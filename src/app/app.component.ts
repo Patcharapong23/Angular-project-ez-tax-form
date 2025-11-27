@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { LoadingService } from './shared/Loding/loading.service'; // พาธเดิมของโปรเจ็กต์
 import { AuthService } from './shared/auth.service'; // ✅ เพิ่ม import
 import { environment } from '../environments/environment';
+import { SidebarService } from './shared/services/sidebar.service'; // Import SidebarService
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,7 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent implements OnInit, OnDestroy {
   loading$ = this.loading.isLoading$;
+  isMobileMenuOpen$ = this.sidebarService.isMobileMenuOpen$; // Expose observable
 
   // เก็บ reference ของ storage listener ไว้ถอดตอน destroy
   private onStorage = (e: StorageEvent) => {
@@ -24,17 +26,21 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private loading: LoadingService,
     private http: HttpClient,
-    private auth: AuthService // ✅ inject ให้เรียกใช้ใน ngOnInit ได้
+    private auth: AuthService, // ✅ inject ให้เรียกใช้ใน ngOnInit ได้
+    private sidebarService: SidebarService // Inject SidebarService
   ) {}
 
   ngOnInit() {
     window.addEventListener('storage', this.onStorage);
 
-    if (this.auth.isLoggedIn()) {
-      this.auth.fetchMe().subscribe({
-        error: () => this.auth.logout(false), // ใช้ false ป้องกันลูป
-      });
-    }
+    // if (this.auth.isLoggedIn()) {
+    //   this.auth.fetchMe().subscribe({
+    //     error: () => this.auth.logoutToLogin() // ถ้า 401/403 ค่อยเด้ง
+    //   });
+    // } else {
+    //   // Defer navigation to the next event loop cycle to avoid ExpressionChangedAfterItHasBeenCheckedError.
+    //   setTimeout(() => this.auth.logoutToLogin());
+    // }
   }
 
   ngOnDestroy(): void {
@@ -52,5 +58,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.http
       .get(`${environment.apiBase}/ping`, { responseType: 'text' })
       .subscribe({ next: () => {}, error: () => {} });
+  }
+
+  closeMobileMenu(): void {
+    this.sidebarService.closeMobileMenu();
   }
 }

@@ -1,21 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { Invoice, InvoiceService } from '../invoice/invoice.service';
 import { NewDocumentDialogComponent } from '../dialogs/new-document-dialog/new-document-dialog.component';
-
-// Interface สำหรับข้อมูลที่จะแสดงในตาราง
-export interface DocumentRow {
-  id: string;
-  docNo: string;
-  taxId: string;
-  customer: string;
-  branch: string;
-  type: string;
-  issueDate: Date;
-  createdAt: Date | undefined;
-  status: string;
-}
+import { DocumentService } from '../documents/document.service';
+import { DocumentListItem, DocumentSearchParams, Page } from '../../shared/models/document.models';
 
 @Component({
   selector: 'app-documentsall',
@@ -23,71 +11,58 @@ export interface DocumentRow {
   styleUrls: ['./documentsall.component.css'],
 })
 export class DocumentsallComponent implements OnInit {
-  f: any = {};
-  private allInvoices: Invoice[] = [];
-  rows: DocumentRow[] = [];
+  f: DocumentSearchParams = {};
+  private allDocuments: DocumentListItem[] = [];
+  rows: DocumentListItem[] = [];
 
   constructor(
-    private invoiceService: InvoiceService,
+    private documentService: DocumentService,
     private router: Router,
     public dialog: MatDialog // Inject MatDialog ที่นี่
   ) {}
 
   ngOnInit(): void {
-    this.loadInvoices();
+    this.loadDocuments();
   }
 
-  loadInvoices(): void {
-    this.invoiceService.getInvoices().subscribe((data: Invoice[]) => {
-      this.allInvoices = data;
-      this.search();
+  loadDocuments(params?: DocumentSearchParams): void {
+    this.documentService.list(params).subscribe((page: Page<DocumentListItem>) => {
+      this.allDocuments = page.content; // Store all documents from the current page
+      this.rows = page.content; // Display documents from the current page
+      // If pagination is implemented, you would also update totalPages, currentPage, etc. here
     });
-  }
-
-  private mapInvoicesToRows(invoices: Invoice[]): DocumentRow[] {
-    return invoices.map((inv) => ({
-      id: inv._id!,
-      docNo: inv.documentNumber || '-',
-      taxId: inv.customer.taxId,
-      customer: inv.customer.name,
-      branch: inv.customer.branchCode || 'สำนักงานใหญ่',
-      type: inv.documentType,
-      issueDate: inv.issueDate,
-      createdAt: inv.createdAt,
-      status: inv.status,
-    }));
   }
 
   search(): void {
-    const filteredInvoices = this.allInvoices.filter((inv) => {
-      const matchDocNo =
-        !this.f.docNo || inv.documentNumber?.includes(this.f.docNo);
-      const matchCustomerTaxId =
-        !this.f.customerTaxId ||
-        inv.customer.taxId.includes(this.f.customerTaxId);
-      const matchDocType =
-        !this.f.docType || inv.documentType === this.f.docType;
-      return matchDocNo && matchCustomerTaxId && matchDocType;
-    });
-
-    this.rows = this.mapInvoicesToRows(filteredInvoices);
+    const searchParams: DocumentSearchParams = {
+      docNo: this.f.docNo,
+      buyerTaxId: this.f.buyerTaxId,
+      docType: this.f.docType,
+      issueDateFrom: this.f.issueDateFrom,
+      issueDateTo: this.f.issueDateTo,
+      createdFrom: this.f.createdFrom,
+      createdTo: this.f.createdTo,
+      status: this.f.status,
+    };
+    this.loadDocuments(searchParams);
   }
 
   clear(): void {
     this.f = {};
-    this.search();
+    this.loadDocuments(); // Load all documents (first page)
   }
 
-  getStatusClass(status: string): string {
-    if (status === 'active') return 'badge-green';
-    if (status === 'cancelled') return 'badge-red';
+  getStatusClass(status: string | undefined): string {
+    if (status === 'CONFIRMED') return 'badge-green';
+    if (status === 'CANCELLED') return 'badge-red';
     return 'badge-gray';
   }
 
-  getStatusText(status: string): string {
-    if (status === 'active') return 'ใช้งาน';
-    if (status === 'cancelled') return 'ยกเลิก';
-    return status;
+  getStatusText(status: string | undefined): string {
+    if (status === 'CONFIRMED') return 'ใช้งาน';
+    if (status === 'CANCELLED') return 'ยกเลิก';
+    if (status === 'DRAFT') return 'แบบร่าง';
+    return status ?? '';
   }
 
   createNewDocument(): void {
@@ -101,7 +76,7 @@ export class DocumentsallComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result && result.documentType && result.documentTemplate) {
+      if (result && result.documentType) {
         this.router.navigate(['/invoice/new'], {
           queryParams: {
             type: result.documentType,
@@ -112,19 +87,39 @@ export class DocumentsallComponent implements OnInit {
     });
   }
 
-  viewInvoice(id: string): void {
-    console.log('View invoice:', id);
+  viewDocument(id: number): void {
+    this.router.navigate(['/documents', id.toString()]);
   }
 
-  editInvoice(id: string): void {
-    this.router.navigate(['/invoice/edit', id]);
+  editDocument(id: number): void {
+    this.router.navigate(['/documents/edit', id.toString()]);
   }
 
-  cancelInvoice(id: string): void {
+  downloadDocument(id: number): void {
+    const docItem = this.rows.find(r => r.id === id);
+    if (docItem && docItem.docUuid) {
+      // For now, let's assume PDF download. We can add a dialog later for format selection.
+      this.documentService.exportDocument(docItem.docUuid, 'pdf').subscribe(blob => {
+        const a = document.createElement('a'); // Correctly refers to the global document object
+        const objectUrl = URL.createObjectURL(blob);
+        a.href = objectUrl;
+        a.download = `${docItem.docNo || 'document'}.pdf`; // Use docNo as filename, fallback to 'document'
+        a.click();
+        URL.revokeObjectURL(objectUrl);
+      }, error => {
+        console.error('Error downloading document:', error);
+        alert('ไม่สามารถดาวน์โหลดเอกสารได้');
+      });
+    } else {
+      alert('ไม่พบเอกสารหรือรหัสเอกสารไม่ถูกต้อง');
+    }
+  }
+
+  cancelInvoice(docUuid: string): void { // Change parameter to docUuid
     if (confirm('คุณต้องการยกเลิกเอกสารนี้ใช่หรือไม่?')) {
-      this.invoiceService.cancelInvoice(id).subscribe(() => {
+      this.documentService.cancel(docUuid).subscribe(() => { // Use docUuid
         alert('ยกเลิกเอกสารสำเร็จ');
-        this.loadInvoices();
+        this.loadDocuments();
       });
     }
   }

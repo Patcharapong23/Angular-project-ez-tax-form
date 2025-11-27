@@ -1,6 +1,6 @@
 <app-sidebar (onToggle)="onSidebarToggle($event)"></app-sidebar>
 
-<div class="main-content" [class.collapsed]="isCollapsed">
+<div class="main-content" [class.collapsed]="isCollapsed" [class.mobile-menu-open]="isMobileMenuOpen$ | async">
   <main class="content-area">
     <app-topbar></app-topbar>
     <router-outlet></router-outlet>

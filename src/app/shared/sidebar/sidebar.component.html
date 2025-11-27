@@ -2,44 +2,48 @@
   class="sidebar"
   [class.collapsed]="isCollapsed"
   [class.hover-expand]="hoverExpand"
+  [class.mobile-mode]="isMobileView"
+  [class.mobile-open]="isMobileView && mobileSidebarOpen"
   (mouseenter)="onMouseEnter()"
   (mouseleave)="onMouseLeave()"
 >
-  <button
-    class="circle-toggle"
-    [class.locked]="isLocked"
-    (click)="toggleLock()"
-    aria-label="Toggle sidebar lock"
-  >
-    <span class="dot"></span>
-  </button>
-
   <div class="sidebar-header">
+    <button
+      class="circle-toggle"
+      [class.locked]="isLocked"
+      (click)="toggleLock()"
+      aria-label="Toggle sidebar lock"
+    >
+      <span class="dot"></span>
+    </button>
+
     <img class="brand-logo" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
   </div>
 
   <nav class="sidebar-nav">
     <ul>
-      <!-- Dashboard -->
+      <!-- แดชบอร์ด -->
       <li>
         <a
           class="nav-item"
           routerLink="/dashboard"
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: true }"
+          (click)="setActive('dashboard')"
+          [class.selected]="currentMain === 'dashboard'"
         >
           <i class="ti ti-layout-dashboard nav-icon"></i>
           <span class="nav-label">แดชบอร์ด</span>
         </a>
       </li>
 
-      <!-- จัดการข้อมูล -->
+      <!-- จัดการข้อมูล (มี dropdown) -->
       <li>
         <div
           class="nav-item"
           (click)="toggleSubMenu('dataManagement')"
           [class.opened]="openSubMenu === 'dataManagement'"
-          [class.selected]="activeMain === 'dataManagement'"
+          [class.selected]="currentMain === 'dataManagement'"
         >
           <i class="ti ti-database nav-icon"></i>
           <span class="nav-label">จัดการข้อมูล</span>
@@ -48,42 +52,63 @@
             [class.rotate]="openSubMenu === 'dataManagement'"
           ></i>
         </div>
+
         <ul class="sub-menu" [class.open]="openSubMenu === 'dataManagement'">
           <li>
-            <a routerLink="/company" routerLinkActive="active-sub"
-              >ข้อมูลบริษัท</a
+            <a
+              routerLink="/company"
+              routerLinkActive="active-sub"
+              (click)="selectSub('dataManagement', 'company')"
             >
+              ข้อมูลบริษัท
+            </a>
           </li>
           <li>
-            <a routerLink="/branches" routerLinkActive="active-sub"
-              >ข้อมูลสาขา</a
+            <a
+              routerLink="/branches"
+              routerLinkActive="active-sub"
+              (click)="selectSub('dataManagement', 'branches')"
             >
+              ข้อมูลสาขา
+            </a>
           </li>
           <li>
-            <a routerLink="/general" routerLinkActive="active-sub"
-              >ข้อมูลทั่วไป</a
+            <a
+              routerLink="/general"
+              routerLinkActive="active-sub"
+              (click)="selectSub('dataManagement', 'general')"
             >
+              ข้อมูลทั่วไป
+            </a>
           </li>
           <li>
-            <a routerLink="/customers" routerLinkActive="active-sub"
-              >ข้อมูลลูกค้า</a
+            <a
+              routerLink="/customers"
+              routerLinkActive="active-sub"
+              (click)="selectSub('dataManagement', 'customers')"
             >
+              ข้อมูลลูกค้า
+            </a>
           </li>
           <li>
-            <a routerLink="/products" routerLinkActive="active-sub"
-              >ข้อมูลสินค้า</a
+            <a
+              routerLink="/products"
+              routerLinkActive="active-sub"
+              (click)="selectSub('dataManagement', 'products')"
             >
+              ข้อมูลสินค้า
+            </a>
           </li>
         </ul>
       </li>
 
-      <!-- จัดการเอกสาร -->
+      <!-- จัดการเอกสาร (มี dropdown) -->
       <li>
         <div
           class="nav-item"
           (click)="toggleSubMenu('documentManagement')"
           [class.opened]="openSubMenu === 'documentManagement'"
-          [class.selected]="activeMain === 'documentManagement'"
+          [class.selected]="currentMain === 'documentManagement'"
         >
           <i class="ti ti-file-text nav-icon"></i>
           <span class="nav-label">จัดการเอกสาร</span>
@@ -92,46 +117,77 @@
             [class.rotate]="openSubMenu === 'documentManagement'"
           ></i>
         </div>
+
         <ul
           class="sub-menu"
           [class.open]="openSubMenu === 'documentManagement'"
         >
           <li>
-            <a routerLink="/documents/import" routerLinkActive="active-sub"
-              >นำเข้าข้อมูล</a
+            <a
+              routerLink="/documents/import"
+              routerLinkActive="active-sub"
+              (click)="selectSub('documentManagement', 'import')"
             >
+              นำเข้าข้อมูล
+            </a>
           </li>
           <li>
-            <a routerLink="/documentsall" routerLinkActive="active-sub"
-              >รายการเอกสารทั้งหมด</a
+            <a
+              routerLink="/documentsall"
+              routerLinkActive="active-sub"
+              (click)="selectSub('documentManagement', 'documentsall')"
             >
+              รายการเอกสารทั้งหมด
+            </a>
           </li>
           <li>
-            <a routerLink="/documents/templates" routerLinkActive="active-sub"
-              >จัดการแม่แบบข้อมูล</a
+            <a
+              routerLink="/documents/templates"
+              routerLinkActive="active-sub"
+              (click)="selectSub('documentManagement', 'templates')"
             >
+              จัดการแม่แบบข้อมูล
+            </a>
           </li>
         </ul>
       </li>
 
-      <!-- อื่น ๆ -->
+      <!-- จัดการผู้ใช้และสิทธิ์ -->
       <li>
-        <a class="nav-item" routerLink="/users" routerLinkActive="active">
+        <a
+          class="nav-item"
+          routerLink="/users"
+          routerLinkActive="active"
+          (click)="setActive('users')"
+          [class.selected]="currentMain === 'users'"
+        >
           <i class="ti ti-user nav-icon"></i>
           <span class="nav-label">จัดการผู้ใช้และสิทธิ์</span>
         </a>
       </li>
+
+      <!-- ประวัติการทำรายการ -->
       <li>
-        <a class="nav-item" routerLink="/history" routerLinkActive="active">
+        <a
+          class="nav-item"
+          routerLink="/history"
+          routerLinkActive="active"
+          (click)="setActive('history')"
+          [class.selected]="currentMain === 'history'"
+        >
           <i class="ti ti-history nav-icon"></i>
           <span class="nav-label">ประวัติการทำรายการ</span>
         </a>
       </li>
+
+      <!-- ตั้งค่า API -->
       <li>
         <a
           class="nav-item"
           routerLink="/api-settings"
           routerLinkActive="active"
+          (click)="setActive('api')"
+          [class.selected]="currentMain === 'api'"
         >
           <i class="ti ti-settings nav-icon"></i>
           <span class="nav-label">ตั้งค่า API</span>
@@ -140,10 +196,10 @@
     </ul>
   </nav>
 
-  <div class="sidebar-footer">
+  <!-- <div class="sidebar-footer">
     <a class="nav-item" (click)="logout()">
       <i class="ti ti-logout nav-icon"></i>
       <span class="nav-label">ออกจากระบบ</span>
     </a>
-  </div>
+  </div> -->
 </aside>

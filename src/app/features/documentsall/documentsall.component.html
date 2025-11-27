@@ -23,11 +23,11 @@
           </div>
 
           <div class="field">
-            <label>เลขที่ผู้เสียภาษีลูกค้า</label>
+            <label>เลขที่ผู้เสียภาษีผู้ซื้อ</label>
             <input
               type="text"
-              [(ngModel)]="f.customerTaxId"
-              name="customerTaxId"
+              [(ngModel)]="f.buyerTaxId"
+              name="buyerTaxId"
             />
           </div>
 
@@ -104,7 +104,7 @@
           <th><input type="checkbox" /></th>
           <th>เลขที่เอกสาร</th>
           <th>เลขที่ผู้เสียภาษี</th>
-          <th>ชื่อลูกค้า</th>
+          <th>ชื่อผู้ซื้อ</th>
           <th>รหัสสาขา</th>
           <th>ประเภทเอกสาร</th>
           <th>วันที่ออกเอกสาร</th>
@@ -117,10 +117,10 @@
         <tr *ngFor="let r of rows">
           <td><input type="checkbox" /></td>
           <td>{{ r.docNo }}</td>
-          <td>{{ r.taxId }}</td>
-          <td>{{ r.customer }}</td>
-          <td>{{ r.branch }}</td>
-          <td>{{ r.type }}</td>
+          <td>{{ r.buyerTaxId }}</td>
+          <td>{{ r.buyerName }}</td>
+          <td>{{ r.branchCode }}</td>
+          <td>{{ r.docTypeCode }}</td>
           <td>{{ r.issueDate | date : "dd/MM/yyyy" }}</td>
           <td>{{ r.createdAt | date : "dd/MM/yyyy" }}</td>
           <td>
@@ -129,16 +129,19 @@
             </span>
           </td>
           <td class="actions">
-            <button class="icon-btn" title="ดู" (click)="viewInvoice(r.id)">
+            <button class="icon-btn" title="ดู" (click)="viewDocument(r.id)">
               <i class="ti ti-eye"></i>
             </button>
-            <button class="icon-btn" title="แก้ไข" (click)="editInvoice(r.id)">
+            <button class="icon-btn" title="แก้ไข" (click)="editDocument(r.id)">
               <i class="ti ti-edit"></i>
+            </button>
+            <button class="icon-btn" title="ดาวน์โหลด" (click)="downloadDocument(r.id)">
+              <i class="ti ti-download"></i>
             </button>
             <button
               class="icon-btn danger"
               title="ยกเลิก"
-              (click)="cancelInvoice(r.id)"
+              (click)="cancelInvoice(r.docUuid)"
             >
               <i class="ti ti-x"></i>
             </button>
