@@ -10,7 +10,7 @@
       <div class="custom-dropdown">
         <button
           class="dropdown-trigger"
-          (click)="toggleDropdown('type')"
+          (click)="toggleDropdown('type'); $event.stopPropagation()"
           [class.active]="opened.type"
         >
           <ng-container *ngIf="!selectedDocType; else selectedTypeTemplate">
@@ -43,7 +43,7 @@
       <div class="custom-dropdown">
         <button
           class="dropdown-trigger"
-          (click)="toggleDropdown('template')"
+          (click)="toggleDropdown('template'); $event.stopPropagation()"
           [class.active]="opened.template"
           [disabled]="filteredTemplates.length === 0"
         >
@@ -82,7 +82,7 @@
   <div class="dialog-actions">
     <button
       type="button"
-      class="button"
+      class="btn"
       [disabled]="!selectedDocType"
       (click)="submit()"
     >

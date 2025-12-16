@@ -97,7 +97,7 @@
 }
 
 .nav-item.active {
-  background-color: #ffc107;
+  background-color: var(--primary-color);
   color: #292927;
   font-weight: 500;
 }
@@ -180,7 +180,7 @@
 
 /* active ของรายการย่อย */
 .sub-menu a.active {
-  background: #ffc107;
+  background: var(--primary-color);
   color: #292927;
 }
 
@@ -214,23 +214,23 @@
 }
 
 .sidebar .sub-menu a.active {
-  background: #ffc107;
+  background: var(--primary-color);
   color: #292927;
   font-weight: 600;
 }
 
 .nav-item.active {
-  background-color: #ffc107;
+  background-color: var(--primary-color);
   color: #292927;
   font-weight: 600;
 }
 .nav-item.selected {
-  background: #ffc107;
+  background: var(--primary-color);
   color: #292927;
   font-weight: 600;
 }
 .sub-menu a.active-sub {
-  background: #ffc107;
+  background: var(--primary-color);
   color: #292927;
   font-weight: 600;
 }
@@ -253,7 +253,7 @@
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 .circle-toggle:hover {
-  border-color: #ffc107;
+  border-color: var(--primary-color);
   background-color: #fffbea;
 }
 .circle-toggle .dot {
@@ -310,8 +310,9 @@
    =========================== */
 /* <1023px = โหมด drawer มือถือ/แท็บเล็ต */
 @media (max-width: 1023px) {
-  .sidebar {
-    width: 260px;
+  .sidebar,
+  .sidebar.collapsed {
+    width: 260px !important;
     height: 100vh;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     border-right: 1px solid rgba(0, 0, 0, 0.05);
@@ -359,9 +360,26 @@
 
   /* มือถือเวลายุบ ไม่มี hover-expand เหมือน desktop
      โลโก้ให้กลับมาเต็มตอน drawer เปิด */
-  .sidebar.mobile-mode .sidebar-header .brand-logo {
+  .sidebar.mobile-mode .sidebar-header .brand-logo,
+  .sidebar.collapsed .sidebar-header .brand-logo {
     transform: scale(1) !important;
     opacity: 1 !important;
+  }
+
+  /* Force show elements hidden by collapsed state */
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .sub-arrow,
+  .sidebar.collapsed .sub-menu {
+    display: block !important;
+  }
+
+  .sidebar.collapsed .nav-item {
+    justify-content: flex-start !important;
+    padding: 12px 20px !important;
+  }
+
+  .sidebar.collapsed .nav-icon {
+    margin-right: 16px !important;
   }
 }
 

@@ -10,7 +10,40 @@ $my-typography: mat.define-typography-config(
 @include mat.core($my-typography);
 
 // 3) พาเลตสี (ตัวอย่าง: indigo/pink/warn)
-$material-tic-tac-toe-primary: mat.define-palette(mat.$indigo-palette);
+$custom-primary-map: (
+  50: #fff8e1,
+  100: #ffecb3,
+  200: #ffe082,
+  300: #ffd54f,
+  400: #ffca28,
+  500: #ffcc00,
+  600: #ffb300,
+  700: #ffa000,
+  800: #ff8f00,
+  900: #ff6f00,
+  A100: #ffe57f,
+  A200: #ffd740,
+  A400: #ffc400,
+  A700: #ffab00,
+  contrast: (
+    50: black,
+    100: black,
+    200: black,
+    300: black,
+    400: black,
+    500: black,
+    600: black,
+    700: black,
+    800: black,
+    900: black,
+    A100: black,
+    A200: black,
+    A400: black,
+    A700: black,
+  )
+);
+
+$material-tic-tac-toe-primary: mat.define-palette($custom-primary-map);
 $material-tic-tac-toe-accent: mat.define-palette(
   mat.$pink-palette,
   A200,

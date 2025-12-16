@@ -1,3 +1,4 @@
+import { MatIconModule } from '@angular/material/icon';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LoginComponent } from './login.component';
@@ -27,6 +28,7 @@ describe('LoginComponent', () => {
         RouterTestingModule,
         MatInputModule,
         NoopAnimationsModule,
+        MatIconModule
       ],
       providers: [{ provide: AuthService, useValue: authSpy }],
     }).compileComponents();

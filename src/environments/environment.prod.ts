@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBase: 'http://localhost:8080/api',
+  apiBase: 'https://api.your-production-domain.com/api', // TODO: Update with real production URL
 };

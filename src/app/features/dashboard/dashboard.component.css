@@ -1,5 +1,5 @@
 .page {
-  padding: 16px 0px 24px;
+  padding: 24px 0px 0px 0px;
   /* background: #f6f7fb; */
   min-height: calc(100vh - 64px);
 }
@@ -38,7 +38,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #ffc107;
+  background: var(--primary-color);
   display: grid;
   place-items: center;
   color: #1f2937;
@@ -52,7 +52,7 @@
 }
 
 .meta .role {
-  color: #ffc107;
+  color: var(--primary-color);
   font-weight: 600;
 }
 

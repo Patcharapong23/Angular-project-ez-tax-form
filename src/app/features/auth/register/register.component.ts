@@ -12,6 +12,7 @@ import { AuthService } from '../../../shared/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { thaiTaxIdValidator } from '../../../shared/validators/thai-taxid.validator';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { SwalService } from '../../../shared/services/swal.service';
 
 interface Province {
   code: string;
@@ -130,6 +131,7 @@ export class RegisterComponent implements OnInit {
           Validators.maxLength(13),
           Validators.pattern(/^\d+$/),
           thaiTaxIdValidator,
+          this.juristicTaxIdValidator,
         ],
       ],
       sellerPhoneNumber: ['', [Validators.pattern(/^\d*$/)]],
@@ -161,7 +163,8 @@ export class RegisterComponent implements OnInit {
     private http: HttpClient,
     private auth: AuthService,
     private router: Router,
-    private snack: MatSnackBar
+    private snack: MatSnackBar,
+    private swalService: SwalService
   ) {}
   private toast(msg: string) {
     // ถ้าไม่ได้ใช้ Material ให้ใช้ alert(msg) แทน
@@ -759,8 +762,25 @@ export class RegisterComponent implements OnInit {
       // error จาก thaiTaxIdValidator
       return 'เลขประจำตัวผู้เสียภาษีไม่ถูกต้องตามรูปแบบที่กำหนด';
     }
+    if (errors['notJuristic']) {
+      return 'ต้องเป็นเลขประจำตัวผู้เสียภาษีนิติบุคคล (ขึ้นต้นด้วย 0) เท่านั้น';
+    }
 
     return 'ข้อมูลไม่ถูกต้อง';
+  }
+
+  // Validator สำหรับเช็คว่าเป็นนิติบุคคล (ขึ้นต้นด้วย 0)
+  juristicTaxIdValidator(control: AbstractControl): { [key: string]: any } | null {
+    const value = (control.value || '').toString();
+    // ถ้ายังไม่ครบ 13 หลัก ให้ validator อื่นจัดการ
+    if (value.length !== 13) {
+      return null;
+    }
+    // เช็คตัวแรก
+    if (!value.startsWith('0')) {
+      return { notJuristic: true };
+    }
+    return null;
   }
 
   // ========================== Logo upload ==========================
@@ -851,8 +871,10 @@ export class RegisterComponent implements OnInit {
       next: (res) => {
         const generatedUser = res.user.username;
         sessionStorage.setItem('register.username', generatedUser);
-        this.router.navigate(['/register-success'], {
-          state: { username: generatedUser },
+        this.swalService.success('สมัครสมาชิกสำเร็จ', `ยินดีต้อนรับสู่ระบบ คุณ ${generatedUser}`).then(() => {
+          this.router.navigate(['/register-success'], {
+            state: { username: generatedUser },
+          });
         });
       },
       error: (err: HttpErrorResponse) => {

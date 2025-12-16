@@ -16,6 +16,8 @@
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "lib": ["es2020", "dom"]
   },
   "angularCompilerOptions": {

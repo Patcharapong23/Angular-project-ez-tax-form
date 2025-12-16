@@ -74,56 +74,12 @@ mat-form-field.full-width {
 }
 
 /* ------- Input Fields (Angular Material MDC) ------- */
-:host ::ng-deep .mat-mdc-form-field {
-  --mdc-outlined-text-field-outline-color: #000;
-  --mdc-outlined-text-field-hover-outline-color: #000;
-  --mdc-outlined-text-field-focus-outline-color: #000;
-  --mdc-outlined-text-field-label-text-color: #000;
-  --mdc-outlined-text-field-focus-label-text-color: #000;
-  --mdc-outlined-text-field-caret-color: #000;
-}
+/* Removed custom overrides to use standard Material theme */
 
-/* เพิ่มความสูงและ spacing ให้ input */
-:host ::ng-deep .mat-mdc-form-field-flex {
-  min-height: 56px !important;
-  align-items: center;
-}
-
-:host ::ng-deep .mat-mdc-text-field-wrapper {
-  border-radius: 8px !important;
-  padding: 0 12px !important;
-}
-
-:host ::ng-deep .mat-mdc-form-field-infix {
-  padding: 12px 0 !important;
-}
-
-:host ::ng-deep .mat-mdc-input-element {
-  font-size: 16px !important;
-  line-height: 24px !important;
-}
-
-/* ✅ ป้องกันวรรณยุกต์หาย (label/notch) */
-:host ::ng-deep .mat-mdc-form-field .mdc-notched-outline__notch,
-:host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
-:host ::ng-deep .mat-mdc-form-field .mdc-floating-label {
-  overflow: visible !important;
-}
-
-/* suffix icon (ปุ่ม toggle password) ให้จัดวางสวยเป๊ะ */
-:host ::ng-deep .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-}
-:host ::ng-deep .mat-mdc-form-field-icon-suffix .mat-icon {
-  font-size: 20px;
-  line-height: 20px;
-}
-
-/* subscript (error/hint) ให้เว้นระยะกำลังดี */
-:host ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-  margin-top: 4px;
+mat-form-field.full-width {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 /* ------- Buttons ------- */
@@ -163,6 +119,7 @@ mat-form-field.full-width {
   font-weight: 600;
   line-height: normal;
 }
+
 .link:hover {
   text-decoration: underline;
 }
@@ -170,8 +127,10 @@ mat-form-field.full-width {
 /* ลืมรหัสผ่านชิดขวาใต้ช่องรหัสผ่าน */
 .forgot-wrapper {
   text-align: right;
-  margin: -24px 0 32px;
+  margin: -8px 0 24px;
+  /* Adjusted margin */
 }
+
 .forgot {
   font-size: 14px;
 }
@@ -189,12 +148,6 @@ mat-form-field.full-width {
 }
 
 /* ------- Error Message ------- */
-:host ::ng-deep .mat-mdc-form-field-error {
-  font-size: 13px;
-  color: #d32f2f !important;
-  margin-top: 4px;
-}
-
 .form-error {
   color: #d32f2f;
   font-size: 13px;
@@ -202,30 +155,16 @@ mat-form-field.full-width {
   margin: -4px 0 12px;
 }
 
-/* ปรับ error ของ mat-error (template ใช้ mat-error ด้วย) */
-.mat-error {
-  font-size: 13px;
-  margin-top: 1px;
-}
-
-/* ให้ label/ข้อความไม่โดน squeeze ในบางธีม */
-.mat-form-field {
-  line-height: 1.5;
-}
-
-/* ✅ ป้องกันไม้เอกไม้โทหาย — ยกเลิก line-height ที่มากับ Material */
-:host ::ng-deep .mat-mdc-input-element {
-  line-height: normal !important;
-}
-
 /* ------- Responsive ------- */
 @media (max-width: 480px) {
   .auth-card {
     padding: 20px;
   }
+
   .title {
     font-size: 24px;
   }
+
   .subtitle {
     font-size: 16px;
   }

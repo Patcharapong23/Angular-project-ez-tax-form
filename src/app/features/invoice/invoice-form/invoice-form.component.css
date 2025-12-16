@@ -34,6 +34,7 @@
   border-radius: 8px;
   transition: background 0.15s ease;
 }
+
 .icon-back:hover {
   background: rgba(0, 0, 0, 0.06);
 }
@@ -63,12 +64,14 @@
   text-align: center;
   margin: 4px 0 20px;
 }
+
 .doc-heading .th {
   font-weight: 700;
   font-size: 18px;
   line-height: 1.25;
   color: #111;
 }
+
 .doc-heading .en {
   font-weight: 500;
   font-size: 14px;
@@ -94,6 +97,7 @@
   align-items: center;
   gap: 8px;
 }
+
 .logo-box img,
 .logo-placeholder {
   width: 200px;
@@ -109,6 +113,7 @@
   padding: 8px;
   object-fit: contain;
 }
+
 .logo-hint {
   font-size: 12px;
   color: #6b7280;
@@ -119,7 +124,7 @@
 /* ฟิลด์ข้อมูลบริษัทด้านขวา */
 .company-fields {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr);
   gap: 14px 24px;
 }
 
@@ -130,12 +135,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative; /* Added for datepicker anchoring */
 }
 
 .form-label {
   font-size: 14px;
   font-weight: 500;
-  color: #374151; /* gray-700 */
+  color: #374151;
+  /* gray-700 */
   line-height: 1.4;
   display: flex;
   align-items: baseline;
@@ -156,7 +163,8 @@ textarea.form-control {
   display: block;
   font-size: 14px;
   line-height: 1.4;
-  padding: 10px 12px;
+  height: 40px; /* Enforce 40px height */
+  padding: 0 12px; /* Adjust padding for fixed height */
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   background-color: #fff;
@@ -187,7 +195,9 @@ textarea.form-control {
 }
 
 textarea.form-control {
+  height: auto;
   min-height: 80px;
+  padding: 8px 12px;
   resize: vertical;
 }
 
@@ -243,6 +253,7 @@ textarea.form-control {
   gap: 8px;
   margin-bottom: 4px;
 }
+
 .section-title::before {
   content: "";
   display: block;
@@ -276,21 +287,29 @@ textarea.form-control {
 .item-row {
   display: grid;
   grid-template-columns:
-    120px /* sku */
-    1fr /* name */
-    70px /* qty */
-    110px /* price */
-    90px /* disc */
-    100px /* vat */
-    110px /* amount */
-    32px; /* delete btn */
+    120px
+    /* sku */
+    1fr
+    /* name */
+    70px
+    /* qty */
+    110px
+    /* price */
+    90px
+    /* disc */
+    100px
+    /* vat */
+    110px
+    /* amount */
+    32px;
+  /* delete btn */
   align-items: center;
   column-gap: 8px;
 }
 
 /* หัวตารางสีเหลือง */
 .items-header {
-  background: #ffcc00;
+  background: var(--primary-color);
   color: #111;
   font-weight: 700;
   font-size: 14px;
@@ -324,19 +343,19 @@ textarea.form-control {
 
 /* แถวรายการสินค้า */
 .item-row {
-  padding: 8px 16px;
+  padding: 8px 8px 0px 0px;
   border-radius: 4px;
 }
 
 /* ช่องอินพุตในแถว */
 .cell-input {
   width: 100%;
-  height: 32px;
+  height: 40px;
   background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
   line-height: 1.4;
   color: #1f2937;
   outline: none;
@@ -356,6 +375,75 @@ textarea.form-control {
   box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3);
 }
 
+/* Column Alignments for Input Fields */
+.item-row input.col-qty {
+  text-align: center;
+}
+
+.item-row input.col-price,
+.item-row input.col-disc,
+.item-row input.col-amt {
+  text-align: right;
+}
+
+/* For the Tax Rate dropdown (custom div) */
+.item-row .col-tax .dropdown-trigger {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end; /* Align content to the right */
+  width: 100%;
+  text-align: right;
+}
+
+.item-row .col-tax .dropdown-trigger span {
+  margin-right: 4px;
+}
+
+/* Wrapper for input + clear button */
+.cell-input-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.cell-input-wrap .cell-input {
+  padding-right: 32px; /* Make room for the button */
+}
+
+.cell-input-wrap .clear-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.cell-input-wrap .clear-btn:hover {
+  background-color: #f3f4f6;
+  color: #ef4444;
+}
+
+.cell-input-wrap .clear-btn .ti {
+  font-size: 16px;
+}
+
+/* Locked state style (optional, if readonly isn't enough) */
+.cell-input.locked {
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
 /* ปุ่มลบรายการ (ไอคอนถังขยะ) */
 .del {
   display: inline-flex;
@@ -367,11 +455,13 @@ textarea.form-control {
   cursor: pointer;
   line-height: 1;
 }
+
 .del .ti {
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1;
   color: #e11d48;
 }
+
 .del:hover .ti {
   color: #be123c;
 }
@@ -412,10 +502,12 @@ textarea.form-control {
   transition: all 0.12s ease;
   margin-bottom: 16px;
 }
+
 .btn-add-row:hover {
   background: #ffffff;
   box-shadow: 0 4px 16px rgba(250, 204, 21, 0.4);
 }
+
 .btn-add-row .ti {
   color: #facc15;
   font-size: 16px;
@@ -428,12 +520,14 @@ textarea.form-control {
   display: flex;
   flex-direction: column;
 }
+
 .note-label {
   font-size: 14px;
   font-weight: 500;
   color: #374151;
   margin-bottom: 6px;
 }
+
 .note-textarea {
   width: auto;
   /* max-width: 500px; */
@@ -448,6 +542,7 @@ textarea.form-control {
   background: #fff;
   transition: all 0.12s ease;
 }
+
 .note-textarea:focus {
   border-color: #facc15;
   box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3);
@@ -470,12 +565,14 @@ textarea.form-control {
   align-items: flex-start;
   font-size: 14px;
   line-height: 1.4;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
+
 .sum-label {
   font-size: 14px;
   color: #111;
 }
+
 .sum-value {
   min-width: 80px;
   font-size: 14px;
@@ -493,10 +590,21 @@ textarea.form-control {
   font-size: 12px;
 }
 
+/* แถวจำนวนเงินรวมทั้งสิ้น - เส้นอยู่ข้างล่าง */
+.sum-row.grand-total {
+  border-bottom: 2px solid #111;
+  padding-bottom: 12px;
+  margin-top: 8px;
+
+  font-weight: 700;
+  font-size: 16px;
+}
+
 /* แถวที่ยังไม่เปิดแก้ไข (ปุ่ม + สีเหลือง) */
 .sum-row.clickable {
   cursor: pointer;
 }
+
 .sum-action {
   background: transparent;
   border: 0;
@@ -510,6 +618,7 @@ textarea.form-control {
   font-weight: 500;
   cursor: pointer;
 }
+
 .sum-action .ti {
   color: #facc15;
   font-size: 14px;
@@ -525,34 +634,36 @@ textarea.form-control {
 .fee-edit-row .sum-label {
   flex: 1;
 }
+
 .fee-input-wrap {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
-  width: 120px; /* กว้างพอ ๆ กับตัวเลข “0.00” ด้านขวา */
+  position: relative;
+  /* width: 120px; */ /* Let it flow naturally or set specific width if needed */
 }
 
 .fee-input {
-  width: 80px;
+  width: 80px; /* Adjust width to match column */
   border: 1px solid #d1d5db;
   border-radius: 6px;
-  padding: 4px 12px;
-  font-size: 16px;
+  padding: 4px 8px;
+  font-size: 14px;
   line-height: 1.4;
   color: #1f2937;
   outline: none;
   box-sizing: border-box;
   background: #fff;
-  text-align: center;
+  text-align: right;
+  margin-right: -9px; /* Pull right to align text with column (1px border + 8px padding) */
 }
+
 .fee-input:focus {
   border-color: #facc15;
   box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3);
 }
 
 /* ปุ่ม X ยกเลิก */
-/* ปุ่ม X ยกเลิก (ดันออกมานิดหน่อย) */
 .fee-cancel-btn {
   border: 0;
   background: transparent;
@@ -561,79 +672,305 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  /* width: 24px;
+  height: 24px; */
   padding: 0;
-}
-.fee-cancel-btn .ti {
-  font-size: 18px;
-  line-height: 1;
-}
-.fee-cancel-btn:hover .ti {
-  color: #be123c;
+  border-radius: 50%;
+  transition: background 0.15s ease;
+  position: absolute;
+  right: -30px; /* Move outside the input area */
 }
 
-/* checkbox ทศนิยม */
-.decimals-row {
-  display: flex;
-  justify-content: flex-start; /* ให้ชิดซ้ายแบบภาพล่าสุด */
-  font-size: 13px;
-  color: #4b5563;
-  margin-top: 8px;
+.fee-cancel-btn:hover {
+  background: rgba(225, 29, 72, 0.1);
 }
-.decimals-check {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-}
-.decimals-check input {
-  accent-color: #facc15;
+
+.fee-cancel-btn .ti {
+  font-size: 18px;
 }
 
 /* ---------------------------
-   ปุ่มบันทึกล่าง
+   Custom Dropdown (Branch, PartyType, TaxRate)
 --------------------------- */
-.bottom-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 24px;
+.custom-dropdown {
+  position: relative;
+  width: 100%;
 }
 
-.bottom-actions .ghost {
-  border: 1px solid #e5e7eb;
+.dropdown-trigger {
+  width: 100%;
+  height: 40px;
   background: #fff;
-  color: #374151;
-  padding: 10px 16px;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
   font-size: 14px;
-  line-height: 1.4;
+  color: #1f2937;
+  transition: all 0.12s ease;
 }
 
-.bottom-actions .primary {
-  background: #ffcc00;
-  color: #111;
-  border: none;
-  padding: 10px 18px;
+.dropdown-trigger:hover {
+  border-color: #facc15;
+}
+
+.dropdown-trigger.active {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3);
+}
+
+.dropdown-arrow {
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-trigger.active .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  max-height: 200px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.15s ease;
+}
+
+.dropdown-panel.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.dropdown-option:hover {
+  background: #f3f4f6;
+  color: #111;
+}
+
+.dropdown-option-tax {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.dropdown-option-tax:hover {
+  background: #f3f4f6;
+  color: #111;
+}
+
+/* ---------------------------
+   Date Picker Display
+--------------------------- */
+.date-display {
+  /* width: 100%; */
+  height: 40px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
   font-size: 14px;
-  line-height: 1.4;
-  font-weight: 600;
+  color: #1f2937;
+  transition: all 0.12s ease;
+}
+
+/* Replacement Section */
+.replacement-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.col-field {
+  width: 100%;
+}
+
+.datepicker-toggle {
+  display: none;
+}
+
+/* Custom Toggle Switch */
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 12px;
+  user-select: none;
+  /* margin-bottom: 16px; handled by gap */
+}
+
+.toggle-switch input {
+  display: none;
+}
+.radio-group {
+  display: flex;
+  gap: 16px;
+  padding-right: 80px;
+  justify-content: space-between;
+}
+.slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: #cbd5e1;
+  border-radius: 24px;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input:checked + .slider {
+  background-color: #facc15; /* Primary Yellow */
+}
+
+input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.toggle-switch:hover .slider {
+  background-color: #94a3b8;
+}
+
+input:checked + .slider:hover {
+  background-color: #eab308;
+}
+
+.date-display:hover {
+  border-color: #facc15;
+}
+
+.date-display mat-icon {
+  color: #9ca3af;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.date-display span.placeholder {
+  color: #9ca3af;
+}
+
+.hidden-input {
+  /* display: none; <-- Causes anchor issue for mat-datepicker */
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+/* ---------------------------
+   VAT Radio Group
+--------------------------- */
+.vat-section {
+  margin-top: 24px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.vat-radio-group {
+  display: flex;
+  gap: 24px;
 }
 
 /* ---------------------------
    Success View
 --------------------------- */
 .success-container {
+  max-width: 600px;
+  margin: 60px auto;
   text-align: center;
-  padding: 48px 24px;
-  margin: 24px auto;
+  padding: 48px 32px;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.success-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  background-color: #65d311; /* Green */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.success-icon {
+  font-size: 40px;
+  color: #fff;
 }
 
 .success-container h2 {
@@ -644,103 +981,380 @@ textarea.form-control {
 }
 
 .success-container p {
-  font-size: 16px;
-  color: #6b7280;
+  color: #9ca3af;
   margin-bottom: 32px;
+  font-size: 14px;
 }
 
 .success-actions {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
 }
 
-.success-actions .primary,
-.success-actions .secondary,
-.success-actions .ghost {
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.success-actions .primary {
-  background: #ffcc00;
+.btn-download-select {
+  background: #facc15;
   color: #111;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.success-actions .secondary {
+.btn-download-select:hover {
+  background: #eab308;
+}
+
+.btn-create-new {
   background: #1f2937;
   color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.success-actions .ghost {
+.btn-create-new:hover {
+  background: #111827;
+}
+
+.btn-view-all {
   background: #fff;
-  color: #374151;
-  border-color: #e5e7eb;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-view-all:hover {
+  background: #f3f4f6;
 }
 
 /* ---------------------------
-   responsive
+   Download Modal
 --------------------------- */
-@media (max-width: 980px) {
-  .header-block {
-    grid-template-columns: 1fr;
-  }
-
-  .company-fields {
-    grid-template-columns: 1fr;
-  }
-
-  .two-col {
-    grid-template-columns: 1fr;
-  }
-
-  .items-header,
-  .item-row {
-    grid-template-columns:
-      90px
-      1fr
-      60px
-      90px
-      70px
-      70px
-      90px
-      28px;
-    column-gap: 6px;
-  }
-
-  .footer-grid {
-    grid-template-columns: 1fr;
-    row-gap: 24px;
-  }
-
-  .bottom-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .bottom-actions .ghost,
-  .bottom-actions .primary {
-    width: 100%;
-    text-align: center;
-  }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.VAT {
-  display: block;
-  padding: 8px;
-  margin-top: 8px;
-}
-
-.item-row .col-qty {
+.modal-content {
+  background: #fff;
+  width: 480px;
+  max-width: 90%;
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
   text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
 }
 
-.item-row .col-price,
-.item-row .col-disc,
-.item-row .col-amt {
-  text-align: right;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 8px;
+  font-size: 20px;
+  display: flex;
+}
+
+.modal-close:hover {
+  color: #111;
+}
+
+.modal-header {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: #facc15;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.modal-icon-wrapper i {
+  font-size: 32px;
+  color: #fff;
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 8px;
+}
+
+.modal-header p {
+  color: #9ca3af;
+  font-size: 14px;
+  margin: 0;
+}
+
+.download-options {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.download-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  width: 100px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.download-card:hover {
+  border-color: #facc15;
+  background: #fffbeb;
+}
+
+.download-card.selected {
+  border-color: #facc15;
+  background: #fffbeb;
+  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.2);
+}
+
+.download-card img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+.checkbox-wrapper {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.download-card.selected .checkbox-wrapper {
+  border-color: #facc15;
+  background: #facc15;
+}
+
+.checkbox-wrapper i {
+  font-size: 14px;
+  color: #111;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+}
+
+/* ---------------------------
+   Bottom Actions (ปุ่มบันทึกด้านล่าง)
+--------------------------- */
+.bottom-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+button.primary {
+  background: #facc15;
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 100px;
+}
+
+button.primary:hover:not(:disabled) {
+  background: #eab308;
+}
+
+button.primary:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+button.ghost {
+  background: transparent;
+  color: #6b7280;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+button.ghost:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #111;
+}
+
+/* ---------------------------
+   Add Payment Button
+--------------------------- */
+.payment-add-btn-row {
+  margin-top: 16px;
+}
+
+.btn-add-payment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #facc15;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-add-payment:hover {
+  background: #eab308;
+  color: #111;
+  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.2);
+}
+
+.btn-add-payment .ti {
+  font-size: 16px;
+}
+
+/* ---------------------------
+   Payment Section (ส่วนช่องทางชำระเงิน)
+--------------------------- */
+.payment-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  margin-top: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.payment-options {
+  display: flex;
+  gap: 24px;
+}
+
+.btn-remove-payment {
+  background: #ffe4e6;
+  border: none;
+  color: #e11d48;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+
+.btn-remove-payment:hover {
+  background: #fecdd3;
+  color: #be123c;
+}
+
+.btn-remove-payment .ti {
+  font-size: 16px;
+}
+
+.check-details {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #e5e7eb;
+}
+
+/* ---------------------------
+   VIEW MODE: All fields should be gray/disabled
+--------------------------- */
+.view-mode .form-control,
+.view-mode .cell-input,
+.view-mode .dropdown-trigger,
+.view-mode .date-display,
+.view-mode textarea.form-control,
+.view-mode .note-textarea {
+  background-color: #f3f4f6 !important;
+  color: #6b7280 !important;
+  border-color: #e5e7eb !important;
+  cursor: default !important;
+}
+
+.view-mode .dropdown-arrow {
+  display: none;
+}
+
+.view-mode .date-icon {
+  color: #9ca3af;
 }

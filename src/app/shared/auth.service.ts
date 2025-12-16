@@ -79,6 +79,7 @@ export interface AuthUser {
   email: string;
   role?: string;
 
+  sellerId?: string; // Add sellerId
   sellerNameTh?: string;
   sellerNameEn?: string;
   sellerTaxId?: string;
@@ -88,6 +89,8 @@ export interface AuthUser {
   branchNameTh?: string;
   branchNameEn?: string;
   sellerAddress?: SellerAddress;
+  fullAddressTh?: string;  // Full address built by backend
+  fullAddressEn?: string;
 }
 
 export interface RegisterDto {
@@ -269,6 +272,7 @@ export class AuthService {
           fullName: profile.fullName,
           email: profile.email,
           role: profile.primaryRole,
+          sellerId: seller?.sellerId,
           sellerNameTh: seller?.sellerNameTh,
           sellerNameEn: seller?.sellerNameEn,
           sellerTaxId: seller?.sellerTaxId,
@@ -329,6 +333,7 @@ export class AuthService {
             fullName: res.user.fullName,
             email: res.user.email,
             role: res.user.authorities?.[0]?.authority,
+            sellerId: seller?.sellerId,
             sellerNameTh: seller?.sellerNameTh,
             sellerNameEn: seller?.sellerNameEn ?? undefined,
             sellerTaxId: seller?.sellerTaxId,
@@ -346,6 +351,9 @@ export class AuthService {
               subdistrictId: branch?.subdistrictId,
               postalCode: branch?.zipCode,
             },
+            // Full address built by backend (buildingNo + addressDetail + subdistrict + district + province + zipCode)
+            fullAddressTh: (res as any).fullAddressTh,
+            fullAddressEn: (res as any).fullAddressEn,
           };
 
           // 3) เก็บ user ลง localStorage + BehaviorSubject

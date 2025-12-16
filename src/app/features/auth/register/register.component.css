@@ -12,6 +12,7 @@
   padding: clamp(16px, 4vw, 32px);
   background: #fff;
 }
+
 .brand {
   width: 200px;
   max-width: 80%;
@@ -28,6 +29,7 @@
   padding: clamp(20px, 4vw, 32px);
   text-align: left;
 }
+
 .section-title {
   margin: 24px 0 12px;
   font-weight: 600;
@@ -35,6 +37,7 @@
   color: #5e5873;
   text-align: left;
 }
+
 .section-title .req {
   color: #ea5455;
   font-weight: 700;
@@ -52,11 +55,13 @@
 .full-width {
   width: 100%;
 }
+
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
 }
+
 .foot-note {
   margin-top: 24px;
   padding-top: 16px;
@@ -76,6 +81,7 @@
   font-weight: 600;
   line-height: normal;
 }
+
 .link:hover {
   text-decoration: underline;
 }
@@ -83,39 +89,10 @@
 /* =========================
    Angular Material tweaks
    ========================= */
-:host ::ng-deep .mdc-notched-outline__notch {
-  overflow: visible !important;
-}
-:host ::ng-deep .mat-mdc-text-field-wrapper {
-  border-radius: 8px !important;
-}
-
-:host ::ng-deep .mat-mdc-form-field {
-  --mdc-outlined-text-field-outline-color: #d7d7d7;
-  --mdc-outlined-text-field-hover-outline-color: #bdbdbd;
-  --mdc-outlined-text-field-focus-outline-color: #000;
-  --mdc-outlined-text-field-label-text-color: rgba(0, 0, 0, 0.6);
-  --mdc-outlined-text-field-focus-label-text-color: #000;
-  --mdc-outlined-text-field-caret-color: #000;
-
-  .mat-mdc-form-field-label {
-    font-size: clamp(
-      14px,
-      2.5vw,
-      16px
-    ) !important; /* Responsive label font size */
-  }
-
-  .mat-mdc-form-field-subscript-wrapper .mat-mdc-form-field-error {
-    font-size: clamp(
-      12px,
-      2vw,
-      13px
-    ) !important; /* Responsive error font size */
-    white-space: normal;
-    min-height: 20px;
-  }
-}
+/* =========================
+   Angular Material tweaks
+   ========================= */
+/* Removed custom overrides to use standard Material theme */
 
 mat-form-field.full-width {
   width: 100%;
@@ -124,25 +101,22 @@ mat-form-field.full-width {
 
 mat-checkbox {
   margin: 16px 0;
-  border-radius: 8px !important;
-
-  font-size: 14px;
-  color: #444;
-  display: flex; /* Make it a flex container */
+  display: flex;
+  /* Make it a flex container */
 }
 
 /* Target the label text within the mat-checkbox */
 mat-checkbox ::ng-deep .mat-checkbox-layout .mat-checkbox-label {
   text-align: left;
-  border-radius: 8px !important;
-
   /* This ensures the text itself aligns left if it wraps to multiple lines */
-  white-space: normal; /* Allow text to wrap */
+  white-space: normal;
+  /* Allow text to wrap */
 }
 
 .mf-relative {
   position: relative;
 }
+
 .field-blocker {
   position: absolute;
   inset: 0;
@@ -151,12 +125,9 @@ mat-checkbox ::ng-deep .mat-checkbox-layout .mat-checkbox-label {
   cursor: not-allowed;
   border-radius: 12px;
 }
+
 .blocked .mat-mdc-text-field-wrapper {
   cursor: not-allowed;
-}
-
-mat-form-field {
-  line-height: 1.5;
 }
 
 /* =========================
@@ -177,30 +148,35 @@ mat-form-field {
   transition: background 0.25s ease, border-color 0.25s ease,
     box-shadow 0.25s ease;
 }
+
 .upload-box:hover {
   border-color: #a7a7a7;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
+
 .upload-box.has-image {
   background: transparent;
   border: none;
 }
+
 .upload-box input[type="file"] {
   display: none;
 }
+
 .logo-preview {
   width: 100%;
   height: 100%;
   object-fit: contain;
   pointer-events: none;
 }
+
 .upload-trigger {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   padding: 6px 14px;
   background: rgba(255, 255, 255, 0.85);
-  color: #ffcc00;
+  color: var(--primary-color);
   border-radius: 8px;
   font-weight: 700;
   font-size: 14px;
@@ -211,12 +187,15 @@ mat-form-field {
   opacity: 0.9;
   transition: opacity 0.2s;
 }
+
 .upload-box.has-image .upload-trigger {
   opacity: 0;
 }
+
 .upload-box:hover .upload-trigger {
   opacity: 0.95;
 }
+
 .upload-note {
   margin: 4px 0 16px;
   text-align: center;
@@ -227,23 +206,6 @@ mat-form-field {
 /* =========================
    Buttons
    ========================= */
-.button {
-  height: 48px;
-  width: 100%;
-  border: 0;
-  border-radius: 10px;
-  background: #ffcc00;
-  color: #111;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  font-size: 16px;
-  margin-top: 16px;
-  transition: all 0.2s ease;
-}
-.button:hover {
-  background: #f5c000;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-}
 
 .actions {
   margin-top: 24px;
@@ -265,6 +227,7 @@ mat-form-field {
   padding: clamp(24px, 4vw, 40px);
   text-align: center;
 }
+
 .title {
   font-size: 32px;
   font-style: normal;
@@ -294,6 +257,7 @@ button[mat-stroked-button] {
   border: 1px solid #d8d6de;
   color: #6e6b7b;
 }
+
 button[mat-stroked-button]:hover {
   background-color: #f8f8f8;
 }
@@ -311,21 +275,26 @@ button[mat-stroked-button]:hover {
   border-radius: 999px;
   overflow: hidden;
 }
+
 .strength-fill {
   height: 100%;
   width: 0;
   transition: width 0.2s ease;
 }
+
 .strength-fill.idle {
   width: 0;
   background: #cfd8dc;
 }
+
 .strength-fill.weak {
   background: #e53935;
 }
+
 .strength-fill.medium {
   background: #fbc02d;
 }
+
 .strength-fill.strong {
   background: #2e7d32;
 }
@@ -335,6 +304,7 @@ button[mat-stroked-button]:hover {
   padding: 0;
   margin: 8px 0 0;
 }
+
 .checklist li {
   display: flex;
   align-items: center;
@@ -344,9 +314,11 @@ button[mat-stroked-button]:hover {
   line-height: 1.5;
   margin: 6px 0;
 }
+
 .checklist li.ok {
   color: #2e7d32;
 }
+
 .checklist mat-icon {
   font-size: 18px;
   width: 18px;
@@ -366,18 +338,7 @@ button[mat-stroked-button]:hover {
 
 @media (max-width: 600px) {
   mat-form-field.full-width {
-    margin-bottom: 12px; /* Reduced margin on smaller screens */
+    margin-bottom: 12px;
+    /* Reduced margin on smaller screens */
   }
-}
-
-mat-checkbox ::ng-deep .mat-checkbox-background {
-}
-
-/* Custom styles for mat-checkbox checked state */
-mat-checkbox.mat-checkbox-checked ::ng-deep .mat-checkbox-background {
-  background-color: #20c997 !important;
-}
-
-mat-checkbox.mat-checkbox-checked ::ng-deep .mat-checkbox-checkmark-path {
-  stroke: #fff !important; /* Ensure the checkmark is white for contrast */
 }

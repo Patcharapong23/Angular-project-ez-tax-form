@@ -168,7 +168,7 @@
 
         <div class="actions">
           <button
-            class="button"
+            class="btn full-width"
             mat-raised-button
             color="primary"
             type="button"
@@ -288,13 +288,7 @@
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>เบอร์ติดต่อธุรกิจ</mat-label>
-          <input
-            matInput
-            formControlName="sellerPhoneNumber"
-            inputmode="numeric"
-            (keydown)="onlyDigitsKeydown($event)"
-            (input)="sanitizeDigits($event, company.get('sellerPhoneNumber'))"
-          />
+          <input matInput formControlName="sellerPhoneNumber" phoneFormat />
         </mat-form-field>
 
         <h3 class="section-title">
@@ -483,7 +477,7 @@
             mat-raised-button
             color="primary"
             type="submit"
-            class="button"
+            class="btn full-width"
             [disabled]="isSubmitting"
           >
             {{ isSubmitting ? "กำลังบันทึก..." : "ลงทะเบียน" }}

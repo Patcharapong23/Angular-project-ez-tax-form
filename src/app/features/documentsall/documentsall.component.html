@@ -8,88 +8,142 @@
     "
   >
     <h1 class="page-title" style="margin: 0">รายการเอกสารทั้งหมด</h1>
-    <button class="btn btn-primary" (click)="createNewDocument()">
-      <i class="ti ti-plus"></i>
-      สร้างเอกสารใหม่
+    <button color="primary" (click)="createNewDocument()" class="btn">
+      <mat-icon>add</mat-icon> สร้างเอกสารใหม่
     </button>
   </div>
   <div class="quick-grid">
     <div class="quick-card placeholder search-card">
-      <form (ngSubmit)="search()" class="search-form">
+      <form [formGroup]="searchForm" (ngSubmit)="search()" class="search-form">
         <div class="grid-3">
           <div class="field">
             <label>เลขที่เอกสาร</label>
-            <input type="text" [(ngModel)]="f.docNo" name="docNo" />
+            <input type="text" formControlName="docNo" />
           </div>
 
           <div class="field">
             <label>เลขที่ผู้เสียภาษีผู้ซื้อ</label>
-            <input
-              type="text"
-              [(ngModel)]="f.buyerTaxId"
-              name="buyerTaxId"
-            />
+            <input type="text" formControlName="buyerTaxId" />
           </div>
 
           <div class="field">
             <label>ประเภทเอกสาร</label>
-            <select [(ngModel)]="f.docType" name="docType">
-              <option value="">ทั้งหมด</option>
-              <option value="T01">ใบเสร็จรับเงิน (T01)</option>
-              <option value="T02">ใบแจ้งหนี้ / ใบกำกับภาษี (T02)</option>
-              <option value="T03">ใบเสร็จรับเงิน / ใบกำกับภาษี (T03)</option>
-              <option value="T04">ใบส่งของ / ใบกำกับภาษี (T04)</option>
-              <option value="380">ใบแจ้งหนี้ (380)</option>
-              <option value="388">ใบกำกับภาษี (388)</option>
-              <option value="80">ใบเพิ่มหนี้ (80)</option>
-              <option value="81">ใบลดหนี้ (81)</option>
-            </select>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('docType'); $event.stopPropagation()"
+                [class.active]="opened['docType']"
+              >
+                <span
+                  [class.placeholder]="
+                    !selectedDocType?.value && selectedDocType?.value !== ''
+                  "
+                >
+                  {{ selectedDocType?.name || "เลือกประเภทเอกสาร" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['docType']">
+                <button
+                  type="button"
+                  *ngFor="let doc of docTypes"
+                  class="dropdown-option"
+                  (click)="selectDocType(doc)"
+                >
+                  <div class="selected-item">
+                    <span>{{ doc.name }}</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="field">
+          <!-- Issue Date Range -->
+          <div formGroupName="issueDateRange" class="date-range-wrapper">
             <label>วันที่ออกเอกสาร (เริ่มต้น–สิ้นสุด)</label>
-            <div class="range">
-              <input
-                type="date"
-                [(ngModel)]="f.issueDateFrom"
-                name="issueDateFrom"
-              />
-              <span>—</span>
-              <input
-                type="date"
-                [(ngModel)]="f.issueDateTo"
-                name="issueDateTo"
-              />
+            <div class="date-display" (click)="issuePicker.open()">
+              <span [class.placeholder]="!issueDateRangeText">
+                {{
+                  issueDateRangeText || "เลือกวันที่เริ่มต้น - วันที่สิ้นสุด"
+                }}
+              </span>
+              <mat-icon>event</mat-icon>
             </div>
+            <mat-date-range-input
+              [rangePicker]="issuePicker"
+              class="hidden-range-input"
+            >
+              <input matStartDate formControlName="start" />
+              <input matEndDate formControlName="end" />
+            </mat-date-range-input>
+            <mat-date-range-picker #issuePicker></mat-date-range-picker>
           </div>
 
-          <div class="field">
+          <!-- Created Date Range -->
+          <div formGroupName="createdDateRange" class="date-range-wrapper">
             <label>วันที่สร้างเอกสาร (เริ่มต้น–สิ้นสุด)</label>
-            <div class="range">
-              <input
-                type="date"
-                [(ngModel)]="f.createdFrom"
-                name="createdFrom"
-              />
-              <span>—</span>
-              <input type="date" [(ngModel)]="f.createdTo" name="createdTo" />
+            <div class="date-display" (click)="createdPicker.open()">
+              <span [class.placeholder]="!createdDateRangeText">
+                {{
+                  createdDateRangeText || "เลือกวันที่เริ่มต้น - วันที่สิ้นสุด"
+                }}
+              </span>
+              <mat-icon>event</mat-icon>
             </div>
+            <mat-date-range-input
+              [rangePicker]="createdPicker"
+              class="hidden-range-input"
+            >
+              <input matStartDate formControlName="start" />
+              <input matEndDate formControlName="end" />
+            </mat-date-range-input>
+            <mat-date-range-picker #createdPicker></mat-date-range-picker>
           </div>
 
           <div class="field">
             <label>สถานะเอกสาร</label>
-            <select [(ngModel)]="f.status" name="status">
-              <option value="">ทั้งหมด</option>
-              <option value="active">ใช้งาน</option>
-              <option value="cancelled">ยกเลิก</option>
-            </select>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('status'); $event.stopPropagation()"
+                [class.active]="opened['status']"
+              >
+                <span
+                  [class.placeholder]="
+                    !selectedStatus?.value && selectedStatus?.value !== ''
+                  "
+                >
+                  {{ selectedStatus?.name || "เลือกสถานะ" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['status']">
+                <button
+                  type="button"
+                  *ngFor="let s of statusOptions"
+                  class="dropdown-option"
+                  (click)="selectStatus(s)"
+                >
+                  <div class="selected-item">
+                    <span>{{ s.name }}</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="action-row">
           <div class="grow"></div>
-          <button type="submit" class="btn btn-warning">ค้นหา</button>
-          <button type="button" class="btn btn-outline" (click)="clear()">
+          <button color="primary" type="submit" class="btn">ค้นหา</button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="button-clear"
+            (click)="clear()"
+          >
             เคลียร์
           </button>
         </div>
@@ -98,61 +152,139 @@
   </div>
 
   <div class="table-card">
-    <table class="doc-table">
+    <table>
       <thead>
         <tr>
-          <th><input type="checkbox" /></th>
-          <th>เลขที่เอกสาร</th>
-          <th>เลขที่ผู้เสียภาษี</th>
-          <th>ชื่อผู้ซื้อ</th>
-          <th>รหัสสาขา</th>
-          <th>ประเภทเอกสาร</th>
-          <th>วันที่ออกเอกสาร</th>
-          <th>วันที่สร้างเอกสาร</th>
-          <th>สถานะเอกสาร</th>
-          <th>การดำเนินการ</th>
+          <th class="text-center"><input type="checkbox" /></th>
+          <th class="text-left">เลขที่เอกสาร</th>
+          <th class="text-left">เลขที่ผู้เสียภาษี</th>
+          <th class="text-left">ชื่อผู้ซื้อ</th>
+          <th class="text-center">รหัสสาขา</th>
+          <th class="text-center">ประเภทเอกสาร</th>
+          <th class="text-left">วันที่ออกเอกสาร</th>
+          <th class="text-left">วันที่สร้างเอกสาร</th>
+          <th class="text-center">สถานะเอกสาร</th>
+          <th class="text-center">การดำเนินการ</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let r of rows">
-          <td><input type="checkbox" /></td>
-          <td>{{ r.docNo }}</td>
-          <td>{{ r.buyerTaxId }}</td>
-          <td>{{ r.buyerName }}</td>
-          <td>{{ r.branchCode }}</td>
-          <td>{{ r.docTypeCode }}</td>
-          <td>{{ r.issueDate | date : "dd/MM/yyyy" }}</td>
-          <td>{{ r.createdAt | date : "dd/MM/yyyy" }}</td>
-          <td>
-            <span class="badge" [ngClass]="getStatusClass(r.status)">
+        <tr *ngFor="let r of paginatedRows">
+          <td class="text-center"><input type="checkbox" /></td>
+          <td class="text-left">{{ r.docNo }}</td>
+          <td class="text-left">
+            {{
+              r.buyerTaxId || r.buyerTaxIdSnapshot || r.buyerPassportNoSnapshot
+            }}
+          </td>
+          <td class="text-left">{{ r.buyerName || r.buyerNameSnapshot }}</td>
+          <td class="text-center">{{ r.branchCode }}</td>
+          <td class="text-center">{{ getDocTypeName(r.docTypeCode) }}</td>
+          <td class="text-left">
+            {{ r.issueDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+          </td>
+          <td class="text-left">
+            {{ r.createdAt | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+          </td>
+          <td class="text-center">
+            <span class="status" [ngClass]="getStatusClass(r.status)">
               {{ getStatusText(r.status) }}
             </span>
           </td>
-          <td class="actions">
-            <button class="icon-btn" title="ดู" (click)="viewDocument(r.id)">
+          <td class="actions text-center">
+            <button
+              mat-icon-button
+              class="icon-view"
+              title="ดู"
+              (click)="viewDocument(r.docUuid)"
+            >
               <i class="ti ti-eye"></i>
             </button>
-            <button class="icon-btn" title="แก้ไข" (click)="editDocument(r.id)">
+            <button
+              mat-icon-button
+              class="icon-edit"
+              title="แก้ไข"
+              (click)="editDocument(r.docUuid)"
+            >
               <i class="ti ti-edit"></i>
             </button>
-            <button class="icon-btn" title="ดาวน์โหลด" (click)="downloadDocument(r.id)">
+            <button
+              mat-icon-button
+              class="icon-view"
+              title="ดาวน์โหลด"
+              (click)="openDownloadModal(r.docUuid, r.docNo)"
+            >
               <i class="ti ti-download"></i>
             </button>
             <button
-              class="icon-btn danger"
+              mat-icon-button
+              class="icon-delete"
               title="ยกเลิก"
               (click)="cancelInvoice(r.docUuid)"
             >
-              <i class="ti ti-x"></i>
+              <i class="ti ti-ban"></i>
+            </button>
+            <button
+              mat-icon-button
+              class="icon-delete"
+              title="ลบ"
+              (click)="deleteDocument(r.docUuid)"
+            >
+              <i class="ti ti-trash"></i>
             </button>
           </td>
         </tr>
         <tr *ngIf="rows.length === 0">
-          <td colspan="10" style="text-align: center; padding: 1rem">
-            ไม่พบข้อมูลเอกสาร
-          </td>
+          <td colspan="10" class="no-data">ไม่พบข้อมูลเอกสาร</td>
         </tr>
       </tbody>
     </table>
+
+    <div class="pagination">
+      <div class="pagination-left">
+        <div class="items-per-page">
+          <span>แสดง</span>
+          <select
+            (change)="onItemsPerPageChange($event)"
+            [value]="itemsPerPage"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span>รายการ</span>
+        </div>
+
+        <div class="pagination-info">
+          แสดง {{ startItemIndex }} ถึง {{ endItemIndex }} จาก
+          {{ rows.length }} รายการ
+        </div>
+      </div>
+
+      <div class="pagination-controls">
+        <div class="page-number">
+          <button
+            (click)="onPageChange(currentPage - 1)"
+            [disabled]="currentPage === 1"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <button
+            *ngFor="let page of pages"
+            (click)="onPageChange(page)"
+            [class.active]="currentPage === page"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>

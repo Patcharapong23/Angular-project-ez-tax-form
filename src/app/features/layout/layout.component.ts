@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { SidebarService } from '../../shared/services/sidebar.service'; // Import SidebarService
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { SidebarService } from '../../shared/services/sidebar.service';
 
 @Component({
   selector: 'app-layout',
@@ -8,9 +9,22 @@ import { SidebarService } from '../../shared/services/sidebar.service'; // Impor
 })
 export class LayoutComponent {
   isCollapsed = true;
-  isMobileMenuOpen$ = this.sidebarService.isMobileMenuOpen$; // Expose observable
+  isMobileView = false;
+  isMobileMenuOpen$ = this.sidebarService.isMobileMenuOpen$;
 
-  constructor(private sidebarService: SidebarService) {} // Inject SidebarService
+  constructor(
+    public sidebarService: SidebarService,
+    private breakpointObserver: BreakpointObserver
+  ) {
+    this.breakpointObserver
+      .observe(['(max-width: 1023px)'])
+      .subscribe((result) => {
+        this.isMobileView = result.matches;
+        if (!this.isMobileView) {
+          this.sidebarService.closeMobileMenu();
+        }
+      });
+  }
 
   onSidebarToggle(isCollapsed: boolean): void {
     this.isCollapsed = isCollapsed;

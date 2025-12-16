@@ -17,11 +17,20 @@
       />
     </svg>
   </button>
-  <h1 class="page-title">สร้างเอกสารใหม่</h1>
+  <h1 class="page-title">
+    <ng-container *ngIf="mode === 'create'">สร้างเอกสารใหม่</ng-container>
+    <ng-container *ngIf="mode === 'view'">ดูเอกสาร</ng-container>
+    <ng-container *ngIf="mode === 'edit'">แก้ไขเอกสาร</ng-container>
+  </h1>
 </div>
 
 <ng-container *ngIf="!creationSuccess; else successView">
-  <form class="invoice-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <form
+    class="invoice-form"
+    [class.view-mode]="mode === 'view'"
+    [formGroup]="form"
+    (ngSubmit)="saveInvoice()"
+  >
     <!-- Header bar / ชื่อหน้า -->
 
     <!-- ชื่อเอกสาร / ประเภทที่เลือก -->
@@ -40,13 +49,17 @@
         <ng-template #placeholderLogo>
           <div class="logo-placeholder">LOGO</div>
         </ng-template>
-        <p class="logo-hint">ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB</p>
+        <p class="logo-hint">
+          ขนาดภาพที่แนะนำ 300 × 300 px และขนาดไม่เกิน 10 MB
+        </p>
       </div>
 
       <div class="company-fields">
         <!-- row1 -->
         <div class="form-field">
-          <label class="form-label">ชื่อผู้ขาย <span class="req">*</span></label>
+          <label class="form-label"
+            >ชื่อผู้ขาย <span class="req">*</span></label
+          >
           <input
             class="form-control"
             type="text"
@@ -82,24 +95,33 @@
 
         <div class="form-field">
           <label class="form-label">ชื่อสาขา <span class="req">*</span></label>
-          <select class="form-control" formControlName="branchCode">
-            <option *ngFor="let b of branches" [value]="b.code">
-              {{ b.name }}
-            </option>
-          </select>
+          <div class="custom-dropdown">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="toggleDropdown('branch')"
+              [class.active]="opened['branch']"
+              [disabled]="mode === 'view'"
+            >
+              <span>{{
+                getBranchName(fgHeader.get("branchCode")?.value)
+              }}</span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['branch']">
+              <button
+                type="button"
+                *ngFor="let b of branches"
+                class="dropdown-option"
+                (click)="selectBranch(b)"
+              >
+                {{ b.name }}
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- row3 -->
-        <div class="form-field">
-          <label class="form-label">เบอร์โทรศัพท์</label>
-          <input
-            class="form-control"
-            type="text"
-            formControlName="tel"
-            [readonly]="true"
-          />
-        </div>
-
         <div class="form-field address-field">
           <label class="form-label"
             >รายละเอียดที่อยู่ <span class="req">*</span></label
@@ -110,6 +132,16 @@
             rows="2"
             [readonly]="true"
           ></textarea>
+        </div>
+        <div class="form-field">
+          <label class="form-label">เบอร์โทรศัพท์</label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="tel"
+            [readonly]="true"
+            phoneFormat
+          />
         </div>
       </div>
     </section>
@@ -128,41 +160,290 @@
             <label class="form-label"
               >ประเภทผู้เสียภาษี <span class="req">*</span></label
             >
-            <select class="form-control" formControlName="partyType">
-              <option *ngFor="let t of partyTypes" [value]="t.value">
-                {{ t.label }}
-              </option>
-            </select>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('partyType')"
+                [class.active]="opened['partyType']"
+                [disabled]="mode === 'view'"
+              >
+                <span>{{
+                  getPartyTypeLabel(fgCustomer.get("partyType")?.value)
+                }}</span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['partyType']">
+                <button
+                  type="button"
+                  *ngFor="let t of partyTypes"
+                  class="dropdown-option"
+                  (click)="selectPartyType(t)"
+                >
+                  {{ t.label }}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- บุคคลธรรมดา -->
+          <!-- PERSON -->
           <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'PERSON'">
+            <!-- View Mode: Display with viewCustomerData property -->
+            <ng-container *ngIf="mode === 'view' && viewCustomerData">
+              <div class="form-field">
+                <label class="form-label">รหัสลูกค้า</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.code"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ชื่อลูกค้า <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.name"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >เลขประจำตัวผู้เสียภาษีอากร <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.taxId"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field full-width">
+                <label class="form-label"
+                  >ที่อยู่ลูกค้า <span class="req">*</span></label
+                >
+                <textarea
+                  class="form-control address-control"
+                  rows="3"
+                  readonly
+                  >{{ viewCustomerData.address }}</textarea
+                >
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >รหัสไปรษณีย์ <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.zip"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">อีเมล</label>
+                <input
+                  class="form-control"
+                  type="email"
+                  [value]="viewCustomerData.email"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">เบอร์โทรศัพท์</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.tel"
+                  readonly
+                />
+              </div>
+            </ng-container>
+
+            <!-- Create/Edit Mode: Form controls -->
+            <ng-container *ngIf="mode !== 'view'">
+              <div class="form-field">
+                <label class="form-label">รหัสลูกค้า</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="code"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ชื่อลูกค้า <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="name"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >เลขประจำตัวผู้เสียภาษีอากร <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="taxId"
+                  maxlength="13"
+                />
+                <div
+                  class="text-danger"
+                  *ngIf="
+                    fgCustomer.get('taxId')?.hasError('invalidThaiTaxId') &&
+                    fgCustomer.get('taxId')?.touched
+                  "
+                >
+                  เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง
+                </div>
+              </div>
+
+              <div class="form-field full-width">
+                <label class="form-label"
+                  >ที่อยู่ลูกค้า <span class="req">*</span></label
+                >
+                <textarea
+                  class="form-control address-control"
+                  rows="3"
+                  formControlName="address"
+                ></textarea>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >รหัสไปรษณีย์ <span class="req">*</span></label
+                >
+                <input class="form-control" type="text" formControlName="zip" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">อีเมล</label>
+                <input
+                  class="form-control"
+                  type="email"
+                  formControlName="email"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">เบอร์โทรศัพท์</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="tel"
+                  phoneFormat
+                />
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <!-- JURISTIC -->
+          <ng-container
+            *ngIf="fgCustomer.get('partyType')!.value === 'JURISTIC'"
+          >
             <div class="form-field">
-              <label class="form-label">รหัสลูกค้า</label>
-              <input class="form-control" type="text" formControlName="code" />
+              <label class="form-label"
+                >รหัสลูกค้า <span class="req">*</span></label
+              >
+              <input
+                class="form-control"
+                type="text"
+                formControlName="code"
+                [matAutocomplete]="autoBuyerCode"
+              />
+              <mat-autocomplete
+                #autoBuyerCode="matAutocomplete"
+                [displayWith]="displayBuyerCode"
+                (optionSelected)="onBuyerSelected($event)"
+              >
+                <mat-option
+                  *ngFor="let buyer of filteredBuyers | async"
+                  [value]="buyer"
+                >
+                  {{ buyer.code }}
+                </mat-option>
+              </mat-autocomplete>
             </div>
 
             <div class="form-field">
               <label class="form-label"
-                >ชื่อลูกค้า <span class="req">*</span></label
+                >ชื่อบริษัท <span class="req">*</span></label
               >
-              <input class="form-control" type="text" formControlName="name" />
+              <input
+                class="form-control"
+                type="text"
+                formControlName="name"
+                [matAutocomplete]="autoBuyerName"
+              />
+              <mat-autocomplete
+                #autoBuyerName="matAutocomplete"
+                [displayWith]="displayBuyer"
+                (optionSelected)="onBuyerSelected($event)"
+              >
+                <mat-option
+                  *ngFor="let buyer of filteredBuyers | async"
+                  [value]="buyer"
+                >
+                  {{ buyer.name }}
+                </mat-option>
+              </mat-autocomplete>
             </div>
 
             <div class="form-field">
               <label class="form-label"
-                >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
+                >เลขประจำตัวผู้เสียภาษีอากร <span class="req">*</span></label
               >
-              <input class="form-control" type="text" formControlName="taxId" maxlength="13" />
-              <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('invalidThaiTaxId') && fgCustomer.get('taxId')?.touched">
-                เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง
+              <input
+                class="form-control"
+                type="text"
+                formControlName="taxId"
+                maxlength="13"
+              />
+              <div
+                class="text-danger"
+                *ngIf="
+                  fgCustomer.get('taxId')?.hasError('invalidThaiTaxId') &&
+                  fgCustomer.get('taxId')?.touched
+                "
+              >
+                เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง
               </div>
-              <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('required') && fgCustomer.get('taxId')?.touched">
-                กรุณากรอกเลขประจำตัวผู้เสียภาษี
+              <div
+                class="text-danger"
+                *ngIf="
+                  fgCustomer.get('taxId')?.hasError('notJuristic') &&
+                  fgCustomer.get('taxId')?.touched
+                "
+              >
+                ต้องเป็นเลขประจำตัวผู้เสียภาษีนิติบุคคล (ขึ้นต้นด้วย 0) เท่านั้น
               </div>
             </div>
 
             <div class="form-field">
+              <label class="form-label">สาขา <span class="req">*</span></label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="branchCode"
+                placeholder=""
+              />
+            </div>
+
+            <div class="form-field full-width">
               <label class="form-label"
                 >ที่อยู่ลูกค้า <span class="req">*</span></label
               >
@@ -175,174 +456,316 @@
 
             <div class="form-field">
               <label class="form-label">อีเมล</label>
-              <input class="form-control" type="email" formControlName="email" />
+              <input
+                class="form-control"
+                type="email"
+                formControlName="email"
+              />
             </div>
 
-                      <div class="form-field">
-                        <label class="form-label">เบอร์โทรศัพท์</label>
-                        <input class="form-control" type="text" formControlName="tel" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-check">
-                          <input type="checkbox" formControlName="saveToMaster" />
-                          <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
-                        </label>
-                      </div>
-                    </ng-container>
-            
-                    <!-- นิติบุคคล -->
-                    <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'JURISTIC'">
-                      <div class="form-field">
-                        <label class="form-label">รหัสลูกค้า</label>
-                        <input class="form-control" type="text" formControlName="code" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >ชื่อลูกค้า (ชื่อบริษัท) <span class="req">*</span></label
-                        >
-                        <input class="form-control" type="text" formControlName="name" />
-                      </div>
-            
-                                  <div class="form-field">
-                                    <label class="form-label"
-                                      >เลขประจำตัวผู้เสียภาษี <span class="req">*</span></label
-                                    >
-                                    <input class="form-control" type="text" formControlName="taxId" maxlength="13" />
-                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('invalidThaiTaxId') && fgCustomer.get('taxId')?.touched">
-                                      เลขประจำตัวผู้เสียภาษีไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง
-                                    </div>
-                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('required') && fgCustomer.get('taxId')?.touched">
-                                      กรุณากรอกเลขประจำตัวผู้เสียภาษี
-                                    </div>
-                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('minlength') && fgCustomer.get('taxId')?.touched">
-                                      เลขประจำตัวผู้เสียภาษีต้องมีความยาว 13 หลัก
-                                    </div>
-                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('maxlength') && fgCustomer.get('taxId')?.touched">
-                                      เลขประจำตัวผู้เสียภาษีต้องมีความยาว 13 หลัก
-                                    </div>
-                                    <div class="text-danger" *ngIf="fgCustomer.get('taxId')?.hasError('pattern') && fgCustomer.get('taxId')?.touched">
-                                      กรอกได้เฉพาะตัวเลข 0–9 เท่านั้น
-                                    </div>
-                                  </div>            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >รหัสสาขา <span class="req">*</span></label
-                        >
-                        <input
-                          class="form-control"
-                          type="text"
-                          formControlName="branchCode"
-                        />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >ชื่อสาขา <span class="req">*</span></label
-                        >
-                        <input
-                          class="form-control"
-                          type="text"
-                          placeholder="สำนักงานใหญ่"
-                          readonly
-                        />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >ที่อยู่ลูกค้า <span class="req">*</span></label
-                        >
-                        <textarea
-                          class="form-control address-control"
-                          rows="3"
-                          formControlName="address"
-                        ></textarea>
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label">อีเมล</label>
-                        <input class="form-control" type="email" formControlName="email" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label">เบอร์โทรศัพท์</label>
-                        <input class="form-control" type="text" formControlName="tel" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-check">
-                          <input type="checkbox" formControlName="saveToMaster" />
-                          <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
-                        </label>
-                      </div>
-                    </ng-container>
-            
-                    <!-- ชาวต่างชาติ -->
-                    <ng-container
-                      *ngIf="fgCustomer.get('partyType')!.value === 'FOREIGNER'"
-                    >
-                      <div class="form-field">
-                        <label class="form-label">รหัสลูกค้า</label>
-                        <input class="form-control" type="text" formControlName="code" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >ชื่อลูกค้า <span class="req">*</span></label
-                        >
-                        <input class="form-control" type="text" formControlName="name" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >เลขหนังสือเดินทาง (Passport) <span class="req">*</span></label
-                        >
-                        <input
-                          class="form-control"
-                          type="text"
-                          formControlName="passportNo"
-                        />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >ที่อยู่ลูกค้า <span class="req">*</span></label
-                        >
-                        <textarea
-                          class="form-control address-control"
-                          rows="3"
-                          formControlName="address"
-                        ></textarea>
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label"
-                          >รหัสไปรษณีย์ <span class="req">*</span></label
-                        >
-                        <input class="form-control" type="text" formControlName="zip" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label">อีเมล</label>
-                        <input class="form-control" type="email" formControlName="email" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-label">เบอร์โทรศัพท์</label>
-                        <input class="form-control" type="text" formControlName="tel" />
-                      </div>
-            
-                      <div class="form-field">
-                        <label class="form-check">
-                          <input type="checkbox" formControlName="saveToMaster" />
-                          <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
-                        </label>
-                      </div>
-                    </ng-container>        </div>
+            <div class="form-field">
+              <label class="form-label">เบอร์โทรศัพท์</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="tel"
+                phoneFormat
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-check">
+                <input type="checkbox" formControlName="saveToMaster" />
+                <span>บันทึกข้อมูลลูกค้าไว้ใช้งานครั้งต่อไป</span>
+              </label>
+            </div>
+          </ng-container>
+
+          <!-- FOREIGNER -->
+          <ng-container
+            *ngIf="fgCustomer.get('partyType')!.value === 'FOREIGNER'"
+          >
+            <!-- View Mode: Display with viewCustomerData property -->
+            <ng-container *ngIf="mode === 'view' && viewCustomerData">
+              <div class="form-field">
+                <label class="form-label">รหัสลูกค้า</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.code"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ชื่อลูกค้า <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.name"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >เลขหนังสือเดินทาง (Passport)
+                  <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.passportNo"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field full-width">
+                <label class="form-label"
+                  >ที่อยู่ลูกค้า <span class="req">*</span></label
+                >
+                <textarea
+                  class="form-control address-control"
+                  rows="3"
+                  readonly
+                  >{{ viewCustomerData.address }}</textarea
+                >
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >รหัสไปรษณีย์ <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.zip"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ประเทศ <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.country"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">อีเมล</label>
+                <input
+                  class="form-control"
+                  type="email"
+                  [value]="viewCustomerData.email"
+                  readonly
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">เบอร์โทรศัพท์</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  [value]="viewCustomerData.tel"
+                  readonly
+                />
+              </div>
+            </ng-container>
+
+            <!-- Create/Edit Mode: Form controls -->
+            <ng-container *ngIf="mode !== 'view'">
+              <div class="form-field">
+                <label class="form-label">รหัสลูกค้า</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="code"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ชื่อลูกค้า <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="name"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >เลขหนังสือเดินทาง (Passport)
+                  <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="passportNo"
+                />
+                <div
+                  class="text-danger"
+                  *ngIf="
+                    fgCustomer.get('passportNo')?.hasError('pattern') &&
+                    fgCustomer.get('passportNo')?.touched
+                  "
+                >
+                  กรุณากรอกเฉพาะตัวเลขและภาษาอังกฤษเท่านั้น (ห้ามกรอกภาษาไทย)
+                </div>
+              </div>
+
+              <div class="form-field full-width">
+                <label class="form-label"
+                  >ที่อยู่ลูกค้า <span class="req">*</span></label
+                >
+                <textarea
+                  class="form-control address-control"
+                  rows="3"
+                  formControlName="address"
+                ></textarea>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >รหัสไปรษณีย์ <span class="req">*</span></label
+                >
+                <input class="form-control" type="text" formControlName="zip" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ประเทศ <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="country"
+                  [matAutocomplete]="autoCountry"
+                />
+                <mat-autocomplete #autoCountry="matAutocomplete">
+                  <mat-option
+                    *ngFor="let country of filteredCountries | async"
+                    [value]="country"
+                  >
+                    {{ country }}
+                  </mat-option>
+                </mat-autocomplete>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">อีเมล</label>
+                <input
+                  class="form-control"
+                  type="email"
+                  formControlName="email"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">เบอร์โทรศัพท์</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="tel"
+                  phoneFormat
+                />
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <!-- OTHER (อื่นๆ) -->
+          <ng-container *ngIf="fgCustomer.get('partyType')!.value === 'OTHER'">
+            <!-- Create/Edit Mode: Form controls -->
+            <ng-container *ngIf="mode !== 'view'">
+              <div class="form-field">
+                <label class="form-label">รหัสลูกค้า</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="code"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ชื่อลูกค้า <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="name"
+                />
+              </div>
+
+              <div class="form-field full-width">
+                <label class="form-label"
+                  >ที่อยู่ลูกค้า <span class="req">*</span></label
+                >
+                <textarea
+                  class="form-control address-control"
+                  rows="3"
+                  formControlName="address"
+                ></textarea>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >รหัสไปรษณีย์ <span class="req">*</span></label
+                >
+                <input class="form-control" type="text" formControlName="zip" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label"
+                  >ประเทศ <span class="req">*</span></label
+                >
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="country"
+                  [matAutocomplete]="autoCountryOther"
+                />
+                <mat-autocomplete #autoCountryOther="matAutocomplete">
+                  <mat-option
+                    *ngFor="let country of filteredCountries | async"
+                    [value]="country"
+                  >
+                    {{ country }}
+                  </mat-option>
+                </mat-autocomplete>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">อีเมล</label>
+                <input
+                  class="form-control"
+                  type="email"
+                  formControlName="email"
+                />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">เบอร์โทรศัพท์</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="tel"
+                  phoneFormat
+                />
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
       </div>
 
-      <!-- ขวา: ข้อมูลเอกสาร -->
       <div class="panel" [formGroup]="fgHeader">
         <div class="section-card">
           <div class="section-title">
@@ -352,14 +775,49 @@
 
           <div class="form-field">
             <label class="form-label">เลขที่เอกสาร</label>
-            <input class="form-control" type="text" formControlName="docNo" />
+            <div style="display: flex; align-items: center; gap: 8px">
+              <input
+                class="form-control"
+                type="text"
+                formControlName="docNo"
+                style="flex: 1"
+                [readonly]="mode === 'edit' || mode === 'view'"
+              />
+              <button
+                *ngIf="mode === 'create'"
+                type="button"
+                class="btn primary"
+                (click)="getDocNumberPreview()"
+                style="padding: 10px 16px; white-space: nowrap"
+              >
+                สร้างเลขใหม่
+              </button>
+            </div>
           </div>
 
           <div class="form-field">
             <label class="form-label"
               >วันที่ออกเอกสาร <span class="req">*</span></label
             >
-            <input class="form-control" type="date" formControlName="issueDate" />
+            <div
+              class="date-display"
+              (click)="mode === 'view' ? null : picker.open()"
+            >
+              <span [class.placeholder]="!fgHeader.get('issueDate')?.value">
+                {{
+                  (fgHeader.get("issueDate")?.value | date : "dd/MM/yyyy") ||
+                    "เลือกวันที่"
+                }}
+              </span>
+              <mat-icon>event</mat-icon>
+            </div>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="issueDate"
+              class="hidden-input"
+            />
+            <mat-datepicker #picker></mat-datepicker>
           </div>
 
           <div class="form-field">
@@ -368,62 +826,236 @@
             >
             <input class="form-control" type="text" formControlName="seller" />
           </div>
+
+          <!-- Group 3 specific fields (80, 81) -->
+          <ng-container *ngIf="isGroup3">
+            <div class="form-field">
+              <label class="form-label"
+                >เลขที่อ้างอิง <span class="req">*</span></label
+              >
+              <input
+                class="form-control"
+                type="text"
+                formControlName="refNo"
+                placeholder="ระบุเลขที่เอกสารที่ต้องการเพิ่มหนี้/ลดหนี้"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label"
+                >วันที่อ้างอิง <span class="req">*</span></label
+              >
+              <div
+                class="date-display"
+                (click)="mode === 'view' ? null : refDatePicker.open()"
+              >
+                <span [class.placeholder]="!fgHeader.get('refDate')?.value">
+                  {{
+                    (fgHeader.get("refDate")?.value | date : "dd/MM/yyyy") ||
+                      "เลือกวันที่"
+                  }}
+                </span>
+                <mat-icon>event</mat-icon>
+              </div>
+              <input
+                matInput
+                [matDatepicker]="refDatePicker"
+                formControlName="refDate"
+                class="hidden-input"
+              />
+              <mat-datepicker #refDatePicker></mat-datepicker>
+            </div>
+
+            <div class="form-field full-width">
+              <label class="form-label"
+                >สาเหตุการออกเอกสาร <span class="req">*</span></label
+              >
+              <textarea
+                class="form-control"
+                rows="2"
+                formControlName="issueReason"
+                placeholder="ระบุสาเหตุ"
+              ></textarea>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label">พนักงานขาย (ผู้รับผิดชอบ)</label>
+              <input
+                class="form-control"
+                type="text"
+                formControlName="salesperson"
+              />
+            </div>
+          </ng-container>
+
+          <!-- Replacement Document Section - only show in create mode -->
+          <div
+            class="replacement-section"
+            *ngIf="canIssueReplacement && mode === 'create'"
+          >
+            <label class="toggle-switch">
+              <input type="checkbox" formControlName="isReplacement" />
+              <span class="slider"></span>
+              <span class="toggle-label">ออกใบใหม่ทดแทนใบเดิม</span>
+            </label>
+            <ng-container *ngIf="fgHeader.get('isReplacement')?.value">
+              <div class="form-field">
+                <div class="row">
+                  <!-- DEBUG -->
+                  <div
+                    style="
+                      background: #f0f0f0;
+                      padding: 10px;
+                      margin-bottom: 20px;
+                    "
+                    *ngIf="debugData"
+                  >
+                    <p><strong>Debug Data (Buyer Info):</strong></p>
+                    <ul>
+                      <li>Name Snapshot: {{ debugData.buyerNameSnapshot }}</li>
+                      <li>
+                        Zip Snapshot: {{ debugData.buyerZipCodeSnapshot }}
+                      </li>
+                      <li>Type Snapshot: {{ debugData.buyerTypeSnapshot }}</li>
+                      <li>Name Legacy: {{ debugData.buyerName }}</li>
+                    </ul>
+                    <details>
+                      <summary>Full Data</summary>
+                      <pre>{{ debugData | json }}</pre>
+                    </details>
+                  </div>
+
+                  <!-- Left Column: Header Form -->
+                  <div class="col-field">
+                    <label class="form-label">ประเภทเอกสารอ้างอิง</label>
+                    <div class="form-field">
+                      <input
+                        type="text"
+                        class="form-control"
+                        [value]="getCurrentDocTypeLabel()"
+                        readonly
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <div class="col-field">
+                    <label class="form-label">เลขที่เอกสารอ้างอิง</label>
+                    <div class="form-field">
+                      <input
+                        type="text"
+                        class="form-control"
+                        formControlName="refDocNo"
+                        [matAutocomplete]="autoRefDoc"
+                        placeholder="ค้นหาเลขที่เอกสาร"
+                      />
+                      <mat-autocomplete
+                        #autoRefDoc="matAutocomplete"
+                        (optionSelected)="onRefDocSelected($event)"
+                      >
+                        <mat-option
+                          *ngFor="let doc of filteredRefDocs | async"
+                          [value]="doc.docNo"
+                        >
+                          {{ doc.docNo }} ({{
+                            doc.issueDate | date : "dd/MM/yyyy"
+                          }})
+                        </mat-option>
+                      </mat-autocomplete>
+                    </div>
+                  </div>
+                  <div class="col-field">
+                    <label class="form-label">วันที่เอกสารอ้างอิง</label>
+                    <div class="form-field" style="position: relative">
+                      <input
+                        type="text"
+                        class="form-control"
+                        [value]="
+                          (fgHeader.get('refDocDate')?.value
+                            | date : 'dd/MM/yyyy') || '(จะถูกเติมอัตโนมัติ)'
+                        "
+                        readonly
+                        disabled
+                        placeholder="(จะถูกเติมอัตโนมัติ)"
+                      />
+                      <input
+                        matInput
+                        [matDatepicker]="refPicker"
+                        formControlName="refDocDate"
+                        class="hidden-input"
+                      />
+                      <mat-datepicker #refPicker></mat-datepicker>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">เหตุผลการออกใบใหม่</label>
+                <div class="custom-dropdown">
+                  <button
+                    type="button"
+                    class="dropdown-trigger"
+                    (click)="toggleDropdown('replacementReason')"
+                    [class.active]="opened['replacementReason']"
+                  >
+                    <span>{{
+                      getReplacementReasonLabel(
+                        fgHeader.get("replacementReason")?.value
+                      )
+                    }}</span>
+                    <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+                  </button>
+                  <div
+                    class="dropdown-panel"
+                    [class.open]="opened['replacementReason']"
+                  >
+                    <button
+                      type="button"
+                      *ngFor="let reason of replacementReasons"
+                      class="dropdown-option"
+                      (click)="selectReplacementReason(reason)"
+                    >
+                      {{ reason.code }} - {{ reason.name }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="form-field"
+                *ngIf="fgHeader.get('replacementReason')?.value === 'TIVC99'"
+              >
+                <label class="form-label">ระบุสาเหตุอื่น</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  formControlName="replacementRemark"
+                  placeholder="ระบุสาเหตุ"
+                />
+              </div>
+            </ng-container>
+          </div>
         </div>
       </div>
     </section>
-    <section class="vat-section">
-      <label class="vat-radio">
-        <input type="radio" formControlName="vatType" value="include" />
-        <span class="radio-custom" aria-hidden="true"></span>
-        <span class="radio-label">ราคารวมภาษีมูลค่าเพิ่ม</span>
-      </label>
 
-      <label class="vat-radio">
-        <input type="radio" formControlName="vatType" value="exclude" />
-        <span class="radio-custom" aria-hidden="true"></span>
-        <span class="radio-label">ราคาไม่รวมภาษีมูลค่าเพิ่ม</span>
-      </label>
+    <section class="vat-section">
+      <mat-radio-group
+        formControlName="vatType"
+        class="vat-radio-group"
+        color="primary"
+      >
+        <mat-radio-button value="exclude"
+          >ราคาไม่รวมภาษีมูลค่าเพิ่ม</mat-radio-button
+        >
+        <mat-radio-button value="include"
+          >ราคารวมภาษีมูลค่าเพิ่ม</mat-radio-button
+        >
+      </mat-radio-group>
     </section>
 
-    <!-- ========== รายการสินค้า / รวมเงิน ========== -->
-    <style>
-      .vat-section {
-        display: flex;
-        margin-top: 32px;
-        gap: 2rem;
-        align-items: center;
-        margin-bottom: 16px;
-      }
-      .vat-radio {
-        display: inline-flex;
-        align-items: center;
-        cursor: pointer;
-        font-size: 14px; /* Adjusted to match form labels */
-      }
-      .vat-radio .radio-label {
-        margin-left: 0.5rem; /* 8px */
-      }
-      .vat-radio input[type="radio"] {
-        display: none; /* Hide the default radio button */
-      }
-      .vat-radio .radio-custom {
-        display: inline-block;
-        width: 16px; /* Smaller control */
-        height: 16px;
-        border: 2px solid #ccc;
-        border-radius: 50%;
-        position: relative;
-        transition: border-color 0.2s;
-      }
-      .vat-radio input[type="radio"]:checked + .radio-custom {
-        border-color: #ffcc00; /* Theme yellow color */
-        background-color: #ffcc00;
-        box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.25);
-      }
-    </style>
     <section class="lines-and-totals">
       <div class="items">
-        <!-- head -->
         <div class="items-header">
           <div class="col-sku">รหัสสินค้า</div>
           <div class="col-name">รายการ</div>
@@ -441,14 +1073,66 @@
           *ngFor="let it of itemForms; let i = index; trackBy: trackByIdx"
           [formGroup]="it"
         >
-          <input class="cell-input col-sku" formControlName="sku" type="text" />
-          <input class="cell-input col-name" formControlName="name" type="text" />
-          <input class="cell-input col-qty" formControlName="qty" type="text" [numberInputFormatter]="'integer'" />
+          <!-- SKU -->
+          <div class="cell-input-wrap col-sku">
+            <input
+              class="cell-input"
+              formControlName="sku"
+              type="text"
+              [matAutocomplete]="autoProductSku"
+              (click)="autoSelect($event)"
+              (blur)="onInputBlur(i, 'sku')"
+            />
+            <mat-autocomplete
+              #autoProductSku="matAutocomplete"
+              [displayWith]="displayProductSku"
+              (optionSelected)="onProductSelected($event, i)"
+            >
+              <mat-option
+                *ngFor="let product of filteredProducts[i] | async"
+                [value]="product"
+              >
+                {{ product.productCode }}
+              </mat-option>
+            </mat-autocomplete>
+          </div>
+
+          <!-- Name -->
+          <div class="cell-input-wrap col-name">
+            <input
+              class="cell-input"
+              formControlName="name"
+              type="text"
+              [matAutocomplete]="autoProduct"
+              (click)="autoSelect($event)"
+              (blur)="onInputBlur(i, 'name')"
+            />
+            <mat-autocomplete
+              #autoProduct="matAutocomplete"
+              [displayWith]="displayProduct"
+              (optionSelected)="onProductSelected($event, i)"
+            >
+              <mat-option
+                *ngFor="let product of filteredProducts[i] | async"
+                [value]="product"
+              >
+                {{ product.name }}
+              </mat-option>
+            </mat-autocomplete>
+          </div>
+
+          <input
+            class="cell-input col-qty"
+            formControlName="qty"
+            type="text"
+            [numberInputFormatter]="'integer'"
+          />
           <input
             class="cell-input col-price"
             formControlName="price"
             type="text"
             numberInputFormatter
+            readonly
           />
           <input
             class="cell-input col-disc"
@@ -456,22 +1140,25 @@
             type="text"
             numberInputFormatter
           />
-          <!-- ใหม่ -->
-          <select class="cell-input col-tax" formControlName="taxRate">
-            <option [ngValue]="0">0%</option>
-            <option [ngValue]="7">7%</option>
-            <option [ngValue]="14">14%</option>
-          </select>
+
+          <!-- Tax Rate - Readonly, no dropdown -->
+          <input
+            class="cell-input col-tax"
+            [value]="it.get('taxRate')?.value + '%'"
+            type="text"
+            readonly
+            style="text-align: center"
+          />
 
           <input
             class="cell-input col-amt"
-            formControlName="amount"
+            [value]="fmt(it.get('amount')?.value)"
             type="text"
             readonly
-            numberInputFormatter
           />
 
           <button
+            *ngIf="mode !== 'view'"
             type="button"
             class="del col-del"
             (click)="removeItem(i)"
@@ -480,50 +1167,57 @@
           >
             <i class="ti ti-trash-filled"></i>
           </button>
+          <div *ngIf="mode === 'view'" class="col-del"></div>
+        </div>
+      </div>
+
+      <div class="table-sep"></div>
+
+      <!-- footer: ซ้าย/ขวา -->
+      <div class="footer-grid">
+        <!-- ซ้าย -->
+        <div class="left-col">
+          <button
+            *ngIf="mode !== 'view'"
+            type="button"
+            class="btn-add-row"
+            (click)="addItem()"
+          >
+            <i class="ti ti-plus"></i>
+            <span>เพิ่มรายการ</span>
+          </button>
+
+          <div class="note-block">
+            <label class="note-label">หมายเหตุ</label>
+            <textarea
+              rows="3"
+              class="note-textarea"
+              formControlName="remark"
+            ></textarea>
+          </div>
         </div>
 
-        <div class="table-sep"></div>
-
-        <!-- footer: ซ้าย/ขวา -->
-        <div class="footer-grid">
-          <!-- ซ้าย -->
-          <div class="left-col">
-            <button type="button" class="btn-add-row" (click)="addItem()">
-              <i class="ti ti-plus"></i>
-              <span>เพิ่มรายการ</span>
-            </button>
-
-            <div class="note-block">
-              <label class="note-label">หมายเหตุ</label>
-              <textarea
-                rows="3"
-                class="note-textarea"
-                formControlName="remark"
-              ></textarea>
-            </div>
+        <!-- ขวา -->
+        <div class="right-col">
+          <div class="sum-row">
+            <div class="sum-label">รวมราคาสินค้า</div>
+            <div class="sum-value">{{ fmt(totals.subtotal) }}</div>
           </div>
 
-          <!-- ขวา -->
-          <div class="right-col">
-            <div class="sum-row">
-              <div class="sum-label">จำนวนเงินรวม</div>
-              <div class="sum-value">{{ fmt(totals.subtotal) }}</div>
-            </div>
+          <div class="sum-row">
+            <div class="sum-label">รวมส่วนลดทั้งหมด</div>
+            <div class="sum-value">{{ fmt(totals.discount) }}</div>
+          </div>
 
-            <div class="sum-row">
-              <div class="sum-label">รวมส่วนลดทั้งหมด</div>
-              <div class="sum-value">{{ fmt(totals.discount) }}</div>
-            </div>
-
-            <div class="sum-row">
-              <div class="sum-label">จำนวนเงินหลังหักส่วนลด</div>
-              <div class="sum-value">
-                {{ fmt(totals.netAfterDiscount) }}
-              </div>
-            </div>
-
-            <!-- ค่าบริการ -->
-            <div class="sum-row clickable" *ngIf="!editingServiceFee">
+          <!-- ค่าบริการ (moved here, under discount) -->
+          <div
+            class="sum-row"
+            *ngIf="!editingServiceFee"
+            [style.justify-content]="
+              serviceFee === 0 && mode !== 'view' ? 'flex-end' : 'space-between'
+            "
+          >
+            <ng-container *ngIf="mode !== 'view'">
               <button
                 type="button"
                 class="sum-action"
@@ -532,114 +1226,264 @@
                 <i class="ti ti-plus"></i>
                 <span>ค่าบริการ</span>
               </button>
-              <div class="sum-value">{{ fmt(serviceFee) }}</div>
-            </div>
-
-            <div class="sum-row fee-edit-row" *ngIf="editingServiceFee">
+            </ng-container>
+            <ng-container *ngIf="mode === 'view'">
               <div class="sum-label">ค่าบริการ</div>
-              <div class="fee-input-wrap">
-                <input
-                  class="fee-input"
-                  type="text"
-                  numberInputFormatter
-                  [value]="serviceFee"
-                  (input)="onServiceFeeInput($event)"
-                />
-                <button
-                  type="button"
-                  class="fee-cancel-btn"
-                  (click)="cancelServiceFee()"
-                  aria-label="ยกเลิกค่าบริการ"
-                  title="ยกเลิก"
-                >
-                  <i class="ti ti-x"></i>
-                </button>
-              </div>
-            </div>
+            </ng-container>
 
-            <!-- ค่าขนส่ง -->
-            <div class="sum-row clickable" *ngIf="!editingShippingFee">
-              <button
-                type="button"
-                class="sum-action"
-                (click)="startEditShippingFee()"
-              >
-                <i class="ti ti-plus"></i>
-                <span>ค่าขนส่ง</span>
-              </button>
-              <div class="sum-value">{{ fmt(shippingFee) }}</div>
-            </div>
-
-            <div class="sum-row fee-edit-row" *ngIf="editingShippingFee">
-              <div class="sum-label">ค่าขนส่ง</div>
-              <div class="fee-input-wrap">
-                <input
-                  class="fee-input"
-                  type="text"
-                  numberInputFormatter
-                  [value]="shippingFee"
-                  (input)="onShippingFeeInput($event)"
-                />
-                <button
-                  type="button"
-                  class="fee-cancel-btn"
-                  (click)="cancelShippingFee()"
-                  aria-label="ยกเลิกค่าขนส่ง"
-                  title="ยกเลิก"
-                >
-                  <i class="ti ti-x"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="sum-row">
-              <div class="sum-label">จำนวนภาษีมูลค่าเพิ่ม</div>
-              <div class="sum-value">{{ fmt(totals.vat) }}</div>
-            </div>
-
-            <div class="sum-row total">
-              <div class="sum-label">จำนวนเงินรวมทั้งสิ้น</div>
-              <div class="sum-value">{{ fmt(totals.grand) }}</div>
-            </div>
-
-            <div class="decimals-row">
-              <label class="decimals-check">
-                <input
-                  type="checkbox"
-                  [checked]="use4Decimals"
-                  (change)="toggleDecimals($event)"
-                />
-                ใช้ทศนิยม 4 ตำแหน่ง
-              </label>
+            <div class="sum-value" *ngIf="serviceFee !== 0 || mode === 'view'">
+              {{ fmt(serviceFee) }}
             </div>
           </div>
+
+          <div class="sum-row fee-edit-row" *ngIf="editingServiceFee">
+            <div class="sum-label">ค่าบริการ</div>
+            <div class="fee-input-wrap">
+              <input
+                class="fee-input"
+                type="text"
+                numberInputFormatter
+                [value]="serviceFee"
+                (input)="onServiceFeeInput($event)"
+                (keypress)="onlyAllowNumbers($event)"
+              />
+              <button
+                type="button"
+                class="fee-cancel-btn"
+                (click)="cancelServiceFee()"
+                aria-label="ยกเลิกค่าบริการ"
+                title="ยกเลิก"
+              >
+                <i class="ti ti-x"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="sum-row">
+            <div class="sum-label">จำนวนเงินที่เสียภาษีมูลค่าเพิ่ม</div>
+            <div class="sum-value">
+              {{ fmt(totals.netAfterDiscount) }}
+            </div>
+          </div>
+
+          <!-- ค่าขนส่ง removed -->
+
+          <div class="sum-row">
+            <div class="sum-label">จำนวนภาษีมูลค่าเพิ่ม</div>
+            <div class="sum-value">{{ fmt(totals.vat) }}</div>
+          </div>
+
+          <div class="sum-row grand-total">
+            <div class="sum-label">จำนวนเงินรวมทั้งสิ้น</div>
+            <div class="sum-value">{{ fmt(totals.grand) }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment Method Section - Only show for Group 1 -->
+    <div
+      class="payment-add-btn-row"
+      *ngIf="!showPaymentMethod && showBankSelection && mode !== 'view'"
+    >
+      <button
+        type="button"
+        class="btn-add-payment"
+        color="primary"
+        (click)="addPaymentMethod()"
+      >
+        <i class="ti ti-plus"></i>
+        <span>เพิ่มช่องทางการชำระ</span>
+      </button>
+    </div>
+
+    <section
+      class="payment-section"
+      *ngIf="showPaymentMethod && showBankSelection"
+      [formGroup]="fgPayment"
+    >
+      <div class="payment-header">
+        <div class="payment-options">
+          <mat-radio-group
+            formControlName="paymentType"
+            class="vat-radio-group"
+            color="primary"
+          >
+            <mat-radio-button value="CASH">เงินสด</mat-radio-button>
+            <mat-radio-button value="TRANSFER">เงินโอน</mat-radio-button>
+            <mat-radio-button value="CHECK">เช็ค</mat-radio-button>
+            <mat-radio-button value="CREDIT">บัตรเครดิต</mat-radio-button>
+          </mat-radio-group>
+        </div>
+        <button
+          *ngIf="mode !== 'view'"
+          type="button"
+          class="btn-remove-payment"
+          (click)="removePaymentMethod()"
+        >
+          ลบช่องทางการชำระ
+          <i class="ti ti-trash-filled del"></i>
+        </button>
+      </div>
+
+      <!-- Check Details -->
+      <div
+        class="check-details"
+        *ngIf="fgPayment.get('paymentType')?.value === 'CHECK'"
+      >
+        <div class="form-field">
+          <label class="form-label"
+            >ชื่อธนาคาร <span class="req">*</span></label
+          >
+          <div class="custom-dropdown">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="toggleDropdown('bankName')"
+              [class.active]="opened['bankName']"
+              [disabled]="mode === 'view'"
+            >
+              <span>{{
+                getBankNameLabel(fgPayment.get("bankName")?.value)
+              }}</span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['bankName']">
+              <button
+                type="button"
+                class="dropdown-option"
+                (click)="selectBank({ bankCode: '' })"
+              >
+                เลือกธนาคาร
+              </button>
+              <button
+                type="button"
+                *ngFor="let bank of banks"
+                class="dropdown-option"
+                (click)="selectBank(bank)"
+              >
+                {{ bank.bankNameTh }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">สาขา <span class="req">*</span></label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="branch"
+            placeholder="ระบุสาขา หรือเลือกจากรายการ"
+            [matAutocomplete]="autoBranch"
+          />
+          <mat-autocomplete #autoBranch="matAutocomplete">
+            <mat-option
+              *ngFor="let branch of bankBranches"
+              [value]="branch.branchNameTh"
+            >
+              {{ branch.branchNameTh }}
+            </mat-option>
+          </mat-autocomplete>
+        </div>
+        <div class="form-field">
+          <label class="form-label"
+            >เลขที่เช็ค <span class="req">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            formControlName="checkNo"
+            placeholder="เลขที่เช็ค"
+          />
+        </div>
+        <div class="form-field">
+          <label class="form-label"
+            >วันที่บนเช็ค <span class="req">*</span></label
+          >
+          <div
+            class="date-display"
+            (click)="mode === 'view' ? null : checkPicker.open()"
+          >
+            <span [class.placeholder]="!fgPayment.get('checkDate')?.value">
+              {{
+                (fgPayment.get("checkDate")?.value | date : "dd/MM/yyyy") ||
+                  "เลือกวันที่"
+              }}
+            </span>
+            <mat-icon>event</mat-icon>
+          </div>
+          <input
+            matInput
+            [matDatepicker]="checkPicker"
+            formControlName="checkDate"
+            class="hidden-input"
+          />
+          <mat-datepicker #checkPicker></mat-datepicker>
+        </div>
+        <div class="form-field">
+          <label class="form-label">จำนวนเงิน <span class="req">*</span></label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="amount"
+            placeholder="ระบุจำนวนเงิน"
+            numberInputFormatter
+          />
         </div>
       </div>
     </section>
 
     <!-- ปุ่มด้านล่าง -->
     <div class="bottom-actions">
-      <button type="button" class="ghost" [disabled]="isSaving">บันทึกแบบร่างข้อมูล</button>
-      <button type="submit" class="primary" [disabled]="isSaving">
-        <span *ngIf="!isSaving">บันทึก</span>
-        <span *ngIf="isSaving">กำลังบันทึก...</span>
-      </button>
+      <!-- View Mode: Edit button -->
+      <!-- <button
+        *ngIf="mode === 'view'"
+        type="button"
+        class="primary"
+        [routerLink]="['/documents/edit', documentUuid]"
+      >
+        แก้ไขเอกสาร
+      </button> -->
+
+      <!-- Create/Edit Mode: Save buttons -->
+      <ng-container *ngIf="mode !== 'view'">
+        <button type="button" class="ghost" [disabled]="isSaving">
+          บันทึกแบบร่างข้อมูล
+        </button>
+        <button
+          type="submit"
+          class="primary"
+          [disabled]="isSaving || (mode === 'edit' && !isFormDirty)"
+        >
+          <span *ngIf="!isSaving">{{
+            mode === "edit" ? "บันทึกการแก้ไข" : "บันทึก"
+          }}</span>
+          <span *ngIf="isSaving">กำลังบันทึก...</span>
+        </button>
+      </ng-container>
     </div>
   </form>
 </ng-container>
 
 <ng-template #successView>
   <div class="success-container">
-    <h2>สร้างเอกสารสำเร็จ!</h2>
-    <p>เอกสารของคุณถูกสร้างเรียบร้อยแล้ว</p>
+    <div class="success-icon-wrapper">
+      <i class="ti ti-check success-icon"></i>
+    </div>
+    <h2>เลือกดำเนินการต่อ</h2>
+    <p>คุณสามารถดาวน์โหลดไฟล์เอกสารได้โดยกด “เลือกดาวน์โหลดไฟล์”</p>
     <div class="success-actions">
-      <button type="button" class="primary" (click)="exportPdf(createdDocument?.docUuid || null)">
-        Export PDF
+      <button
+        type="button"
+        class="btn-download-select"
+        (click)="openDownloadDialog()"
+      >
+        เลือกดาวน์โหลดไฟล์
       </button>
-      <button type="button" class="secondary" (click)="resetForm()">
+      <button type="button" class="btn-create-new" (click)="resetForm()">
         สร้างเอกสารใหม่
       </button>
-      <button type="button" class="ghost" routerLink="/documentsall">
+      <button type="button" class="btn-view-all" routerLink="/documentsall">
         ดูเอกสารทั้งหมด
       </button>
     </div>

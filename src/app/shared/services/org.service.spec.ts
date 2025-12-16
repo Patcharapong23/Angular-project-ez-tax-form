@@ -1,4 +1,3 @@
-
 import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { OrgService, SellerProfile } from './org.service';
@@ -57,18 +56,11 @@ describe('OrgService', () => {
         tel: '',
         address: '',
         logoUrl: '',
-        branches: [],
+        branches: [{ code: '00000', name: 'สำนักงานใหญ่' }],
       };
 
       service.me().subscribe(profile => {
-        expect(profile).toEqual(jasmine.objectContaining({
-            companyName: '',
-            taxId: '',
-            branchCode: '00000',
-            branchName: 'สำนักงานใหญ่',
-            tel: '',
-            address: '',
-        }));
+        expect(profile).toEqual(emptyProfile);
       });
 
       const req = httpMock.expectOne(`${api}/auth/me`);
@@ -79,10 +71,16 @@ describe('OrgService', () => {
 
   describe('loadSellerProfile', () => {
     it('should load and transform seller profile correctly', () => {
-      const meResponse = { branchId: 'b1', tenantId: 't1' };
-      const branchResponse = { branchCode: '00001', nameTh: 'สาขา 1' };
-      const tenantResponse = { nameTh: 'บริษัท A', tenantTaxId: '123', tel: '02-123', addressDetailTh: '123 ถ.สุขุมวิท' };
-      const branchesResponse = [{ branchCode: '00001', nameTh: 'สาขา 1' }, { branchCode: '00002', nameEn: 'Branch 2' }];
+        const meResponse = {
+            sellerNameTh: 'บริษัท A',
+            sellerTaxId: '123',
+            branchCode: '00001',
+            branchNameTh: 'สาขา 1',
+            sellerPhone: '02-123',
+            addressDetailTh: '123 ถ.สุขุมวิท',
+            logoUrl: 'logo.png',
+            branches: [{ code: '00001', nameTh: 'สาขา 1' }, { code: '00002', nameTh: 'สาขา 2' }]
+        };
 
       const expectedProfile: SellerProfile = {
         companyName: 'บริษัท A',
@@ -91,10 +89,10 @@ describe('OrgService', () => {
         branchName: 'สาขา 1',
         tel: '02-123',
         address: '123 ถ.สุขุมวิท',
-        logoUrl: '',
+        logoUrl: 'logo.png',
         branches: [
           { code: '00001', name: 'สาขา 1' },
-          { code: '00002', name: 'Branch 2' }
+          { code: '00002', name: 'สาขา 2' }
         ]
       };
 
@@ -105,43 +103,38 @@ describe('OrgService', () => {
       const meReq = httpMock.expectOne(`${api}/auth/me`);
       expect(meReq.request.method).toBe('GET');
       meReq.flush(meResponse);
-
-      const branchReq = httpMock.expectOne(`${api}/branches/b1`);
-      expect(branchReq.request.method).toBe('GET');
-      branchReq.flush(branchResponse);
-
-      const tenantReq = httpMock.expectOne(`${api}/tenants/t1`);
-      expect(tenantReq.request.method).toBe('GET');
-      tenantReq.flush(tenantResponse);
-
-      const branchesReq = httpMock.expectOne(`${api}/branches?tenantId=t1`);
-      expect(branchesReq.request.method).toBe('GET');
-      branchesReq.flush(branchesResponse);
     });
 
-    it('should handle null branchId and tenantId', () => {
-        const meResponse = { branchId: null, tenantId: null };
-  
-        const expectedProfile: SellerProfile = {
-          companyName: '',
-          taxId: '',
-          branchCode: '00000',
-          branchName: 'สำนักงานใหญ่',
-          tel: '',
-          address: '',
-          logoUrl: '',
-          branches: [
-            { code: '00000', name: 'สำนักงานใหญ่' }
-          ]
+    it('should handle null values in response', () => {
+        const meResponse = {
+            sellerNameEn: 'Company B',
+            sellerTaxId: null,
+            branchCode: null,
+            branchNameEn: 'Branch B',
+            sellerPhone: null,
+            addressDetailTh: null,
+            logoUrl: null,
+            branches: null
         };
-  
-        service.loadSellerProfile().subscribe(profile => {
-          expect(profile).toEqual(expectedProfile);
-        });
-  
-        const meReq = httpMock.expectOne(`${api}/auth/me`);
-        expect(meReq.request.method).toBe('GET');
-        meReq.flush(meResponse);
+
+      const expectedProfile: SellerProfile = {
+        companyName: 'Company B',
+        taxId: '',
+        branchCode: '00000',
+        branchName: 'Branch B',
+        tel: '',
+        address: '',
+        logoUrl: '',
+        branches: []
+      };
+
+      service.loadSellerProfile().subscribe(profile => {
+        expect(profile).toEqual(expectedProfile);
       });
+
+      const meReq = httpMock.expectOne(`${api}/auth/me`);
+      expect(meReq.request.method).toBe('GET');
+      meReq.flush(meResponse);
+    });
   });
 });

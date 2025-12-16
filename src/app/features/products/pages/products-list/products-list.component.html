@@ -1,0 +1,209 @@
+<section class="products-page">
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>ข้อมูลสินค้า</h1>
+    <button color="primary" (click)="createNewProduct()" class="btn">
+      <mat-icon>add</mat-icon> เพิ่มสินค้า
+    </button>
+  </div>
+
+  <div class="search-card">
+    <form [formGroup]="searchForm" (ngSubmit)="search()" class="search-form">
+      <div class="grid-3">
+        <!-- รหัสสินค้า -->
+        <div class="field">
+          <label>รหัสสินค้า</label>
+          <input
+            type="text"
+            formControlName="sku"
+            placeholder="กรอกรหัสสินค้า"
+          />
+        </div>
+
+        <!-- วันที่สร้าง (เริ่มต้น-สิ้นสุด) -->
+        <div formGroupName="dateRange" class="date-range-wrapper">
+          <label>วันที่สร้าง (เริ่มต้น-สิ้นสุด)</label>
+
+          <!-- กล่องที่เห็นบนจอ -->
+          <div class="date-display" (click)="picker.open()">
+            <span [class.placeholder]="!dateRangeText">
+              {{ dateRangeText || "เลือกวันที่เริ่มต้น - วันที่สิ้นสุด" }}
+            </span>
+            <mat-icon>event</mat-icon>
+          </div>
+
+          <!-- ตัวเก็บค่าที่ซ่อนอยู่ -->
+          <mat-date-range-input
+            [rangePicker]="picker"
+            class="hidden-range-input"
+          >
+            <input matStartDate formControlName="start" />
+            <input matEndDate formControlName="end" />
+          </mat-date-range-input>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </div>
+
+        <!-- สถานะ -->
+        <div class="field">
+          <label>สถานะ</label>
+          <div class="custom-dropdown">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="toggleDropdown('status')"
+              [class.active]="opened['status']"
+            >
+              <span
+                [class.placeholder]="
+                  !selectedStatus?.value && selectedStatus?.value !== ''
+                "
+              >
+                {{ selectedStatus?.name || "เลือกสถานะ" }}
+              </span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['status']">
+              <button
+                type="button"
+                *ngFor="let s of statusOptions"
+                class="dropdown-option"
+                (click)="selectStatus(s)"
+              >
+                <div class="selected-item">
+                  <span>{{ s.name }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="grow"></div>
+        <button mat-raised-button color="primary" type="submit" class="btn">
+          ค้นหา
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          class="button-clear"
+          (click)="clear()"
+        >
+          เคลียร์
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th class="text-left">รหัสสินค้า</th>
+          <th class="text-left">ชื่อสินค้า</th>
+          <th class="text-left">วันที่สร้าง</th>
+          <th class="text-left">วันที่แก้ไข</th>
+          <th class="text-center">สถานะ</th>
+          <th class="text-center">การดำเนินการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of paginatedProducts">
+          <td class="text-left">{{ product.productCode }}</td>
+          <td class="text-left">{{ product.name }}</td>
+          <td class="text-left">
+            {{ product.createDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+          </td>
+          <td class="text-left">
+            {{ product.updateDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+          </td>
+          <td class="text-center">
+            <span
+              class="status"
+              [ngClass]="product.status === 'ACTIVE' ? 'active' : 'inactive'"
+            >
+              {{ product.status === "ACTIVE" ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+            </span>
+          </td>
+          <td class="actions text-center">
+            <button
+              mat-icon-button
+              class="icon-view"
+              (click)="viewProduct(product)"
+              title="ดูรายละเอียด"
+            >
+              <i class="ti ti-eye"></i>
+            </button>
+            <button
+              mat-icon-button
+              class="icon-edit"
+              (click)="editProduct(product)"
+              title="แก้ไข"
+            >
+              <i class="ti ti-edit"></i>
+            </button>
+            <button
+              mat-icon-button
+              class="icon-delete"
+              (click)="deleteProduct(product)"
+              title="ลบ"
+            >
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="products.length === 0">
+          <td colspan="6" class="no-data">ไม่พบข้อมูลสินค้า</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <div class="pagination-left">
+        <div class="items-per-page">
+          <span>แสดง</span>
+          <select
+            (change)="onItemsPerPageChange($event)"
+            [value]="itemsPerPage"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span>รายการ</span>
+        </div>
+
+        <div class="pagination-info">
+          แสดง {{ startItemIndex }} ถึง {{ endItemIndex }} จาก
+          {{ products.length }} รายการ
+        </div>
+      </div>
+
+      <div class="pagination-controls">
+        <div class="page-number">
+          <button
+            (click)="onPageChange(currentPage - 1)"
+            [disabled]="currentPage === 1"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <button
+            *ngFor="let page of pages"
+            (click)="onPageChange(page)"
+            [class.active]="currentPage === page"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            (click)="onPageChange(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

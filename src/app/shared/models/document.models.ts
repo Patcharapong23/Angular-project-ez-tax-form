@@ -11,7 +11,11 @@ export interface DocumentListItem {
   buyerTaxId?: string;
   branchCode?: string;
   createdAt?: string;
-  status?: 'DRAFT' | 'CONFIRMED' | 'CANCELLED';
+  status?: 'NEW' | 'UPDATED' | 'CANCELLED';
+  // Snapshot fields for foreigners/persons without buyer entity
+  buyerTaxIdSnapshot?: string;
+  buyerNameSnapshot?: string;
+  buyerPassportNoSnapshot?: string;
 }
 
 // payload สำหรับสร้างเอกสาร
@@ -108,7 +112,34 @@ export interface EzDocumentFull {
   createdAt?: string;
 }
 
-export type CreateDocumentRequest = DocumentCreatePayload;
+// Backend DTOs
+export interface DocumentItemRequest {
+  productId: string | null;
+  itemName: string;
+  qty: number;
+  unitPrice: number;
+  vatRate: number;
+}
+
+export interface PaymentRequest {
+  type: string;
+  amount: number;
+  reference?: string | null;
+}
+
+export interface DocumentRequest {
+  sellerId: string;
+  branchCode: string;
+  docTypeCode: string;
+  docIssueDate: string;
+  buyerId: string | null;
+  items: DocumentItemRequest[];
+  payments: PaymentRequest[];
+  charges: any[];
+}
+
+export type CreateDocumentRequest = DocumentRequest;
+
 
 export interface DocumentTypeDto {
   code: string;
@@ -214,5 +245,7 @@ export interface Page<T> {
   empty: boolean;
 }
 
-// For now, assume it's similar to DocumentCreatePayload or a partial of DocumentDto
-export type UpdateDocumentRequest = Partial<DocumentCreatePayload>;
+// UpdateDocumentRequest - supports both nested structure (edit-document) and flat structure (invoice-form)
+// Using 'any' to allow flexibility between different component implementations
+export type UpdateDocumentRequest = any;
+

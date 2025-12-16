@@ -1,50 +1,92 @@
-<div class="export-wrap">
-  <button class="close-x" (click)="close()" aria-label="ปิด">✕</button>
+<!-- Download Modal -->
+<!-- Note: modal-overlay not needed if opened via MatDialog, but keeping structure if CSS relies on it, 
+     or better yet, replacing with just the content since MatDialog provides the overlay. 
+     However, checking the errors, this HTML is used as the template for the component. 
+     MatDialog automatically wraps it. 
+     We should probably remove .modal-overlay and just have the content, 
+     BUT if the CSS depends on it, I might keep the inner structure.
+     Let's clean it up to work with MatDialog.
+-->
+<div class="modal-content">
+  <button class="modal-close" (click)="close()">
+    <i class="ti ti-x"></i>
+  </button>
 
-  <div class="big-icon">
-    <div class="circle">
+  <div class="modal-header">
+    <div class="modal-icon-wrapper">
       <i class="ti ti-download"></i>
     </div>
+    <h3>เลือกไฟล์ที่ต้องการดาวน์โหลด</h3>
+    <p>เมื่อเลือกไฟล์ที่ต้องการดาวน์โหลดแล้วกด "ดาวน์โหลดเอกสาร"</p>
   </div>
 
-  <h2 class="title">เลือกไฟล์ที่ต้องการดาวน์โหลด</h2>
-  <p class="hint">เมื่อเลือกไฟล์ที่ต้องการดาวน์โหลดแล้วกด “ดาวน์โหลดเอกสาร”</p>
-
-  <div class="file-grid">
+  <div class="download-options">
     <!-- PDF -->
-    <div class="file-col">
-      <div class="file-icon pdf">
-        <span class="ext">PDF</span>
+    <div
+      class="download-card"
+      [class.selected]="wantPdf"
+      (click)="toggleFormat('pdf')"
+    >
+      <img src="assets/Dowload File/PDF.svg" alt="PDF" />
+      <!-- <span class="format-label">PDF</span> -->
+      <div class="checkbox-wrapper-42" (click)="$event.stopPropagation()">
+        <input
+          id="cbx-pdf"
+          type="checkbox"
+          [checked]="wantPdf"
+          (click)="$event.stopPropagation(); toggleFormat('pdf')"
+        />
+        <label class="cbx" for="cbx-pdf"></label>
       </div>
-      <label class="chk">
-        <input type="checkbox" [(ngModel)]="wantPdf" />
-      </label>
     </div>
 
     <!-- XML -->
-    <div class="file-col">
-      <div class="file-icon xml">
-        <span class="ext">XML</span>
+    <div
+      class="download-card"
+      [class.selected]="wantXml"
+      (click)="toggleFormat('xml')"
+    >
+      <img src="assets/Dowload File/XML.svg" alt="XML" />
+      <!-- <span class="format-label">XML</span> -->
+      <div class="checkbox-wrapper-42" (click)="$event.stopPropagation()">
+        <input
+          id="cbx-xml"
+          type="checkbox"
+          [checked]="wantXml"
+          (click)="$event.stopPropagation(); toggleFormat('xml')"
+        />
+        <label class="cbx" for="cbx-xml"></label>
       </div>
-      <label class="chk">
-        <input type="checkbox" [(ngModel)]="wantXml" />
-      </label>
     </div>
 
     <!-- CSV -->
-    <div class="file-col">
-      <div class="file-icon csv">
-        <span class="ext">CSV</span>
+    <div
+      class="download-card"
+      [class.selected]="wantCsv"
+      (click)="toggleFormat('csv')"
+    >
+      <img src="assets/Dowload File/CSV.svg" alt="CSV" />
+      <!-- <span class="format-label">CSV</span> -->
+      <div class="checkbox-wrapper-42" (click)="$event.stopPropagation()">
+        <input
+          id="cbx-csv"
+          type="checkbox"
+          [checked]="wantCsv"
+          (click)="$event.stopPropagation(); toggleFormat('csv')"
+        />
+        <label class="cbx" for="cbx-csv"></label>
       </div>
-      <label class="chk">
-        <input type="checkbox" [(ngModel)]="wantCsv" />
-      </label>
     </div>
   </div>
 
-  <div class="bottom">
-    <button class="download-btn" (click)="downloadAll()" [disabled]="isLoading">
-      {{ isLoading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลดเอกสาร" }}
+  <div class="modal-actions">
+    <button
+      type="button"
+      class="btn-download-confirm"
+      (click)="downloadAll()"
+      [disabled]="isLoading"
+    >
+      ดาวน์โหลดไฟล์เอกสาร
     </button>
   </div>
 </div>

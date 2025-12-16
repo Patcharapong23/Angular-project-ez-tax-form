@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 
 @Directive({
   selector: '[numberInputFormatter]',
+  standalone: false,
 })
 export class NumberInputFormatterDirective implements OnInit, OnDestroy {
   @Input('numberInputFormatter') formatTypeInput: 'integer' | 'decimal' | '' = 'decimal';

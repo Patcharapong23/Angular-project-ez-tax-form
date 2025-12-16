@@ -6,13 +6,15 @@ import { AuthService } from './shared/auth.service'; // ✅ เพิ่ม impo
 import { environment } from '../environments/environment';
 import { SidebarService } from './shared/services/sidebar.service'; // Import SidebarService
 
+import { delay } from 'rxjs/operators';
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  loading$ = this.loading.isLoading$;
+  loading$ = this.loading.isLoading$.pipe(delay(0));
   isMobileMenuOpen$ = this.sidebarService.isMobileMenuOpen$; // Expose observable
 
   // เก็บ reference ของ storage listener ไว้ถอดตอน destroy

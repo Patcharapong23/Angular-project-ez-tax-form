@@ -1,0 +1,296 @@
+/* ===== พื้นหลังทั้งหน้า ===== */
+.buyers-page {
+  padding: 24px 0px 0px 0px;
+  background: #f7f7f9;
+}
+
+/* ===== HEADER ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* ===== SEARCH CARD ===== */
+.search-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.btn {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: none;
+}
+
+.btn[color="primary"] {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.button-clear {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 6px;
+  border: 1px solid #ef4444 !important;
+  color: #ef4444 !important;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* layout 3 ช่อง: รหัส / วันที่ / สถานะ */
+.search-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px 24px;
+  align-items: start;
+}
+
+.search-grid mat-form-field {
+  width: 100%;
+}
+
+/* ===== ปุ่มค้นหา / เคลียร์ ===== */
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.grow {
+  flex: 1;
+}
+
+/* ===== TABLE ===== */
+
+.table-card {
+  background: #ffffff;
+  margin-top: 20px;
+  border-radius: 8px; /* Slightly less rounded */
+  padding: 0; /* Remove padding to let table fill card */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden; /* For rounded corners */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #e5e7eb; /* Light gray header */
+  border-bottom: 1px solid #d1d5db;
+}
+
+th {
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+  background: #ffffff;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px;
+}
+
+/* chip สถานะ */
+.status {
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status.active {
+  background: #dcfce7;
+  color: #166534; /* Darker green text */
+}
+
+.status.inactive {
+  background: #fee2e2;
+  color: #991b1b; /* Darker red text */
+}
+
+/* ปุ่ม action ในตาราง */
+
+/* Alignment helpers */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Specific column widths if needed, or just rely on text-align */
+th.text-center,
+td.text-center {
+  text-align: center;
+}
+
+th.text-left,
+td.text-left {
+  text-align: left;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px; /* Increased gap */
+}
+
+.actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.actions button:hover {
+  transform: scale(1.1);
+}
+
+/* Icon colors matching the image */
+.icon-view {
+  color: #06b6d4; /* Cyan/Blue */
+}
+
+.icon-edit {
+  color: #f59e0b; /* Orange/Yellow */
+}
+
+.icon-delete {
+  color: #ef4444; /* Red */
+}
+
+.actions i {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px; /* Ensure vertical centering */
+}
+
+/* pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+}
+
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* Space between dropdown and info text */
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.items-per-page select {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  color: #374151;
+  outline: none;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+.page-number {
+  display: flex;
+  gap: 4px;
+}
+
+.page-number button {
+  border-radius: 4px;
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: #f3f4f6;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0; /* Reset padding */
+}
+
+.page-number button:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.page-number button.active {
+  background: #ffc107; /* Yellow active state */
+  color: #000000;
+  font-weight: 500;
+}
+
+.page-number button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-number mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}

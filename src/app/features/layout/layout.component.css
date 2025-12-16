@@ -119,3 +119,21 @@
   box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04), 0 1px 3px rgba(17, 24, 39, 0.06);
   padding: 16px;
 }
+
+/* Sidebar Backdrop */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999; /* Below sidebar (1100), above content */
+  animation: backdropFade 0.2s ease both;
+}
+
+@keyframes backdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

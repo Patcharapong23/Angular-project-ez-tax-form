@@ -1,6 +1,21 @@
-<app-sidebar (onToggle)="onSidebarToggle($event)"></app-sidebar>
+<app-sidebar
+  [isMobileView]="isMobileView"
+  [mobileSidebarOpen]="(isMobileMenuOpen$ | async) || false"
+  (onToggle)="onSidebarToggle($event)"
+></app-sidebar>
 
-<div class="main-content" [class.collapsed]="isCollapsed" [class.mobile-menu-open]="isMobileMenuOpen$ | async">
+<!-- Mobile Backdrop -->
+<div
+  class="sidebar-backdrop"
+  *ngIf="(isMobileMenuOpen$ | async) && isMobileView"
+  (click)="sidebarService.closeMobileMenu()"
+></div>
+
+<div
+  class="main-content"
+  [class.collapsed]="isCollapsed"
+  [class.mobile-menu-open]="isMobileMenuOpen$ | async"
+>
   <main class="content-area">
     <app-topbar></app-topbar>
     <router-outlet></router-outlet>

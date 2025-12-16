@@ -1,0 +1,157 @@
+<section class="buyers-page">
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>ข้อมูลลูกค้า</h1>
+    <button  color="primary" (click)="onAddBuyer()" class="btn">
+      <mat-icon>add</mat-icon> เพิ่มข้อมูลลูกค้า
+    </button>
+  </div>
+
+  <!-- SEARCH CARD -->
+  <div class="search-card">
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+      <div class="search-grid">
+        <!-- รหัสลูกค้า -->
+        <div class="field">
+          <label>รหัสลูกค้า</label>
+          <input type="text" formControlName="customerCode" placeholder="กรอกรหัสลูกค้า" />
+        </div>
+
+        <!-- วันที่สร้าง (เริ่มต้น-สิ้นสุด) -->
+        <!-- วันที่สร้าง (เริ่มต้น-สิ้นสุด) -->
+        <div formGroupName="dateRange" class="date-range-wrapper">
+          <label>วันที่สร้าง (เริ่มต้น-สิ้นสุด)</label>
+
+          <!-- กล่องที่เห็นบนจอ -->
+          <div class="date-display" (click)="picker.open()" [class.active]="picker.opened">
+            <span [class.placeholder]="!dateRangeText">
+              {{ dateRangeText || "เลือกวันที่เริ่มต้น - วันที่สิ้นสุด" }}
+            </span>
+            <mat-icon>event</mat-icon>
+          </div>
+
+          <!-- ตัวเก็บค่าที่ซ่อนอยู่ -->
+          <mat-date-range-input [rangePicker]="picker" class="hidden-range-input">
+            <input matStartDate formControlName="start" />
+            <input matEndDate formControlName="end" />
+          </mat-date-range-input>
+          <mat-date-range-picker #picker [panelClass]="'ez-datepicker-panel'"></mat-date-range-picker>
+        </div>
+
+        <!-- สถานะ -->
+        <div class="field">
+          <label>สถานะ</label>
+          <div class="custom-dropdown">
+            <button type="button" class="dropdown-trigger" (click)="toggleDropdown('status')"
+              [class.active]="opened['status']">
+              <span [class.placeholder]="!selectedStatus?.value && selectedStatus?.value !== ''">
+                {{ selectedStatus?.name || 'เลือกสถานะ' }}
+              </span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['status']">
+              <button type="button" *ngFor="let s of statusOptions" class="dropdown-option" (click)="selectStatus(s)">
+                <div class="selected-item">
+                  <span>{{ s.name }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="grow"></div>
+        <button color="primary" type="submit" class="btn">
+          ค้นหา
+        </button>
+        <button mat-stroked-button type="button" class="button-clear" (click)="onClear()">
+          เคลียร์
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th class="text-left">รหัสลูกค้า</th>
+          <th class="text-left">ชื่อลูกค้า</th>
+          <th class="text-left">อีเมล</th>
+          <th class="text-left">วันที่สร้าง</th>
+          <th class="text-left">วันที่แก้ไข</th>
+          <th class="text-center">สถานะ</th>
+          <th class="text-center">การดำเนินการ</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let buyer of paginatedBuyers">
+          <td class="text-left">{{ buyer.code }}</td>
+          <td class="text-left">{{ buyer.name }}</td>
+          <td class="text-left">{{ buyer.email }}</td>
+          <td class="text-left">{{ buyer.createDate | thaiDate:'dd/MM/yyyy HH:mm:ss' }}</td>
+          <td class="text-left">{{ buyer.updateDate | thaiDate:'dd/MM/yyyy HH:mm:ss' }}</td>
+          <td class="text-center">
+            <span class="status" [ngClass]="buyer.status === 'ACTIVE' ? 'active' : 'inactive'">
+              {{ buyer.status === "ACTIVE" ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+            </span>
+          </td>
+          <td class="actions text-center">
+            <button mat-icon-button class="icon-view" title="ดู" (click)="onView(buyer)">
+              <i class="ti ti-eye"></i>
+            </button>
+            <button mat-icon-button class="icon-edit" title="แก้ไข" (click)="onEdit(buyer)">
+              <i class="ti ti-edit"></i>
+            </button>
+            <button mat-icon-button class="icon-delete" title="ลบ" (click)="onDelete(buyer)">
+              <i class="ti ti-trash"></i>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="buyers.length === 0">
+          <td colspan="7" class="no-data">ไม่พบข้อมูลลูกค้า</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <div class="pagination-left">
+        <div class="items-per-page">
+          <span>แสดง</span>
+          <select (change)="onItemsPerPageChange($event)" [value]="itemsPerPage">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          <span>รายการ</span>
+        </div>
+
+        <div class="pagination-info">
+          แสดง {{ startItemIndex }} ถึง {{ endItemIndex }} จาก {{ buyers.length }} รายการ
+        </div>
+      </div>
+
+      <div class="pagination-controls">
+        <div class="page-number">
+          <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          
+          <button *ngFor="let page of pages" 
+                  (click)="onPageChange(page)" 
+                  [class.active]="currentPage === page">
+            {{ page }}
+          </button>
+
+          <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

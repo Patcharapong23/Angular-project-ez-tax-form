@@ -53,21 +53,7 @@ export class NewDocumentDialogComponent implements AfterViewInit {
     { value: '80', name: 'ใบเพิ่มหนี้ (80)', icon: 'ti-file-invoice' },
     { value: '81', name: 'ใบลดหนี้ (81)', icon: 'ti-file-invoice' },
   ];
-  private allTemplates: DocumentTemplate[] = [
-    { value: 'T01-default', viewValue: 'T01 - General Receipt', type: 'T01' },
-    { value: 'T01-simple', viewValue: 'T01 - Simple Form', type: 'T01' },
-    { value: 'T02-standard', viewValue: 'T02 - Standard Invoice', type: 'T02' },
-    {
-      value: '388-official',
-      viewValue: '388 - Official Tax Invoice',
-      type: '388',
-    },
-    {
-      value: 'template-C',
-      viewValue: 'Template C (For T02, 388)',
-      type: ['T02', '388'],
-    },
-  ];
+  private allTemplates: DocumentTemplate[] = [];
 
   filteredTemplates: DocumentTemplate[] = [];
   selectedDocType: DocType | null = null;
@@ -164,6 +150,16 @@ export class NewDocumentDialogComponent implements AfterViewInit {
   // ปิดด้วย ESC
   @HostListener('document:keydown.escape') onEsc() {
     this.closeAll();
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    // If click is inside the dialog but NOT on a dropdown trigger, close dropdowns
+    // We can check if the target is inside .custom-dropdown
+    const target = event.target as HTMLElement;
+    if (!target.closest('.custom-dropdown')) {
+      this.closeAll();
+    }
   }
 
   // คีย์บอร์ด: เปิดด้วย ArrowDown/Enter บน trigger

@@ -1,0 +1,41 @@
+[
+    { "code": "PCS",    "nameTh": "ชิ้น",        "nameEn": "Piece" },
+    { "code": "UNIT",   "nameTh": "หน่วย",      "nameEn": "Unit" },
+    { "code": "SET",    "nameTh": "ชุด",        "nameEn": "Set" },
+    { "code": "PAIR",   "nameTh": "คู่",        "nameEn": "Pair" },
+    { "code": "BOX",    "nameTh": "กล่อง",      "nameEn": "Box" },
+    { "code": "PACK",   "nameTh": "แพ็ค",       "nameEn": "Pack" },
+    { "code": "DOZ",    "nameTh": "โหล",        "nameEn": "Dozen" },
+    { "code": "BAG",    "nameTh": "ถุง",        "nameEn": "Bag" },
+    { "code": "ROLL",   "nameTh": "ม้วน",       "nameEn": "Roll" },
+    { "code": "BOOK",   "nameTh": "เล่ม",       "nameEn": "Book" },
+    { "code": "SHEET",  "nameTh": "แผ่น",       "nameEn": "Sheet" },
+    { "code": "PILL",   "nameTh": "เม็ด",       "nameEn": "Tablet" },
+    { "code": "TUBE",   "nameTh": "หลอด",      "nameEn": "Tube" },
+  
+    { "code": "KG",     "nameTh": "กิโลกรัม",   "nameEn": "Kilogram" },
+    { "code": "G",      "nameTh": "กรัม",       "nameEn": "Gram" },
+    { "code": "TON",    "nameTh": "ตัน",        "nameEn": "Ton" },
+  
+    { "code": "L",      "nameTh": "ลิตร",       "nameEn": "Litre" },
+    { "code": "ML",     "nameTh": "มิลลิลิตร",  "nameEn": "Millilitre" },
+  
+    { "code": "M",      "nameTh": "เมตร",       "nameEn": "Metre" },
+    { "code": "CM",     "nameTh": "เซนติเมตร",  "nameEn": "Centimetre" },
+    { "code": "SQM",    "nameTh": "ตารางเมตร",  "nameEn": "Square metre" },
+    { "code": "CUM",    "nameTh": "ลูกบาศก์เมตร", "nameEn": "Cubic metre" },
+  
+    { "code": "HR",     "nameTh": "ชั่วโมง",    "nameEn": "Hour" },
+    { "code": "DAY",    "nameTh": "วัน",        "nameEn": "Day" },
+    { "code": "MONTH",  "nameTh": "เดือน",      "nameEn": "Month" },
+    { "code": "YEAR",   "nameTh": "ปี",         "nameEn": "Year" },
+  
+    { "code": "JOB",    "nameTh": "งาน",        "nameEn": "Job" },
+    { "code": "TIME",   "nameTh": "ครั้ง",      "nameEn": "Time" },
+    { "code": "ROOM",   "nameTh": "ห้อง",       "nameEn": "Room" },
+    { "code": "CAR",    "nameTh": "คัน",        "nameEn": "Vehicle" },
+    { "code": "MACHINE","nameTh": "เครื่อง",    "nameEn": "Machine" },
+    { "code": "ANIMAL", "nameTh": "ตัว",        "nameEn": "Animal" },
+    { "code": "HOUSE",  "nameTh": "หลัง",       "nameEn": "House" }
+  ]
+  

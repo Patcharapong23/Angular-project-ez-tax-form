@@ -1,0 +1,201 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h1 class="dialog-title">
+      {{
+        data.mode === "view"
+          ? "ดูข้อมูลสินค้า"
+          : data.id != null || data.productCode
+          ? "แก้ไขข้อมูลสินค้า"
+          : "เพิ่มข้อมูลสินค้า"
+      }}
+    </h1>
+    <button type="button" class="icon-x" (click)="onCancel()">✕</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSave()">
+    <div class="dialog-body">
+      <!-- Section 1: ข้อมูลรายการสินค้า -->
+      <h2 class="section-title">ข้อมูลรายการสินค้า</h2>
+
+      <div class="section-grid section-grid-product">
+        <!-- Row 1: รหัสสินค้า / ชื่อสินค้า -->
+        <div class="form-field">
+          <label class="form-label"
+            >รหัสสินค้า
+            <span class="req" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            formControlName="productCode"
+            placeholder="กรอกรหัสสินค้า"
+            (input)="validateNoThaiInput($event)"
+          />
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('productCode')?.hasError('required') &&
+              form.get('productCode')?.touched
+            "
+          >
+            กรุณากรอกรหัสสินค้า
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label"
+            >ชื่อสินค้า
+            <span class="req" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            formControlName="name"
+            placeholder="กรอกชื่อสินค้า"
+          />
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('name')?.hasError('required') &&
+              form.get('name')?.touched
+            "
+          >
+            กรุณากรอกชื่อสินค้า
+          </div>
+        </div>
+
+        <!-- Row 2: ชื่อหน่วยสินค้า / รายละเอียดสินค้า -->
+        <div class="form-field">
+          <label class="form-label">ชื่อหน่วยสินค้า</label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="unit"
+            placeholder="กรอกชื่อหน่วยสินค้า เช่น ชิ้น, อัน, กล่อง"
+            [matAutocomplete]="autoUnit"
+          />
+          <mat-autocomplete #autoUnit="matAutocomplete">
+            <mat-option
+              *ngFor="let unit of filteredUnits | async"
+              [value]="unit"
+            >
+              {{ unit }}
+            </mat-option>
+          </mat-autocomplete>
+        </div>
+
+        <div class="form-field dialog-field-description">
+          <label class="form-label">รายละเอียดสินค้า</label>
+          <textarea
+            class="form-control"
+            formControlName="description"
+            placeholder="กรอกรายละเอียดสินค้า"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Section 2: กำหนดราคาสินค้า -->
+      <h2 class="section-title">กำหนดราคาสินค้า</h2>
+
+      <div class="section-grid-price">
+        <!-- ราคาต่อหน่วย -->
+        <div class="form-field">
+          <label class="form-label"
+            >ราคา (บาท) ต่อหน่วย (แยกภาษีมูลค่าเพิ่ม)
+            <span class="req" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            formControlName="defaultPrice"
+            placeholder="กรอกราคา"
+            numberInputFormatter="decimal"
+          />
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('defaultPrice')?.hasError('required') &&
+              form.get('defaultPrice')?.touched
+            "
+          >
+            กรุณากรอกราคา
+          </div>
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('defaultPrice')?.hasError('min') &&
+              form.get('defaultPrice')?.touched
+            "
+          >
+            ราคาต้องไม่ต่ำกว่า 0
+          </div>
+        </div>
+
+        <!-- อัตราภาษี -->
+        <div class="form-field">
+          <label class="form-label"
+            >อัตราภาษี
+            <span class="req" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <div class="custom-dropdown" [class.disabled]="data.mode === 'view'">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="data.mode !== 'view' && toggleDropdown('taxRate')"
+              [class.active]="opened['taxRate']"
+              [disabled]="data.mode === 'view'"
+            >
+              <span>{{ getTaxRateLabel(form.get("taxRate")?.value) }}</span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['taxRate']">
+              <button
+                type="button"
+                *ngFor="let option of taxRateOptions"
+                class="dropdown-option"
+                (click)="selectTaxRate(option.value)"
+              >
+                {{ option.label }}
+              </button>
+            </div>
+          </div>
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('taxRate')?.hasError('required') &&
+              form.get('taxRate')?.touched
+            "
+          >
+            กรุณาเลือกอัตราภาษี
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: สถานะ -->
+      <div class="status-group">
+        <label class="form-label">สถานะ</label>
+        <mat-radio-group formControlName="status" class="radio-group">
+          <mat-radio-button color="primary" value="ACTIVE" class="radio-item"
+            >เปิดการใช้งาน</mat-radio-button
+          >
+          <mat-radio-button color="primary" value="INACTIVE" class="radio-item"
+            >ปิดการใช้งาน</mat-radio-button
+          >
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div class="dialog-actions" *ngIf="data.mode !== 'view'">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        class="btn"
+        [disabled]="!form.valid"
+      >
+        บันทึก
+      </button>
+    </div>
+  </form>
+</div>

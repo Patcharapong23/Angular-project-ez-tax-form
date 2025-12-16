@@ -1,0 +1,48 @@
+<div class="cancel-dialog-container">
+  <div class="dialog-icon-wrapper">
+    <!-- Close Icon (Symbolic Red Circle with X) -->
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="50" cy="50" r="50" fill="#DC2626" />
+      <!-- Red 600 -->
+      <path
+        d="M35 35L65 65M65 35L35 65"
+        stroke="white"
+        stroke-width="6"
+        stroke-linecap="round"
+      />
+    </svg>
+  </div>
+
+  <h2 class="dialog-title">คุณต้องการยกเลิกใบกำกับภาษีนี้ใช่หรือไม่</h2>
+  <p class="dialog-subtitle">
+    เมื่อตกลงแล้ว ใบกำกับภาษีนี้จะไม่สามารถใช้งานได้อีก
+  </p>
+
+  <div class="input-group">
+    <label for="reason">เหตุผล<span class="required">*</span></label>
+    <textarea
+      id="reason"
+      [formControl]="reasonControl"
+      placeholder="รายละเอียด"
+      rows="4"
+      class="taxtarea"
+    ></textarea>
+    <div
+      class="error-text"
+      *ngIf="reasonControl.invalid && reasonControl.touched"
+    >
+      กรุณาระบุเหตุผล
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button class="btn-ghost" (click)="onCancel()">ไม่ยกเลิก</button>
+    <button class="btn-danger" (click)="onConfirm()">ยกเลิกใบกำกับภาษี</button>
+  </div>
+</div>

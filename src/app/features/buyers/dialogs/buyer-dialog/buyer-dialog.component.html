@@ -1,0 +1,270 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h1 class="dialog-title">
+      {{
+        data.mode === "view"
+          ? "ดูข้อมูลลูกค้า"
+          : data.mode === "edit"
+          ? "แก้ไขข้อมูลลูกค้า"
+          : "เพิ่มข้อมูลลูกค้า"
+      }}
+    </h1>
+    <button mat-icon-button class="close-btn" (click)="onCancel()">
+      <mat-icon class="icon-x">close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSave()">
+    <div class="dialog-body">
+      <div class="grid-2">
+        <!-- ประเภทผู้เสียภาษี -->
+        <div class="dialog-field">
+          <label
+            >ประเภทผู้เสียภาษี
+            <span class="required" *ngIf="false">*</span></label
+          >
+          <div class="custom-dropdown disabled">
+            <button type="button" class="dropdown-trigger" disabled>
+              <span [class.placeholder]="!selectedTaxpayerType?.value">
+                {{ selectedTaxpayerType?.name || "เลือกประเภท" }}
+              </span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- รหัสลูกค้า -->
+        <div class="dialog-field">
+          <label
+            >รหัสลูกค้า
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="code"
+            placeholder="กรอกรหัสลูกค้า"
+            (input)="validateNoThaiInput($event)"
+          />
+        </div>
+
+        <!-- ชื่อลูกค้า (ภาษาไทย) -->
+        <div class="dialog-field">
+          <label
+            >ชื่อลูกค้า (ภาษาไทย)
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="กรอกชื่อลูกค้า (ภาษาไทย)"
+            (input)="validateThaiInput($event)"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('name')?.hasError('pattern') && form.get('name')?.touched
+            "
+          >
+            กรุณากรอกชื่อเป็นภาษาไทยเท่านั้น
+          </div>
+        </div>
+
+        <!-- ชื่อลูกค้า (ภาษาอังกฤษ) -->
+        <div class="dialog-field">
+          <label>ชื่อลูกค้า (ภาษาอังกฤษ)</label>
+          <input
+            type="text"
+            formControlName="nameEn"
+            placeholder="กรอกชื่อลูกค้า (ภาษาอังกฤษ)"
+            (input)="validateNoThaiInput($event)"
+          />
+        </div>
+
+        <!-- เลขประจำตัวผู้เสียภาษีอากร -->
+        <div class="dialog-field">
+          <label
+            >เลขประจำตัวผู้เสียภาษีอากร
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="taxId"
+            maxlength="13"
+            placeholder="กรอกเลขประจำตัวผู้เสียภาษี"
+            (input)="validateNumericInput($event, 13)"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('taxId')?.hasError('pattern') &&
+              form.get('taxId')?.touched &&
+              form.get('taxpayerType')?.value !== 'FOREIGN'
+            "
+          >
+            เลขผู้เสียภาษีนิติบุคคล 13 หลัก
+          </div>
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('taxId')?.hasError('notJuristic') &&
+              form.get('taxId')?.touched
+            "
+          >
+            ต้องเป็นเลขประจำตัวผู้เสียภาษีนิติบุคคล (ขึ้นต้นด้วย 0) เท่านั้น
+          </div>
+        </div>
+
+        <!-- รหัสสาขา 5 หลัก -->
+        <div class="dialog-field">
+          <label
+            >รหัสสาขา 5 หลัก
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="branch"
+            maxlength="5"
+            placeholder="กรอกรหัสสาขา 5 หลัก"
+            (input)="validateNumericInput($event, 5)"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('branch')?.hasError('pattern') &&
+              form.get('branch')?.touched
+            "
+          >
+            กรุณากรอกตัวเลข 5 หลัก
+          </div>
+        </div>
+
+        <!-- ชื่อสาขา (ภาษาไทย) -->
+        <div class="dialog-field">
+          <label
+            >ชื่อสาขา (ภาษาไทย)
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="branchName"
+            placeholder="กรอกชื่อสาขา (ภาษาไทย)"
+            (input)="validateNoEnglishInput($event)"
+          />
+        </div>
+
+        <!-- ชื่อสาขา (ภาษาอังกฤษ) -->
+        <div class="dialog-field">
+          <label>ชื่อสาขา (ภาษาอังกฤษ)</label>
+          <input
+            type="text"
+            formControlName="branchNameEn"
+            placeholder="กรอกชื่อสาขา (ภาษาอังกฤษ)"
+            (input)="validateNoThaiInput($event)"
+          />
+        </div>
+      </div>
+
+      <!-- รายละเอียดที่อยู่ (ภาษาไทย) -->
+      <div class="dialog-field full-width" style="margin-top: 14px">
+        <label
+          >รายละเอียดที่อยู่ (ภาษาไทย)
+          <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+        >
+        <textarea
+          formControlName="address"
+          rows="3"
+          placeholder="กรอกรายละเอียดที่อยู่ (ภาษาไทย)"
+          (input)="validateNoEnglishInput($event)"
+        ></textarea>
+      </div>
+
+      <!-- รายละเอียดที่อยู่ (ภาษาอังกฤษ) -->
+      <div class="dialog-field full-width" style="margin-top: 14px">
+        <label>รายละเอียดที่อยู่ (ภาษาอังกฤษ)</label>
+        <textarea
+          formControlName="addressEn"
+          rows="3"
+          placeholder="กรอกรายละเอียดที่อยู่ (ภาษาอังกฤษ)"
+        ></textarea>
+      </div>
+
+      <div class="grid-2" style="margin-top: 14px">
+        <!-- รหัสไปรษณีย์ -->
+        <div class="dialog-field">
+          <label
+            >รหัสไปรษณีย์
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="zipCode"
+            maxlength="5"
+            placeholder="กรอกรหัสไปรษณีย์"
+            (input)="validateNumericInput($event, 5)"
+          />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 14px">
+        <!-- อีเมล -->
+        <div class="dialog-field">
+          <label
+            >อีเมล
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input type="email" formControlName="email" placeholder="กรอกอีเมล" />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('email')?.hasError('email') && form.get('email')?.touched
+            "
+          >
+            รูปแบบอีเมลไม่ถูกต้อง
+          </div>
+        </div>
+
+        <!-- เบอร์โทรศัพท์ -->
+        <div class="dialog-field">
+          <label
+            >เบอร์โทรศัพท์
+            <span class="required" *ngIf="data.mode !== 'view'">*</span></label
+          >
+          <input
+            type="text"
+            formControlName="telephone"
+            placeholder="กรอกหมายเลขเบอร์โทรศัพท์"
+            phoneFormat
+          />
+        </div>
+      </div>
+
+      <!-- สถานะ -->
+      <div class="dialog-field" style="margin-top: 20px">
+        <label style="margin-bottom: 8px; display: block">สถานะ:</label>
+        <div class="radio-group">
+          <label class="radio-label" [class.disabled]="data.mode === 'view'">
+            <input type="radio" formControlName="status" value="ACTIVE" />
+            <span class="radio-custom"></span>
+            เปิดการใช้งาน
+          </label>
+          <label class="radio-label" [class.disabled]="data.mode === 'view'">
+            <input type="radio" formControlName="status" value="INACTIVE" />
+            <span class="radio-custom"></span>
+            ปิดการใช้งาน
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions" *ngIf="!isViewMode">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="!form.valid"
+      >
+        บันทึก
+      </button>
+    </div>
+  </form>
+</div>

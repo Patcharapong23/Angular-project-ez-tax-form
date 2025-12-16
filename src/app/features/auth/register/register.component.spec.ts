@@ -1,6 +1,8 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -20,11 +22,13 @@ describe('RegisterComponent', () => {
       imports: [
         BrowserAnimationsModule, // Material ต้องการ
         ReactiveFormsModule,
+        HttpClientTestingModule,
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
         MatCheckboxModule,
         MatIconModule,
+        MatSnackBarModule
       ],
       // ถ้าใช้ HttpClient ในคอมโพเนนต์ ให้เพิ่ม HttpClientTestingModule ด้วย
     }).compileComponents();

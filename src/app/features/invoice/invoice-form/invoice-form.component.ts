@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -6,15 +6,30 @@ import {
   FormArray,
   Validators,
   ReactiveFormsModule,
+  FormControl,
+  AbstractControl,
 } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DocumentService } from '../../documents/document.service';
 import { OrgService } from '../../../shared/services/org.service';
 import { AuthService, AuthUser } from '../../../shared/auth.service';
-import { DocumentDto } from '../../../shared/models/document.models';
+import { DocumentDto, DocumentListItem } from '../../../shared/models/document.models';
 import { environment } from '../../../../environments/environment'; // Import environment
 import { HttpClient } from '@angular/common/http'; // Import HttpClient
+import { MatDatepicker } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
+import { ExportDialogComponent } from '../../dialogs/export-dialog/export-dialog.component';
+import { SwalService } from '../../../shared/services/swal.service';
 import { thaiTaxIdValidator } from '../../../shared/validators/thai-tax-id-angular.validator'; // <--- Add this import
+import { Buyer, BuyerService } from '../../../shared/services/buyer.service';
+import { Observable, asyncScheduler, merge, of } from 'rxjs';
+import { startWith, debounceTime, switchMap, map, observeOn } from 'rxjs/operators';
+
+import { BankService } from '../../../core/services/bank.service';
+
+
+import { Product, ProductService } from '../../../shared/services/product.service';
+import { CalculationService, CalculationTotals } from '../../../shared/services/calculation.service';
 
 interface MeResponse {
   user: {
@@ -53,16 +68,39 @@ interface MeResponse {
   styleUrls: ['./invoice-form.component.css'],
 })
 export class InvoiceFormComponent implements OnInit {
+  // ===== mode (create/view/edit) =====
+  mode: 'create' | 'view' | 'edit' = 'create';
+
   // ===== state =====
   createdDocument: DocumentDto | null = null; // New property to store the created document
   creationSuccess = false;
   isSaving = false;
   documentUuid: string | null = null;
+  isFormDirty = false; // Track if form has changes (for edit mode)
+
+  // ===== View mode customer data (for reliable display) =====
+  viewCustomerData: {
+    partyType: string;
+    code: string;
+    name: string;
+    taxId: string;
+    branchCode: string;
+    address: string;
+    email: string;
+    tel: string;
+    zip: string;
+    passportNo: string;
+    country: string;
+  } | null = null;
 
   // ===== forms =====
   form!: FormGroup;
   fgHeader!: FormGroup;
   fgCustomer!: FormGroup;
+  fgPayment!: FormGroup; // Payment form group
+  @ViewChild('checkPicker') checkPicker!: MatDatepicker<any>;
+
+
 
   // ===== heading (บนบัตร/หัวเอกสาร) =====
   docTypeTh = '';
@@ -70,33 +108,112 @@ export class InvoiceFormComponent implements OnInit {
   docTypeCode = '';
 
   // ===== seller / header view state =====
+  seller: any = null; // Add seller property
   branches: { code: string; name: string }[] = [
-    { code: '00000', name: 'สำนักงานใหญ่' },
+    { code: '00000', name: 'สำนักงานใหญ่' }
   ];
   logoUrl = '';
 
   // ===== items / totals state =====
-  use4Decimals = false;
-  editingServiceFee = false;
-  editingShippingFee = false;
-  serviceFee = 0;
-  shippingFee = 0;
 
-  totals = {
+  editingServiceFee = false;
+  showPaymentMethod = false; // Toggle for payment section
+  serviceFee = 0;
+  filteredProducts: Observable<Product[]>[] = [];
+  filteredRefDocs: Observable<DocumentListItem[]> = of([]); // Add this line
+  banks: any[] = []; // Store fetched banks
+  bankBranches: any[] = []; // Store fetched branches
+
+
+  totals: CalculationTotals = {
     subtotal: 0,
     discount: 0,
     netAfterDiscount: 0,
     vat: 0,
     grand: 0,
   };
+  debugData: any;
 
   partyTypes = [
     { value: 'PERSON', label: 'บุคคลธรรมดา' },
     { value: 'JURISTIC', label: 'นิติบุคคล' },
     { value: 'FOREIGNER', label: 'ชาวต่างชาติ' },
+    { value: 'OTHER', label: 'อื่นๆ' },
   ];
 
+  docTypes = [
+    { code: 'T01', name: 'ใบเสร็จรับเงิน (Receipt)' },
+    { code: 'T02', name: 'ใบแจ้งหนี้/ใบกำกับภาษี (Invoice/Tax Invoice)' },
+    { code: 'T03', name: 'ใบเสร็จรับเงิน/ใบกำกับภาษี (Receipt/Tax Invoice)' },
+    { code: 'T04', name: 'ใบส่งของ/ใบกำกับภาษี (Delivery Order/Tax Invoice)' },
+    { code: '80', name: 'ใบเพิ่มหนี้ (Debit Note)' },
+    { code: '81', name: 'ใบลดหนี้ (Credit Note)' },
+    { code: '380', name: 'ใบแจ้งหนี้ (Invoice)' },
+    { code: '388', name: 'ใบกำกับภาษี (Tax Invoice)' }
+  ];
+
+  replacementReasons = [
+    { code: 'TIVC01', name: 'ชื่อผิด' },
+    { code: 'TIVC02', name: 'ที่อยู่ผิด' },
+    { code: 'TIVC99', name: 'เหตุอื่น (ระบุสาเหตุ)' }
+  ];
+
+  get canIssueReplacement(): boolean {
+    return ['T01', 'T02', 'T03', 'T04', '388'].includes(this.docTypeCode);
+  }
+
+  // Document Type Groups
+  get isGroup1(): boolean {
+    return ['T01', 'T03'].includes(this.docTypeCode);
+  }
+
+  get isGroup2(): boolean {
+    return ['T02', 'T04', '380', '388'].includes(this.docTypeCode);
+  }
+
+  get isGroup3(): boolean {
+    return ['80', '81'].includes(this.docTypeCode);
+  }
+
+  get showBankSelection(): boolean {
+    return this.isGroup1;
+  }
+
   user: AuthUser | null = null;
+  filteredBuyers!: Observable<Buyer[]>;
+  buyers: Buyer[] = []; // Store buyers locally
+  selectedJuristicBuyer: any = null; // Store selected Juristic buyer
+  products: Product[] = []; // Store products locally
+
+  filteredCountries!: Observable<string[]>;
+
+  // Thai Address Data
+  provinces: any[] = [];
+  districts: any[] = [];
+  subdistricts: any[] = [];
+
+  countries: string[] = [
+    'Afghanistan (อัฟกานิสถาน)', 'Albania (แอลเบเนีย)', 'Algeria (แอลจีเรีย)', 'Andorra (อันดอร์รา)', 'Angola (แองโกลา)', 'Antigua and Barbuda (แอนติกาและบาร์บูดา)', 'Argentina (อาร์เจนตินา)', 'Armenia (อาร์เมเนีย)', 'Australia (ออสเตรเลีย)', 'Austria (ออสเตรีย)',
+    'Azerbaijan (อาเซอร์ไบจาน)', 'Bahamas (บาฮามาส)', 'Bahrain (บาห์เรน)', 'Bangladesh (บังกลาเทศ)', 'Barbados (บาร์เบโดส)', 'Belarus (เบลารุส)', 'Belgium (เบลเยียม)', 'Belize (เบลีซ)', 'Benin (เบนิน)', 'Bhutan (ภูฏาน)',
+    'Bolivia (โบลิเวีย)', 'Bosnia and Herzegovina (บอสเนียและเฮอร์เซโกวีนา)', 'Botswana (บอตสวานา)', 'Brazil (บราซิล)', 'Brunei (บรูไน)', 'Bulgaria (บัลแกเรีย)', 'Burkina Faso (บูร์กินาฟาโซ)', 'Burundi (บุรุนดี)', 'Cabo Verde (กาบูเวร์ดี)', 'Cambodia (กัมพูชา)',
+    'Cameroon (แคเมอรูน)', 'Canada (แคนาดา)', 'Central African Republic (สาธารณรัฐแอฟริกากลาง)', 'Chad (ชาด)', 'Chile (ชิลี)', 'China (จีน)', 'Colombia (โคลอมเบีย)', 'Comoros (คอโมโรส)', 'Congo (Congo-Brazzaville) (คองโก)', 'Costa Rica (คอสตาริกา)',
+    'Croatia (โครเอเชีย)', 'Cuba (คิวบา)', 'Cyprus (ไซปรัส)', 'Czechia (Czech Republic) (เช็ก)', 'Democratic Republic of the Congo (สาธารณรัฐประชาธิปไตยคองโก)', 'Denmark (เดนมาร์ก)', 'Djibouti (จิบูตี)', 'Dominica (ดอมินีกา)', 'Dominican Republic (สาธารณรัฐโดมินิกัน)', 'East Timor (Timor-Leste) (ติมอร์-เลสเต)',
+    'Ecuador (เอกวาดอร์)', 'Egypt (อียิปต์)', 'El Salvador (เอลซัลวาดอร์)', 'Equatorial Guinea (อิเควทอเรียลกินี)', 'Eritrea (เอริเทรีย)', 'Estonia (เอสโตเนีย)', 'Eswatini (fmr. "Swaziland") (เอสวาตีนี)', 'Ethiopia (เอธิโอเปีย)', 'Fiji (ฟิจิ)', 'Finland (ฟินแลนด์)',
+    'France (ฝรั่งเศส)', 'Gabon (กาบอง)', 'Gambia (แกมเบีย)', 'Georgia (จอร์เจีย)', 'Germany (เยอรมนี)', 'Ghana (กานา)', 'Greece (กรีซ)', 'Grenada (เกรเนดา)', 'Guatemala (กัวเตมาลา)', 'Guinea (กินี)',
+    'Guinea-Bissau (กินี-บิสเซา)', 'Guyana (กายอานา)', 'Haiti (เฮติ)', 'Holy See (นครรัฐวาติกัน)', 'Honduras (ฮอนดูรัส)', 'Hungary (ฮังการี)', 'Iceland (ไอซ์แลนด์)', 'India (อินเดีย)', 'Indonesia (อินโดนีเซีย)', 'Iran (อิหร่าน)',
+    'Iraq (อิรัก)', 'Ireland (ไอร์แลนด์)', 'Israel (อิสราเอล)', 'Italy (อิตาลี)', 'Jamaica (จาเมกา)', 'Japan (ญี่ปุ่น)', 'Jordan (จอร์แดน)', 'Kazakhstan (คาซัคสถาน)', 'Kenya (เคนยา)', 'Kiribati (คิริบาส)',
+    'Kuwait (คูเวต)', 'Kyrgyzstan (คีร์กีซสถาน)', 'Laos (ลาว)', 'Latvia (ลัตเวีย)', 'Lebanon (เลบานอน)', 'Lesotho (เลโซโท)', 'Liberia (ไลบีเรีย)', 'Libya (ลิเบีย)', 'Liechtenstein (ลิกเตนสไตน์)', 'Lithuania (ลิทัวเนีย)',
+    'Luxembourg (ลักเซมเบิร์ก)', 'Madagascar (มาดากัสการ์)', 'Malawi (มาลาวี)', 'Malaysia (มาเลเซีย)', 'Maldives (มัลดีฟส์)', 'Mali (มาลี)', 'Malta (มอลตา)', 'Marshall Islands (หมู่เกาะมาร์แชลล์)', 'Mauritania (มอริเตเนีย)', 'Mauritius (มอริเชียส)',
+    'Mexico (เม็กซิโก)', 'Micronesia (ไมโครนีเซีย)', 'Moldova (มอลโดวา)', 'Monaco (โมนาโก)', 'Mongolia (มองโกเลีย)', 'Montenegro (มอนเตเนโกร)', 'Morocco (โมร็อกโก)', 'Mozambique (โมซัมบิก)', 'Myanmar (formerly Burma) (พม่า)', 'Namibia (นามิเบีย)',
+    'Nauru (นาอูรู)', 'Nepal (เนปาล)', 'Netherlands (เนเธอร์แลนด์)', 'New Zealand (นิวซีแลนด์)', 'Nicaragua (นิการากัว)', 'Niger (ไนเจอร์)', 'Nigeria (ไนจีเรีย)', 'North Korea (เกาหลีเหนือ)', 'North Macedonia (มาซิโดเนียเหนือ)', 'Norway (นอร์เวย์)',
+    'Oman (โอมาน)', 'Pakistan (ปากีสถาน)', 'Palau (ปาเลา)', 'Palestine State (ปาเลสไตน์)', 'Panama (ปานามา)', 'Papua New Guinea (ปาปัวนิวกินี)', 'Paraguay (ปารากวัย)', 'Peru (เปรู)', 'Philippines (ฟิลิปปินส์)', 'Poland (โปแลนด์)',
+    'Portugal (โปรตุเกส)', 'Qatar (กาตาร์)', 'Romania (โรมาเนีย)', 'Russia (รัสเซีย)', 'Rwanda (รวันดา)', 'Saint Kitts and Nevis (เซนต์คิตส์และเนวิส)', 'Saint Lucia (เซนต์ลูเชีย)', 'Saint Vincent and the Grenadines (เซนต์วินเซนต์และเกรนาดีนส์)', 'Samoa (ซามัว)', 'San Marino (ซานมารีโน)',
+    'Sao Tome and Principe (เซาตูเมและปรินซิปี)', 'Saudi Arabia (ซาอุดีอาระเบีย)', 'Senegal (เซเนกัล)', 'Serbia (เซอร์เบีย)', 'Seychelles (เซเชลส์)', 'Sierra Leone (เซียร์ราลีโอน)', 'Singapore (สิงคโปร์)', 'Slovakia (สโลวาเกีย)', 'Slovenia (สโลวีเนีย)',
+    'Solomon Islands (หมู่เกาะโซโลมอน)', 'Somalia (โซมาเลีย)', 'South Africa (แอฟริกาใต้)', 'South Korea (เกาหลีใต้)', 'South Sudan (ซูดานใต้)', 'Spain (สเปน)', 'Sri Lanka (ศรีลังกา)', 'Sudan (ซูดาน)', 'Suriname (ซูรินาม)', 'Sweden (สวีเดน)',
+    'Switzerland (สวิตเซอร์แลนด์)', 'Syria (ซีเรีย)', 'Tajikistan (ทาจิกิสถาน)', 'Tanzania (แทนซาเนีย)', 'Thailand (ไทย)', 'Togo (โตโก)', 'Tonga (ตองกา)', 'Trinidad and Tobago (ตรินิแดดและโตเบโก)', 'Tunisia (ตูนิเซีย)', 'Turkey (ตุรกี)',
+    'Turkmenistan (เติร์กเมนิสถาน)', 'Tuvalu (ตูวาลู)', 'Uganda (ยูกานดา)', 'Ukraine (ยูเครน)', 'United Arab Emirates (สหรัฐอาหรับเอมิเรตส์)', 'United Kingdom (สหราชอาณาจักร)', 'United States of America (สหรัฐอเมริกา)', 'Uruguay (อุรุกวัย)', 'Uzbekistan (อุซเบกิสถาน)',
+    'Vanuatu (วานูอาตู)', 'Venezuela (เวเนซุเอลา)', 'Vietnam (เวียดนาม)', 'Yemen (เยเมน)', 'Zambia (แซมเบีย)', 'Zimbabwe (ซิมบับเว)'
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -105,10 +222,56 @@ export class InvoiceFormComponent implements OnInit {
     private docs: DocumentService,
     private org: OrgService,
     private auth: AuthService,
-    private http: HttpClient
+    private http: HttpClient,
+    private buyerService: BuyerService,
+    private productService: ProductService,
+    private calculationService: CalculationService,
+    private bankService: BankService,
+    private dialog: MatDialog,
+    private swalService: SwalService
   ) {}
 
   ngOnInit(): void {
+    // Get mode from route data
+    this.mode = this.route.snapshot.data['mode'] || 'create';
+    
+    // Get document ID from route params (for view/edit)
+    const docId = this.route.snapshot.paramMap.get('id');
+    if (docId && (this.mode === 'view' || this.mode === 'edit')) {
+      this.documentUuid = docId;
+    }
+
+    // Load buyers once
+    this.buyerService.getBuyers().subscribe(buyers => {
+      this.buyers = buyers;
+    });
+
+    // Load products once for validation
+    this.productService.getProducts().subscribe(products => {
+      this.products = products;
+    });
+
+    // Load banks
+    this.bankService.getBanks().subscribe(response => {
+      if (response && response.result && response.result.data) {
+        this.banks = response.result.data;
+      }
+    });
+
+    // Load Thai Address Data
+    this.http.get<any[]>('assets/thai/provinces.json').subscribe(p => {
+      this.provinces = p;
+      this.refreshFormattedAddress();
+    });
+    this.http.get<any[]>('assets/thai/districts.json').subscribe(d => {
+      this.districts = d;
+      this.refreshFormattedAddress();
+    });
+    this.http.get<any[]>('assets/thai/subdistricts.json').subscribe(s => {
+      this.subdistricts = s;
+      this.refreshFormattedAddress();
+    });
+
     // ----- build forms -----
     this.fgHeader = this.fb.group({
       companyName: [{ value: '', disabled: true }],
@@ -116,18 +279,44 @@ export class InvoiceFormComponent implements OnInit {
       branchCode: ['00000', Validators.required],
       tel: [{ value: '', disabled: true }],
       address: [{ value: '', disabled: true }],
-
-      // ✅ ต้องมีคอนโทรลนี้ให้ตรงกับ HTML
       seller: ['', Validators.required],
-
-      // ถ้ามี field อื่นอยู่แล้ว ให้คงไว้เหมือนเดิม
       docNo: [''],
-      issueDate: [this.todayIsoString(), Validators.required],
+      issueDate: [new Date(), Validators.required],
       taxRate: [7],
+      isReplacement: [false],
+      refDocType: [''],
+      refDocNo: [''],
+      refDocDate: [null],
+      replacementReason: [''],
+      replacementRemark: [''],
+      // Group 3 specific fields (80, 81)
+      refNo: [''],
+      refDate: [null],
+      issueReason: [''],
+      salesperson: ['']
+    });
+    
+    // Reset replacement fields when unchecked, set refDocType when checked
+    this.fgHeader.get('isReplacement')?.valueChanges.subscribe(checked => {
+      if (!checked) {
+        this.fgHeader.patchValue({
+          refDocType: '',
+          refDocNo: '',
+          refDocDate: null,
+          replacementReason: '',
+          replacementRemark: ''
+        }, { emitEvent: false });
+      } else {
+        // Lock refDocType to current document type
+        this.fgHeader.patchValue({
+          refDocType: this.docTypeCode
+        }, { emitEvent: false });
+      }
     });
 
     this.fgCustomer = this.fb.group({
       partyType: ['PERSON', Validators.required],
+      hasThaiTIN: [false], // For FOREIGNER: true = มี TIN ไทย, false = ไม่มี TIN ไทย (Default false for easier Passport flow)
       code: [''],
       name: ['', Validators.required],
       taxId: ['', [thaiTaxIdValidator]],
@@ -137,20 +326,147 @@ export class InvoiceFormComponent implements OnInit {
       email: [''],
       tel: [''],
       zip: [''],
+      country: [''],
       saveToMaster: [false],
+    });
+
+    this.filteredCountries = this.fgCustomer.get('country')!.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterCountries(value || '')),
+    );
+
+    // Initialize Payment Form
+    this.fgPayment = this.fb.group({
+      paymentType: [''], // Default to empty
+      bankName: [''],
+      branch: [''],
+      checkNo: [''],
+      checkDate: [null],
+      amount: [''],
+    });
+
+    // Reference Document Autocomplete Logic
+    const refDocNoControl = this.fgHeader.get('refDocNo');
+
+    if (refDocNoControl) {
+      // Create filteredRefDocs observable - always use current docTypeCode
+      this.filteredRefDocs = refDocNoControl.valueChanges.pipe(
+        startWith(''),
+        debounceTime(300),
+        switchMap((value) => {
+          // Always filter by current docTypeCode
+          if (!this.docTypeCode) return of([]);
+          
+          return this.docs.list({ docType: this.docTypeCode, page: 0, size: 50 }).pipe(
+            map(response => {
+              // Handle different response structures
+              const docs = response?.content || response || [];
+              if (!Array.isArray(docs)) return [];
+              
+              const filterValue = (value || '').toLowerCase();
+              return docs.filter(d => d?.docNo?.toLowerCase().includes(filterValue));
+            })
+          );
+        })
+      );
+    }
+
+    // Listen to paymentType changes to reset fields if needed
+    this.fgPayment.get('paymentType')?.valueChanges.subscribe((val) => {
+      if (val !== 'CHECK') {
+        this.fgPayment.patchValue({
+          bankName: '',
+          branch: '',
+          checkNo: '',
+          checkDate: null,
+          amount: '',
+        });
+      }
     });
 
     // Conditional validation for taxId
     this.fgCustomer.get('partyType')?.valueChanges.subscribe(partyType => {
       const taxIdControl = this.fgCustomer.get('taxId');
-      if (!taxIdControl) return;
+      const codeControl = this.fgCustomer.get('code');
+      const passportNoControl = this.fgCustomer.get('passportNo');
+      const hasThaiTINControl = this.fgCustomer.get('hasThaiTIN');
+      if (!taxIdControl || !codeControl || !passportNoControl) return;
 
+      // Logic to clear/restore form data
       if (partyType === 'JURISTIC') {
-        taxIdControl.setValidators([Validators.required, Validators.minLength(13), Validators.maxLength(13), Validators.pattern(/^\d+$/), thaiTaxIdValidator]);
+        // Restore if we have a saved buyer
+        if (this.selectedJuristicBuyer) {
+          this.fgCustomer.patchValue(this.selectedJuristicBuyer, { emitEvent: false });
+        }
+        taxIdControl.setValidators([Validators.required, Validators.minLength(13), Validators.maxLength(13), Validators.pattern(/^\d+$/), thaiTaxIdValidator, this.juristicTaxIdValidator]);
+        codeControl.setValidators([Validators.required]);
+        passportNoControl.clearValidators();
+      } else if (partyType === 'FOREIGNER') {
+        // Clear fields when switching to FOREIGNER
+        this.fgCustomer.patchValue({
+          code: '',
+          name: '',
+          taxId: '',
+          branchCode: '',
+          address: '',
+          email: '',
+          tel: '',
+          zip: '',
+          passportNo: '',
+          hasThaiTIN: false // Default to false when manually switching to Foreigner
+        }, { emitEvent: false });
+        
+        // Set validation based on hasThaiTIN
+        this.updateForeignerValidation();
+        codeControl.clearValidators();
       } else {
-        taxIdControl.setValidators([thaiTaxIdValidator]); // Only taxId format validation
+        // PERSON - Clear fields
+        this.fgCustomer.patchValue({
+          code: '',
+          name: '',
+          taxId: '',
+          branchCode: '',
+          address: '',
+          email: '',
+          tel: '',
+          zip: '',
+          country: '',
+          passportNo: ''
+        }, { emitEvent: false });
+
+        taxIdControl.setValidators([thaiTaxIdValidator]); // Only format validation
+        codeControl.clearValidators();
+        passportNoControl.clearValidators();
       }
       taxIdControl.updateValueAndValidity();
+      codeControl.updateValueAndValidity();
+      passportNoControl.updateValueAndValidity();
+
+      // Validate address, zip, country for FOREIGNER and OTHER
+      const addressControl = this.fgCustomer.get('address');
+      const zipControl = this.fgCustomer.get('zip');
+      const countryControl = this.fgCustomer.get('country');
+      
+      if (partyType === 'FOREIGNER' || partyType === 'OTHER') {
+         addressControl?.setValidators([Validators.required]);
+         zipControl?.setValidators([Validators.required]);
+         countryControl?.setValidators([Validators.required]);
+      } else {
+         addressControl?.clearValidators();
+         zipControl?.clearValidators();
+         countryControl?.clearValidators();
+      }
+      addressControl?.updateValueAndValidity();
+      zipControl?.updateValueAndValidity();
+      countryControl?.updateValueAndValidity();
+    });
+
+    // hasThaiTIN toggle handler for FOREIGNER
+    this.fgCustomer.get('hasThaiTIN')?.valueChanges.subscribe(() => {
+      const partyType = this.fgCustomer.get('partyType')?.value;
+      if (partyType === 'FOREIGNER') {
+        this.updateForeignerValidation();
+      }
     });
 
     // Initial check for partyType on load
@@ -158,7 +474,7 @@ export class InvoiceFormComponent implements OnInit {
     const taxIdControl = this.fgCustomer.get('taxId');
     if (taxIdControl) {
       if (initialPartyType === 'JURISTIC') {
-        taxIdControl.setValidators([Validators.required, Validators.minLength(13), Validators.maxLength(13), Validators.pattern(/^\d+$/), thaiTaxIdValidator]);
+        taxIdControl.setValidators([Validators.required, Validators.minLength(13), Validators.maxLength(13), Validators.pattern(/^\d+$/), thaiTaxIdValidator, this.juristicTaxIdValidator]);
       } else {
         taxIdControl.setValidators([thaiTaxIdValidator]);
       }
@@ -174,108 +490,298 @@ export class InvoiceFormComponent implements OnInit {
     });
 
     this.form.get('vatType')?.valueChanges.subscribe(() => {
-      this.calculateTotals();
+      this.recalculateAllAmounts();
     });
+
+    // Merge valueChanges from both name and code controls
+    const nameControl = this.fgCustomer.get('name')!;
+    const codeControl = this.fgCustomer.get('code')!;
+
+    this.filteredBuyers = merge(
+      nameControl.valueChanges,
+      codeControl.valueChanges
+    ).pipe(
+      startWith(''),
+      map(value => this._filterBuyers(value || ''))
+    );
 
     // ----- preload seller/org (ชื่อบริษัท / ภาษี / สาขา / โลโก้ / ที่อยู่) -----
     this.auth.user$.subscribe((user) => {
-      if (user) {
-        this.user = user;
-        this.logoUrl = user.logoUrl ?? '';
-        this.branches = user.branchCode
-          ? [
+          if (user) {
+            this.user = user;
+            this.logoUrl = user.logoUrl ?? '';
+            this.branches = user.branchCode
+              ? [
+                  {
+                    code: user.branchCode,
+                    name: user.branchNameTh || user.branchNameEn || 'สำนักงานใหญ่',
+                  },
+                ]
+              : [];
+            
+            // Patch form with info - address comes directly from backend (full address built by AddressService)
+            this.fgHeader.patchValue({
+              companyName: user.sellerNameTh || user.sellerNameEn || '',
+              taxId: user.sellerTaxId || '',
+              branchCode: user.branchCode || '',
+              tel: user.sellerPhoneNumber || '',
+              seller: user.fullName || user.userName || '',
+              // Use getFormattedSellerAddress to ensure all parts are concatenated
+              address: this.getFormattedSellerAddress() || user.fullAddressTh || '',
+            });
+            
+            this.getDocNumberPreview();
+          }
+        });
+    
+        // ----- route: สร้างใหม่หรือแก้ไข -----
+        const docNo = this.route.snapshot.paramMap.get('docNo');
+        if (docNo) {
+          // โหมดดู/แก้ไข: โหลดรายละเอียดด้วยเลขเอกสาร
+          this.docs.getByDocNoDetail(docNo).subscribe((d: any) => {
+            this.debugData = d;
+            console.log('Debug Data:', d);
+            this.docTypeCode = d.docTypeCode || '';
+            this.docTypeTh = d.docType || '';
+            this.fgHeader.patchValue(
               {
-                code: user.branchCode,
-                name: user.branchNameTh || user.branchNameEn || 'สำนักงานใหญ่',
+                docNo: d.docNo,
+                issueDate: d.issueDate,
+                seller: d.sellerName || '',
               },
-            ]
-          : [];
-        const address = [
-          user.sellerAddress?.buildingNo,
-          user.sellerAddress?.addressDetailTh,
-          user.sellerAddress?.postalCode,
-        ]
-          .filter(Boolean)
-          .join(' ');
+              { emitEvent: false }
+            );
+    
+            this.fgCustomer.patchValue(
+              {
+                partyType: this.mapBuyerTypeToPartyType(d.buyerType || d.buyerTypeSnapshot || 'JURISTIC'),
+                code: d.buyerCode || '',
+                name: d.buyerNameSnapshot || d.buyerName || '',
+                taxId: d.buyerTaxIdSnapshot || d.buyerTaxId || '',
+                branchCode: d.buyerBranchCodeSnapshot || d.buyerBranchCode || '',
+                address: d.buyerAddressSnapshot || d.buyerAddress || '',
+                email: d.buyerEmail || '',
+                tel: d.buyerTel || '',
+                zip: d.buyerZipCodeSnapshot || d.buyerZip || '',
+                passportNo: d.buyerPassportNo || '',
+              },
+              { emitEvent: false }
+            );
+    
+            this.itemsFA().clear();
+            (d.items || []).forEach((it: any) => this.addItem(it));
+            this.serviceFee = Number(d.serviceFee || 0);
+          });
+        } else {
+          // โหมดสร้าง: ให้มีอย่างน้อย 1 แถว
+          // โหมดสร้าง: ให้มีอย่างน้อย 1 แถว
+          this.route.queryParams.subscribe((params) => {
+            const typeCode = params['type'];
+            this.docTypeCode = typeCode;
+            this.docTypeTh = this.docTypeMap[typeCode] || typeCode; // Fallback to code if not found
+            this.docTypeEn = this.docTypeEnMap[typeCode] || '';
+            if (this.mode === 'create') {
+              this.getDocNumberPreview();
+            }
+          });
+          
+          // For view/edit modes, load existing document data
+          if (this.documentUuid && (this.mode === 'view' || this.mode === 'edit')) {
+            this.loadDocumentData();
+          } else {
+            this.addItem();
+          }
+        }
+      }
+    
+      getDocNumberPreview(): void {
+        const isCreateMode = !this.route.snapshot.paramMap.get('docNo');
+                                if (isCreateMode && this.docTypeCode && this.user?.branchCode && this.user?.sellerTaxId) {
+                                  this.docs
+                                    .preview(this.docTypeCode, this.user.branchCode, this.user.sellerTaxId, this.todayIsoString())            .subscribe((res) => {
+              this.fgHeader.patchValue({ docNo: res.docNo });
+            });
+        }
+      }
 
+  // Maps for Document Type Display (Thai and English)
+  docTypeMap: { [key: string]: string } = {
+    T01: 'ใบเสร็จรับเงิน (T01)',
+    T02: 'ใบแจ้งหนี้/ใบกำกับภาษี (T02)',
+    T03: 'ใบเสร็จรับเงิน/ใบกำกับภาษี (T03)',
+    T04: 'ใบส่งของ/ใบกำกับภาษี (T04)',
+    '380': 'ใบแจ้งหนี้ (380)',
+    '388': 'ใบกำกับภาษี (388)',
+    '80': 'ใบเพิ่มหนี้ (80)',
+    '81': 'ใบลดหนี้ (81)',
+  };
+
+  docTypeEnMap: { [key: string]: string } = {
+    T01: 'Receipt (T01)',
+    T02: 'Invoice/Tax Invoice (T02)',
+    T03: 'Receipt/Tax Invoice (T03)',
+    T04: 'Delivery Order/Tax Invoice (T04)',
+    '380': 'Invoice (380)',
+    '388': 'Tax Invoice (388)',
+    '80': 'Debit Note (80)',
+    '81': 'Credit Note (81)',
+  };
+
+  // ===== Load Document for view/edit modes =====
+  loadDocumentData(): void {
+    if (!this.documentUuid) return;
+
+    this.docs.getDocumentByUuid(this.documentUuid).subscribe({
+      next: (doc: any) => {
+        this.debugData = doc;
+        console.log('Loaded document data:', doc);
+        
+        // Set document type info
+        this.docTypeCode = doc.docTypeCode || doc.docType?.code || '';
+        
+        // Use SHARED logic from docTypeMap/docTypeEnMap to ensure consistency with Create mode
+        this.docTypeTh = this.docTypeMap[this.docTypeCode] || doc.docType?.thName || this.docTypeCode;
+        this.docTypeEn = this.docTypeEnMap[this.docTypeCode] || doc.docType?.enName || '';
+
+        // Patch header form
         this.fgHeader.patchValue({
-          companyName: user.sellerNameTh || user.sellerNameEn || '',
-          taxId: user.sellerTaxId || '',
-          branchCode: user.branchCode || '',
-          tel: user.sellerPhoneNumber || '',
-          address: address,
-          seller: user.fullName || user.userName || '',
+          docNo: doc.docNo || doc.docNumber || '',
+          issueDate: doc.issueDate ? new Date(doc.issueDate) : (doc.docIssueDate ? new Date(doc.docIssueDate) : new Date()),
+          branchCode: doc.branchCode || '00000',
+          // seller field is for salesperson (salesName), not company name
+          seller: doc.salesName || this.user?.fullName || '',
+          companyName: doc.sellerName || '',
+          taxId: doc.sellerTaxId || '',
+          address: doc.sellerAddress || '',
+        });
+
+        // Patch customer form - use snapshot fields first, then buyer relation as fallback
+        const partyType = this.mapBuyerTypeToPartyType(doc.buyerType || doc.buyer?.type || 'PERSON');
+        
+        console.log('=== CUSTOMER PATCH DEBUG ===');
+        console.log('Raw buyerType:', doc.buyerType);
+        console.log('Mapped partyType:', partyType);
+        console.log('buyerName:', doc.buyerName);
+        console.log('buyerTaxId:', doc.buyerTaxId);
+        console.log('buyerAddress:', doc.buyerAddress);
+        console.log('buyerZipCode:', doc.buyerZipCode);
+        
+        // Determine if this is a foreign buyer (passport-based)
+        const isForeigner = partyType === 'FOREIGNER' || doc.buyerType === 'FOREIGN';
+        
+        const customerPatchData = {
+          partyType: partyType,
+          // Code: check buyerCodeSnapshot first, then buyer relation
+          code: doc.buyerCode || doc.buyer?.code || doc.buyer?.buyerCode || '',
+          name: doc.buyerName || doc.buyer?.name || doc.buyer?.buyerNameTh || '',
+          // For foreigners: taxId field contains passportNo, so we use taxId here for consistency
+          taxId: doc.buyerTaxId || doc.buyer?.taxId || doc.buyer?.buyerTaxId || '',
+          branchCode: doc.buyerBranchCode || doc.buyer?.branchCode || doc.buyer?.buyerBranchCode || '',
+          address: doc.buyerAddress || doc.buyer?.addressDetailTh || doc.buyer?.buyerAddressTh || '',
+          // Email and tel - try snapshot then buyer relation
+          email: doc.buyerEmail || doc.buyer?.email || doc.buyer?.buyerEmail || '',
+          tel: doc.buyerPhone || doc.buyer?.phoneNumber || doc.buyer?.buyerPhoneNumber || '',
+          zip: doc.buyerZipCode || doc.buyer?.zipCode || doc.buyer?.buyerZipCode || '',
+          // PassportNo: use taxId for foreigners (since passport is mapped to taxId in backend now)
+          passportNo: (isForeigner ? (doc.buyerTaxId || doc.buyer?.buyerTaxId) : '') || doc.buyer?.passportNo || '',
+          // Country for foreigners
+          country: doc.buyerCountry || doc.buyer?.country || '',
+        };
+        
+        console.log('Customer patch data:', customerPatchData);
+        
+        this.fgCustomer.patchValue(customerPatchData);
+        
+        console.log('After patch - fgCustomer values:', this.fgCustomer.getRawValue());
+
+        // Populate items - use correct field names from DocumentItem entity
+        const itemsFormArray = this.itemsFA();
+        itemsFormArray.clear();
+        if (doc.items && Array.isArray(doc.items)) {
+          doc.items.forEach((item: any) => {
+            this.addItem({
+              sku: item.productCode || item.product?.productCode || '',
+              name: item.itemName || item.legacyName || item.name || '',
+              qty: item.qty || 1,
+              price: item.unitPrice || 0,
+              discount: item.discount || 0,
+              taxRate: item.vatRate || 7,
+              amount: item.amount || item.lineTotal || 0,
+            });
+          });
+        } else {
+          this.addItem(); // Add empty row if no items
+        }
+
+        // Populate remark
+        this.form.patchValue({
+          remark: doc.remark || doc.note || doc.remarkOther || '',
+        });
+
+        // Populate fees - use 'description' field to match backend
+        this.serviceFee = doc.charges?.find((c: any) => c.description === 'service')?.amount || 0;
+        
+        // If there's a service fee, show the edit view (input field) instead of the add button
+        if (this.serviceFee > 0) {
+          this.editingServiceFee = true;
+        }
+
+        // Recalculate totals
+        this.calculateTotals();
+
+        // Disable form for view mode - use setTimeout to ensure values are rendered first
+        if (this.mode === 'view') {
+          // Store customer data in dedicated properties for view mode
+          this.viewCustomerData = {
+            partyType: partyType,
+            code: customerPatchData.code,
+            name: customerPatchData.name,
+            taxId: customerPatchData.taxId,
+            branchCode: customerPatchData.branchCode,
+            address: customerPatchData.address,
+            email: customerPatchData.email,
+            tel: customerPatchData.tel,
+            zip: customerPatchData.zip,
+            passportNo: customerPatchData.passportNo,
+            country: customerPatchData.country,
+          };
+          console.log('viewCustomerData set:', this.viewCustomerData);
+          
+          setTimeout(() => {
+            this.form.disable();
+            this.fgHeader.disable();
+            this.fgCustomer.disable();
+            this.fgPayment.disable();
+          }, 0);
+        }
+
+        // Track form changes for edit mode - enable save button only when changes are made
+        if (this.mode === 'edit') {
+          // Mark form as clean after initial load
+          this.isFormDirty = false;
+          
+          // Subscribe to form changes
+          this.form.valueChanges.subscribe(() => {
+            this.isFormDirty = true;
+          });
+          this.fgHeader.valueChanges.subscribe(() => {
+            this.isFormDirty = true;
+          });
+          this.fgCustomer.valueChanges.subscribe(() => {
+            this.isFormDirty = true;
+          });
+          this.fgPayment.valueChanges.subscribe(() => {
+            this.isFormDirty = true;
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error loading document:', err);
+        this.swalService.error('ไม่สามารถโหลดข้อมูลเอกสารได้', 'กรุณาลองใหม่อีกครั้ง').then(() => {
+          this.router.navigate(['/documentsall']);
         });
       }
     });
-
-    // ----- route: สร้างใหม่หรือแก้ไข -----
-    const docNo = this.route.snapshot.paramMap.get('docNo');
-    if (docNo) {
-      // โหมดดู/แก้ไข: โหลดรายละเอียดด้วยเลขเอกสาร
-      this.docs.getByDocNoDetail(docNo).subscribe((d: any) => {
-        this.docTypeCode = d.docTypeCode || '';
-        this.docTypeTh = d.docType || '';
-        this.fgHeader.patchValue(
-          {
-            docNo: d.docNo,
-            issueDate: d.issueDate,
-            seller: d.sellerName || '',
-          },
-          { emitEvent: false }
-        );
-
-        this.fgCustomer.patchValue(
-          {
-            partyType: d.buyerType || 'PERSON',
-            code: d.buyerCode || '',
-            name: d.buyerName || '',
-            taxId: d.buyerTaxId || '',
-            branchCode: d.buyerBranchCode || '',
-            address: d.buyerAddress || '',
-            email: d.buyerEmail || '',
-            tel: d.buyerTel || '',
-            zip: d.buyerZip || '',
-            passportNo: d.buyerPassportNo || '',
-          },
-          { emitEvent: false }
-        );
-
-        this.itemsFA().clear();
-        (d.items || []).forEach((it: any) => this.addItem(it));
-        this.serviceFee = Number(d.serviceFee || 0);
-        this.shippingFee = Number(d.shippingFee || 0);
-      });
-    } else {
-      // โหมดสร้าง: ให้มีอย่างน้อย 1 แถว
-      this.route.queryParams.subscribe((params) => {
-        const docTypeMap: { [key: string]: string } = {
-          T01: 'ใบเสร็จรับเงิน (T01)',
-          T02: 'ใบแจ้งหนี้/ใบกำกับภาษี (T02)',
-          T03: 'ใบเสร็จรับเงิน/ใบกำกับภาษี (T03)',
-          T04: 'ใบส่งของ/ใบกำกับภาษี (T04)',
-          '380': 'ใบแจ้งหนี้ (380)',
-          '388': 'ใบกำกับภาษี (388)',
-          '80': 'ใบเพิ่มหนี้ (80)',
-          '81': 'ใบลดหนี้ (81)',
-        };
-        const docTypeEnMap: { [key: string]: string } = {
-          T01: 'Receipt (T01)',
-          T02: 'Invoice/Tax Invoice (T02)',
-          T03: 'Receipt/Tax Invoice (T03)',
-          T04: 'Delivery Order/Tax Invoice (T04)',
-          '380': 'Invoice (380)',
-          '388': 'Tax Invoice (388)',
-          '80': 'Debit Note (80)',
-          '81': 'Credit Note (81)',
-        };
-        const typeCode = params['type'];
-        this.docTypeCode = typeCode;
-        this.docTypeTh = docTypeMap[typeCode] || typeCode; // Fallback to code if not found
-        this.docTypeEn = docTypeEnMap[typeCode] || '';
-      });
-      this.addItem();
-    }
   }
 
   // ===== utilities =====
@@ -302,126 +808,90 @@ export class InvoiceFormComponent implements OnInit {
   }
 
   calculateTotals() {
-    const rows = this.itemForms.map((f) => f.getRawValue());
-    const vatType = this.form.get('vatType')?.value || 'exclude';
-    const serviceAndShipping = this.serviceFee + this.shippingFee;
+    const headerTax = Number(this.fgHeader.get('taxRate')?.value ?? 0);
 
-    let subtotal = 0; // จำนวนเงินรวมก่อนส่วนลด (qty * price)
-    let discountTotal = 0; // ส่วนลดรวมทั้งบิล
-    let netAfterDiscount = 0; // หลังหักส่วนลด (รวมทุกบรรทัด)
-    let baseTotal = 0; // ฐานภาษี (ยอดก่อน VAT)
-    let vatTotal = 0; // VAT รวมทั้งบิล
-
-    for (const r of rows) {
-      const qty = Number(r.qty) || 0;
-      const price = Number(r.price) || 0;
-      const discount = Number(r.discount) || 0;
-      const taxRate = Number(r.taxRate) || 0; // ← ใช้ % ของแต่ละแถว
-
-      const lineAmount = qty * price; // จำนวนเงินรวมของแถว (ก่อนลด)
-      const lineNet = lineAmount - discount; // หลังหักส่วนลด แต่อาจยังรวมภาษีอยู่
-
-      subtotal += lineAmount;
-      discountTotal += discount;
-      netAfterDiscount += lineNet;
-
-      if (vatType === 'include') {
-        // ราคาในช่องคือ "รวม VAT แล้ว"
-        if (taxRate > 0) {
-          const base = lineNet / (1 + taxRate / 100);
-          const vat = lineNet - base;
-          baseTotal += base;
-          vatTotal += vat;
-        } else {
-          // อัตรา 0% ก็ถือเป็นฐานภาษีเต็ม ไม่มี VAT
-          baseTotal += lineNet;
-        }
-      } else {
-        // ราคาในช่องคือ "ยังไม่รวม VAT"
-        baseTotal += lineNet;
-        if (taxRate > 0) {
-          const vat = lineNet * (taxRate / 100);
-          vatTotal += vat;
-        }
-      }
-    }
-
-    // ----- ค่าบริการ + ค่าขนส่ง -----
-    // ตอนนี้สมมติใช้ VAT มาตรฐาน 7% ให้ทั้งสองอย่าง (ปรับได้ถ้าอยากซับซ้อนขึ้น)
-    const serviceRate = 7;
-    if (serviceAndShipping > 0) {
-      if (vatType === 'include') {
-        const base = serviceAndShipping / (1 + serviceRate / 100);
-        const vat = serviceAndShipping - base;
-        baseTotal += base;
-        vatTotal += vat;
-        netAfterDiscount += serviceAndShipping; // เพราะค่าบริการ/ขนส่งรวมอยู่ในราคารวมภาษี
-      } else {
-        baseTotal += serviceAndShipping;
-        const vat = serviceAndShipping * (serviceRate / 100);
-        vatTotal += vat;
-      }
-    }
-
-    // ----- ยอดรวมสุทธิ -----
-    const grand =
-      vatType === 'include'
-        ? netAfterDiscount // รวม VAT อยู่แล้ว
-        : baseTotal + vatTotal;
-
-    this.totals = {
-      subtotal: this.round(subtotal),
-      discount: this.round(discountTotal),
-      netAfterDiscount: this.round(netAfterDiscount),
-      vat: this.round(vatTotal),
-      grand: this.round(grand),
-    };
+    this.totals = this.calculationService.calculateTotals(
+      this.itemForms,
+      this.form.get('vatType')?.value || 'exclude',
+      this.serviceFee,
+      0, // shippingFee removed
+      headerTax,
+      false
+    );
   }
 
-  private round(v: number) {
-    return this.use4Decimals ? Number(v.toFixed(4)) : Number(v.toFixed(2));
-  }
+  // private round(v: number) {
+  //   return this.use4Decimals ? Number(v.toFixed(4)) : Number(v.toFixed(2));
+  // }
 
-  private fix(v: number, d: number): string {
-    const num = Number.isFinite(v) ? v : 0;
-    // Use 'th-TH' locale for comma separation and specified decimal places
-    return num.toLocaleString('th-TH', {
-      minimumFractionDigits: d,
-      maximumFractionDigits: d,
-    });
-  }
+  // private fix(v: number, d: number): string {
+  //   const num = Number.isFinite(v) ? v : 0;
+  //   // Use 'th-TH' locale for comma separation and specified decimal places
+  //   return num.toLocaleString('th-TH', {
+  //     minimumFractionDigits: d,
+  //     maximumFractionDigits: d,
+  //   });
+  // }
 
   addItem(init?: any) {
     const fg = this.fb.group({
-      sku: [init?.sku || ''],
-      name: [init?.name || ''],
+      sku: [init?.sku || '', [Validators.required, this.productValidator.bind(this)]],
+      name: [init?.name || '', [Validators.required, this.productValidator.bind(this)]],
       qty: [init?.qty ?? 1],
       price: [init?.price ?? 0],
       discount: [init?.discount ?? 0],
-
-      // ถ้ามาจากเอกสารเดิมให้ลองอ่าน init.vatRate ก่อน
       taxRate: [init?.taxRate ?? init?.vatRate ?? 7],
-
-      amount: [{ value: 0, disabled: true }],
+      amount: [{ value: init?.amount ?? 0, disabled: true }],
     });
 
     // autocalc amount + sync taxRate
     fg.valueChanges.subscribe((v) => {
-      const amount =
-        (Number(v.qty) || 0) * (Number(v.price) || 0) -
-        (Number(v.discount) || 0);
+      const qty = Number(v.qty) || 0;
+      const price = Number(v.price) || 0;
+      const discount = Number(v.discount) || 0;
+      const taxRate = Number(v.taxRate ?? 0);
+      const vatType = this.form.get('vatType')?.value || 'exclude';
 
+      let amount = qty * price - discount;
+
+      // ถ้าราคาไม่รวมภาษี (exclude) = แสดงราคาเดิม ไม่บวก VAT (VAT จะคำนวณแยกในยอดรวม)
+      // ถ้าราคารวมภาษี (include) = ต้องบวก VAT เข้าไปในจำนวนเงิน
+      if (vatType === 'include' && taxRate > 0) {
+        amount = amount * (1 + taxRate / 100);
+      }
+
+      // Update amount control
       const amountControl = fg.get('amount');
-      if (amountControl && this.round(amount) !== amountControl.value) {
-        amountControl.setValue(this.round(amount));
+       if (amountControl && this.calculationService.round(amount, false) !== amountControl.value) {
+        amountControl.setValue(this.calculationService.round(amount, false), { emitEvent: false });
       }
 
       // ✅ sync taxRate ของแถวนี้ไปที่หัวเอกสาร
       const headerTax = Number(v.taxRate ?? 0);
-      this.fgHeader.patchValue({ taxRate: headerTax }, { emitEvent: false });
+      // Only update header tax rate if it's different to avoid loops/excessive updates
+      if (this.fgHeader.get('taxRate')?.value !== headerTax) {
+         this.fgHeader.patchValue({ taxRate: headerTax }, { emitEvent: false });
+      }
 
       this.calculateTotals();
     });
+
+    const skuCtrl = fg.get('sku') as FormControl;
+    const nameCtrl = fg.get('name') as FormControl;
+
+    const currentIndex = this.itemsFA().length; // Get the index for the new row
+
+    const filteredProducts$ = merge(
+      skuCtrl.valueChanges,
+      nameCtrl.valueChanges
+    ).pipe(
+      startWith(''),
+      observeOn(asyncScheduler),
+      debounceTime(300),
+      switchMap(value => this._filterProducts(value || '', currentIndex))
+    );
+    this.filteredProducts.push(filteredProducts$);
+
 
     this.itemsFA().push(fg);
 
@@ -433,24 +903,134 @@ export class InvoiceFormComponent implements OnInit {
     this.calculateTotals();
   }
 
+  recalculateAllAmounts() {
+    this.itemForms.forEach(fg => {
+      const v = fg.getRawValue();
+      const qty = Number(v.qty) || 0;
+      const price = Number(v.price) || 0;
+      const discount = Number(v.discount) || 0;
+      const taxRate = Number(v.taxRate ?? 0);
+      const vatType = this.form.get('vatType')?.value || 'exclude';
+
+      let amount = qty * price - discount;
+
+      // ถ้าราคาไม่รวมภาษี (exclude) = แสดงราคาเดิม ไม่บวก VAT (VAT จะคำนวณแยกในยอดรวม)
+      // ถ้าราคารวมภาษี (include) = ต้องบวก VAT เข้าไปในจำนวนเงิน
+      if (vatType === 'include' && taxRate > 0) {
+        amount = amount * (1 + taxRate / 100);
+      }
+
+      const amountControl = fg.get('amount');
+      if (amountControl) {
+        amountControl.setValue(this.calculationService.round(amount, false), { emitEvent: false });
+      }
+    });
+    this.calculateTotals();
+  }
+
   removeItem(i: number) {
     this.itemsFA().removeAt(i);
+    this.filteredProducts.splice(i, 1);
+    this.calculateTotals(); // Recalculate totals after removing item
   }
 
   trackByIdx(i: number) {
     return i;
   }
 
-  // ===== totals (getter ให้เทมเพลตเรียกใช้) =====
+  private _filterProducts(value: string | Product, currentIndex: number): Observable<Product[]> {
+    const filterValue = typeof value === 'string' ? value.toLowerCase() : value.name.toLowerCase();
+    
+    // Get all selected SKUs except the one in the current row
+    const selectedSkus = this.itemForms
+      .map((fg, index) => index !== currentIndex ? fg.get('sku')?.value : null)
+      .filter(sku => sku);
 
+    // ใช้ cached products แทนการเรียก API ทุกครั้ง
+    const filteredProducts = this.products.filter(product => {
+      // Exclude if already selected in another row
+      if (selectedSkus.includes(product.productCode)) {
+        return false;
+      }
+      // Filter by name or sku
+      return product.name.toLowerCase().includes(filterValue) ||
+             product.productCode.toLowerCase().includes(filterValue);
+    });
+    return of(filteredProducts);
+  }
+
+  productValidator(control: AbstractControl): { [key: string]: any } | null {
+    const value = control.value;
+    if (!value) return null; 
+    
+    // If value is an object (selected product), it's valid
+    if (typeof value === 'object' && (value.productCode || value.name)) return null;
+
+    // If products are not loaded yet, skip validation
+    if (this.products.length === 0) return null;
+
+    // Check if value matches any product SKU or Name exactly
+    const isValid = this.products.some(p => p.productCode === value || p.name === value);
+    
+    return isValid ? null : { invalidProduct: true };
+  }
+
+  displayProduct(product: Product | string): string {
+    if (typeof product === 'string') return product;
+    return product && product.name ? product.name : '';
+  }
+
+  displayProductSku(product: Product | string): string {
+    if (typeof product === 'string') return product;
+    return product && product.productCode ? product.productCode : '';
+  }
+
+  // Store last valid product for each row to support reversion on blur
+  private lastValidProducts: { [index: number]: Product } = {};
+
+  autoSelect(event: any) {
+    event.target.select();
+  }
+
+  onProductSelected(event: any, index: number): void {
+    const selectedProduct = event.option.value as Product;
+    const itemFormGroup = this.itemForms[index];
+    
+    // Update cache
+    this.lastValidProducts[index] = selectedProduct;
+
+    itemFormGroup.patchValue({
+      sku: selectedProduct.productCode,
+      name: selectedProduct.name,
+      price: selectedProduct.defaultPrice, // Use defaultPrice from Product interface if available, or price
+      taxRate: selectedProduct.taxRate,
+    });
+    
+    // If price is not in Product interface, check what was used before.
+    // Previous code used: price: selectedProduct.defaultPrice
+  }
+
+  onInputBlur(index: number, field: 'sku' | 'name') {
+    const fg = this.itemForms[index];
+    const control = fg.get(field);
+    const value = control?.value;
+
+    // If value is not an object (i.e. user typed text but didn't select) 
+    // AND we have a previous valid product, revert to it.
+    if (this.lastValidProducts[index] && (typeof value !== 'object' || !value)) {
+      const lastProduct = this.lastValidProducts[index];
+      fg.patchValue({
+        sku: lastProduct.productCode,
+        name: lastProduct.name
+      }, { emitEvent: false });
+    }
+  }
   fmt(v: number) {
-    return this.use4Decimals ? this.fix(v, 4) : this.fix(v, 2);
+    return this.calculationService.formatNumber(v, false);
   }
 
   // ===== events (ให้ซิกเนเจอร์รับ $event ได้ เพื่อไม่ต้องแก้ HTML) =====
-  toggleDecimals(_: any = null) {
-    this.use4Decimals = !this.use4Decimals;
-  }
+
   startEditServiceFee() {
     this.editingServiceFee = true;
   }
@@ -458,28 +1038,70 @@ export class InvoiceFormComponent implements OnInit {
     this.editingServiceFee = false;
   }
   onServiceFeeInput(e: Event) {
-    this.serviceFee = Number((e.target as HTMLInputElement).value || 0);
-  }
-  startEditShippingFee() {
-    this.editingShippingFee = true;
-  }
-  stopEditShippingFee() {
-    this.editingShippingFee = false;
-  }
-  onShippingFeeInput(e: Event) {
-    this.shippingFee = Number((e.target as HTMLInputElement).value || 0);
+    const rawValue = (e.target as HTMLInputElement).value || '0';
+    // ลบ comma และอักขระที่ไม่ใช่ตัวเลขออก
+    const cleanValue = rawValue.replace(/,/g, '').replace(/[^0-9.-]/g, '');
+    this.serviceFee = Number(cleanValue) || 0;
+    this.calculateTotals();
   }
   cancelServiceFee() {
     this.serviceFee = 0;
     this.editingServiceFee = false;
-  }
-  cancelShippingFee() {
-    this.shippingFee = 0;
-    this.editingShippingFee = false;
+    this.calculateTotals();
   }
 
-  onSubmit() {
+  // ฟังก์ชันบล็อกการพิมพ์ตัวอักษรที่ไม่ใช่ตัวเลข
+  onlyAllowNumbers(event: KeyboardEvent): boolean {
+    const charCode = event.key;
+    // อนุญาตเฉพาะตัวเลข, จุด (.), และ backspace/delete
+    if (/^[0-9.]$/.test(charCode) || event.key === 'Backspace' || event.key === 'Delete' || event.key === 'Tab' || event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      return true;
+    }
+    event.preventDefault();
+    return false;
+  }
+
+
+  // ===== Reference Document Selection =====
+  onRefDocSelected(event: any): void {
+    const selectedDocNo = event.option.value;
+    // Find the document in the current filtered list to get its date
+    this.docs.list({ docType: this.docTypeCode, page: 0, size: 100 }).subscribe(response => {
+      const docs = response?.content || response || [];
+      if (!Array.isArray(docs)) return;
+      
+      const selectedDoc = docs.find(d => d?.docNo === selectedDocNo);
+      if (selectedDoc) {
+        this.fgHeader.patchValue({
+          refDocDate: selectedDoc.issueDate ? new Date(selectedDoc.issueDate) : null
+        });
+      }
+    });
+  }
+
+  getCurrentDocTypeLabel(): string {
+    const found = this.docTypes.find(t => t.code === this.docTypeCode);
+    return found ? `${found.code} - ${found.name}` : this.docTypeCode || 'เลือกประเภท';
+  }
+
+
+  saveInvoice() {
     if (this.form.invalid || this.fgHeader.invalid || this.fgCustomer.invalid) {
+      console.warn('Cannot save: Form validation failed');
+      
+      if (this.form.invalid) {
+        console.warn('Main Form Invalid:', this.findInvalidControls(this.form));
+      }
+      if (this.fgHeader.invalid) {
+        console.warn('Header Form Invalid:', this.findInvalidControls(this.fgHeader));
+      }
+      if (this.fgCustomer.invalid) {
+        console.warn('Customer Form Invalid:', this.findInvalidControls(this.fgCustomer));
+      }
+
+      this.form.markAllAsTouched();
+      this.fgHeader.markAllAsTouched();
+      this.fgCustomer.markAllAsTouched();
       return;
     }
     this.isSaving = true;
@@ -487,89 +1109,195 @@ export class InvoiceFormComponent implements OnInit {
     const header = this.fgHeader.getRawValue();
     const customer = this.fgCustomer.getRawValue();
     const totals = this.totals;
+
+    // 1. Find Seller ID
+    const sellerId = this.seller?.sellerId || this.user?.sellerId; // fallback
+    if (!sellerId) {
+      console.error('Seller ID not found!');
+      // You might want to show an alert to the user here
+      this.swalService.error('ไม่พบข้อมูลผู้ขาย', 'กรุณาตรวจสอบข้อมูลผู้ขาย');
+      this.isSaving = false;
+      return;
+    }
+
+    // 2. Find Buyer ID
+    let buyerId = customer.id; // Assuming id might be in form value?
+    if (!buyerId) {
+       // Lookup by Tax ID or Name in this.buyers
+       const foundBuyer = this.buyers.find(b => b.taxId === customer.taxId || b.name === customer.name);
+       if (foundBuyer && foundBuyer.id) { 
+           buyerId = foundBuyer.id;
+       }
+    }
+    
+    // If strict backend, we need buyerId. 
+    // If not found, we send null and backend might 500/404.
+    // For now, let's proceed.
+
+    // 3. Map Items
     const items = this.itemForms.map((f, i) => {
-      const item = f.getRawValue();
+      const itemVal = f.getRawValue();
+      
+      // Try finding from cache first (guaranteed object from selection)
+      let product = this.lastValidProducts[i];
+      
+      // If not in cache, try looking up by SKU or Name in the full list (Loose matching)
+      if (!product) {
+         const skuSearch = (itemVal.sku || '').toString().trim().toLowerCase();
+         const nameSearch = (itemVal.name || '').toString().trim().toLowerCase();
+
+         product = this.products.find(p => {
+             const pSku = (p.productCode || '').toString().trim().toLowerCase();
+             const pName = (p.name || '').toString().trim().toLowerCase();
+             return (skuSearch && pSku === skuSearch) || (nameSearch && pName === nameSearch);
+         }) as Product;
+      }
+
+      if (!product) {
+          console.warn(`Product not found for item index ${i}. Name: '${itemVal.name}', SKU: '${itemVal.sku}'. Product ID will be null.`);
+      } else {
+          console.log(`Mapped Item ${i}: ${itemVal.name} -> Product ID: ${product.id}`);
+      }
+      
       return {
+        productId: product?.id ? String(product.id) : null, // Backend needs UUID
+        productCode: product?.productCode || itemVal.sku, // Send productCode
+        itemName: itemVal.name,
+        qty: itemVal.qty,
+        unitPrice: itemVal.price,
+        vatRate: itemVal.taxRate,
+        discount: itemVal.discount || 0,
         lineNo: i + 1,
-        name: item.name,
-        qty: item.qty,
-        unitPrice: item.price,
-        discount: item.discount,
-        vatRate: item.taxRate,
-        sku: item.sku,
       };
     });
 
-    // Convert issueDate to full ISO 8601 format
-    const issueDate = new Date(header.issueDate).toISOString();
+    // 4. Map Payments
+    const payments = [];
+    if (this.showPaymentMethod) {
+        const pVal = this.fgPayment.getRawValue();
+        // PaymentRequest: type, amount, reference
+        payments.push({
+            type: pVal.paymentType,
+            amount: totals.grand, // Assuming full payment
+            reference: pVal.paymentType === 'CHECK' ? pVal.checkNo : null
+        });
+    }
 
     const payload = {
-      header: {
-        docTypeCode: this.docTypeCode,
-        docNo: header.docNo,
-        issueDate: issueDate,
-        sellerTaxId: header.taxId,
-        branchCode: header.branchCode, // Added branchCode
+        // Seller/Branch identification
+        sellerId: sellerId,
+        branchCode: header.branchCode || '00000',
+        
+        // Document info (use correct field names for DocumentRequest DTO)
+        docNo: header.docNo || '',
+        docTypeCode: this.docTypeCode,  // String, not object
+        docIssueDate: new Date(header.issueDate).toISOString().split('T')[0], // LocalDate YYYY-MM-DD
+        
+        // Seller snapshot info
+        sellerTaxId: this.user?.sellerTaxId || header.taxId || '',
+        sellerName: this.user?.sellerNameTh || header.companyName || '',
+        sellerNameEn: this.user?.sellerNameEn || '',  // English name added
+        sellerAddress: this.getFormattedSellerAddress() || header.address || '',
+        sellerBranchCode: header.branchCode || '00000',
+        sellerPhoneNumber: this.user?.sellerPhoneNumber || header.tel || '',
+        sellerLogoUrl: this.logoUrl || null,
+        
+        // Buyer info
+        buyerId: buyerId || null,
+        buyerCode: customer.code || '',  // Customer code
+        buyerName: customer.name || '',
+        // TaxId is always from taxId field for all types (รวมถึงชาวต่างชาติ)
+        // If Foreigner and no Tax ID, use Passport Number as Tax ID per user request
+        buyerTaxId: customer.taxId || (customer.partyType === 'FOREIGNER' ? (customer.passportNo || '') : ''),
+        buyerBranchCode: customer.branchCode || '00000',
+        buyerAddress: customer.address || '',
+        buyerType: this.mapPartyTypeToBuyerType(customer.partyType),
+        buyerZipCode: customer.zip || '',
+        // Additional snapshot fields for email, phone, country
+        buyerEmail: customer.email || '',
+        buyerPhone: customer.tel || '',
+        buyerCountry: customer.country || '',
+        // Passport number for foreigners only (เฉพาะชาวต่างชาติ)
+        buyerPassportNo: customer.partyType === 'FOREIGNER' ? (customer.passportNo || '') : null,
+        
+        // Optional fields
+        salesperson: header.seller || '',
         currency: 'THB',
-        vatRateStandard: header.taxRate,
-      },
-      party: {
-        buyerDetails: {
-          type: customer.partyType,
-          buyerNameTh: customer.name,
-          buyerAddressTh: customer.address,
-          buyerEmail: customer.email,
-          buyerPhoneNumber: customer.tel,
-          buyerZipCode: customer.zip,
-          buyerCode: customer.code,
-          buyerBranchCode: customer.branchCode,
-          buyerTaxId:
-            customer.partyType === 'JURISTIC' ? customer.taxId || null : null,
-          buyerPassportNo:
-            customer.partyType === 'PERSON'
-              ? customer.passportNo || null
-              : null,
-        },
-        saveToMaster: customer.saveToMaster, // Added saveToMaster
-      },
-      items: items,
-      moneyTaxbasisTotalamt: totals.subtotal, // Flattened total
-      moneyTaxTotalamt: totals.vat, // Flattened total
-      moneyGrandTotalamt: totals.grand, // Flattened total
-      remarkOther: this.form.value.remark, // Renamed remark
+        note: this.form.get('remark')?.value || '',
+
+        reference: header.refDocNo || '',
+        status: 'NEW',
+        
+        // Items, Charges, Payments
+        items: items,
+        charges: [
+          { description: 'service', amount: this.serviceFee || 0 }
+        ],
+        payments: payments
     };
 
-    this.docs.createDocument(payload).subscribe({
-      // Use createDocument
-      next: (res) => {
-        console.log('Created document', res);
-        const docUuid = res.document.docUuid;
-        const pdfAvailable = res.exportInfo.pdfAvailable;
+    console.log('Sending Payload:', payload);
+    console.log('Mode:', this.mode, 'Document UUID:', this.documentUuid);
 
-        this.createdDocument = res.document; // Store the created document
-        this.documentUuid = docUuid; // Store the UUID
-        this.creationSuccess = true;
-        this.isSaving = false;
-
-        if (pdfAvailable) {
-          this.docs.exportDocument(docUuid, 'pdf').subscribe((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = `document-${docUuid}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
+    // Use updateDocument (PUT) for edit mode, createDocument (POST) for create mode
+    if (this.mode === 'edit' && this.documentUuid) {
+      this.docs.updateDocument(this.documentUuid, payload as any).subscribe({
+        next: (res: any) => {
+          console.log('Updated document:', res);
+          this.isSaving = false;
+          
+          // Navigate back to documents list and show success dialog
+          this.router.navigate(['/documentsall']).then(() => {
+            this.swalService.success('บันทึกสำเร็จ', 'บันทึกเอกสารสำเร็จแล้ว');
           });
-        }
-      },
-      error: (err) => {
-        console.error('Error creating document', err);
-        this.isSaving = false;
-        // You can add user-facing error handling here
-      },
+        },
+        error: (err) => {
+          console.error('Error updating document', err);
+          this.isSaving = false;
+          this.swalService.error('เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการแก้ไขเอกสาร');
+        },
+      });
+    } else {
+      // Create mode - use POST
+      this.docs.createDocument(payload as any).subscribe({
+        next: (res: any) => {
+          console.log('Created document RAW:', res);
+          console.log('Created document JSON:', JSON.stringify(res));
+          console.log('Created document Keys:', Object.keys(res));
+
+          // The backend returns the Document object directly (with 'id').
+          // We try multiple known patterns.
+          const docUuid = res.id || res.document?.docUuid || res.docUuid || (res.body ? res.body.id : null);
+          
+          this.createdDocument = res.document || res; 
+          this.documentUuid = docUuid; 
+          console.log('Extracted UUID:', this.documentUuid); // DEBUG LOG
+
+          if (!this.documentUuid) {
+               console.error('CRITICAL: Could not extract Document UUID! Response structure might be unexpected.', res);
+               this.swalService.warning('คำเตือน', 'สร้างเอกสารสำเร็จ แต่ไม่พบ UUID การดาวน์โหลดอาจไม่ทำงาน');
+          }
+
+          this.creationSuccess = true;
+          this.isSaving = false;
+          this.swalService.success('สร้างเอกสารสำเร็จ', 'ระบบได้สร้างเอกสารเรียบร้อยแล้ว');
+        },
+        error: (err) => {
+          console.error('Error creating document', err);
+          this.isSaving = false;
+          this.swalService.error('เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการสร้างเอกสาร');
+        },
+      });
+    }
+  }
+
+  openDownloadDialog() {
+    if (!this.documentUuid) return;
+    this.dialog.open(ExportDialogComponent, {
+      data: {
+        docUuid: this.documentUuid,
+        docNo: this.fgHeader.get('docNo')?.value || ''
+      }
     });
   }
 
@@ -603,7 +1331,319 @@ export class InvoiceFormComponent implements OnInit {
     this.itemsFA().clear();
     this.addItem();
     this.fgHeader.patchValue({
-      issueDate: this.todayIsoString(),
+      issueDate: new Date(),
     });
+    this.removePaymentMethod(); // Reset payment method
+  }
+
+  // Payment Method Logic
+  addPaymentMethod() {
+    this.showPaymentMethod = true;
+    this.fgPayment.reset({ paymentType: '' });
+  }
+
+  removePaymentMethod() {
+    this.showPaymentMethod = false;
+    this.fgPayment.reset({ paymentType: '' });
+  }
+
+  public asFormControl(control: AbstractControl | null): FormControl {
+    return control as FormControl;
+  }
+
+  private _filterBuyers(value: string | Buyer): Buyer[] {
+    const filterValue = typeof value === 'string' ? value.toLowerCase() : value.name.toLowerCase();
+    return this.buyers.filter(buyer => 
+      buyer.name.toLowerCase().includes(filterValue) || 
+      (buyer.code && buyer.code.toLowerCase().includes(filterValue))
+    );
+  }
+
+  displayBuyer(buyer: Buyer | string): string {
+    if (typeof buyer === 'string') return buyer;
+    return buyer && buyer.name ? buyer.name : '';
+  }
+
+  displayBuyerCode(buyer: Buyer | string): string {
+    if (typeof buyer === 'string') return buyer;
+    return buyer && buyer.code ? buyer.code : '';
+  }
+
+  onBuyerSelected(event: any): void {
+    const selectedBuyer = event.option.value as Buyer;
+    // Combine address with zipCode and normalize กรุงเทพ to กรุงเทพฯ
+    let fullAddress = selectedBuyer.zipCode 
+      ? `${selectedBuyer.address || ''} ${selectedBuyer.zipCode}`.trim()
+      : selectedBuyer.address || '';
+    // Add ฯ to กรุงเทพ if not followed by มหานคร or ฯ
+    fullAddress = fullAddress.replace(/กรุงเทพ(?!มหานคร|ฯ)/g, 'กรุงเทพฯ');
+    
+    const patchData: any = {
+      code: selectedBuyer.code,
+      name: selectedBuyer.name,
+      taxId: selectedBuyer.taxId,
+      address: fullAddress,
+      branchCode: selectedBuyer.branch,
+      email: selectedBuyer.email,
+      tel: selectedBuyer.telephone,
+      zip: selectedBuyer.zipCode,
+    };
+
+    // If Foreigner, handle Passport logic
+    const currentPartyType = this.fgCustomer.get('partyType')?.value;
+    const isForeignerBuyer = selectedBuyer.taxpayerType === 'FOREIGN';
+
+    // 1. Ensure partyType is set correctly first (if needed)
+    if (isForeignerBuyer && currentPartyType !== 'FOREIGNER') {
+         this.fgCustomer.patchValue({ partyType: 'FOREIGNER' }); // This invalidates/clears form, so we patch data after
+    }
+
+    // 2. Check for Passport-as-TaxID case
+    if (isForeignerBuyer || currentPartyType === 'FOREIGNER') {
+        const taxIdVal = selectedBuyer.taxId || '';
+        // If taxId is present but NOT 13 digits (Thai Tax ID), treat as Passport
+        // User request: "Passport is taxId" -> so we map it to passportNo field for the form
+        if (taxIdVal && !/^\d{13}$/.test(taxIdVal)) {
+            // Set hasThaiTIN to false to enable Passport validation and disable Tax ID validation
+            this.fgCustomer.patchValue({ hasThaiTIN: false }); // emitEvent: true to trigger updateForeignerValidation
+            patchData.passportNo = taxIdVal;
+            patchData.taxId = ''; // Clear taxId field so it doesn't fail pattern check (if any remains)
+        } else {
+             // If valid 13 digits, likely has Thai TIN
+             this.fgCustomer.patchValue({ hasThaiTIN: true });
+        }
+    }
+    
+    // 3. Patch the rest of the data (will overwrite any cleared fields from partyType change)
+    this.fgCustomer.patchValue(patchData);
+
+    // 4. Force Foreigner Validation Update if needed
+    // This must happen AFTER patching data to ensure hasThaiTIN and passportNo are set
+    if (this.fgCustomer.get('partyType')?.value === 'FOREIGNER') {
+      // Re-apply hasThaiTIN if it was meant to be false (Passport case)
+      if (patchData.passportNo && !patchData.taxId) {
+          this.fgCustomer.patchValue({ hasThaiTIN: false }, { emitEvent: false });
+      }
+      this.updateForeignerValidation();
+    }
+
+    // Save if Juristic
+    if (this.fgCustomer.get('partyType')?.value === 'JURISTIC') {
+      this.selectedJuristicBuyer = patchData;
+    }
+  }
+
+  // ===== Custom Dropdown Logic =====
+  opened: { [key: string]: boolean } = {};
+
+  toggleDropdown(key: string) {
+    this.opened[key] = !this.opened[key];
+  }
+
+  selectBranch(branch: { code: string; name: string }) {
+    this.fgHeader.patchValue({ branchCode: branch.code });
+    this.opened['branch'] = false;
+  }
+
+  selectPartyType(type: { value: string; label: string }) {
+    this.fgCustomer.patchValue({ partyType: type.value });
+    this.opened['partyType'] = false;
+  }
+
+  selectTaxRate(rate: number, index: number) {
+    const item = this.itemForms[index];
+    item.patchValue({ taxRate: rate });
+    this.opened['taxRate-' + index] = false;
+  }
+
+  private _filterCountries(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return this.countries.filter(option => option.toLowerCase().includes(filterValue));
+  }
+
+  getBranchName(code: string): string {
+    const b = this.branches.find((x) => x.code === code);
+    return b ? b.name : 'เลือกสาขา';
+  }
+
+  getPartyTypeLabel(value: string): string {
+    const t = this.partyTypes.find((x) => x.value === value);
+    return t ? t.label : 'เลือกประเภท';
+  }
+
+  getRefDocTypeLabel(code: string): string {
+    if (!code) {
+      return 'เลือกประเภท';
+    }
+    const type = this.docTypes.find((x) => x.code === code);
+    return type ? `${type.code} - ${type.name}` : 'เลือกประเภท';
+  }
+
+  selectRefDocType(type: any) {
+    const code = typeof type === 'string' ? type : type.code;
+    this.fgHeader.patchValue({ refDocType: code });
+    this.opened['refDocType'] = false;
+  }
+
+  getReplacementReasonLabel(code: string): string {
+    if (!code) {
+      return 'เลือกเหตุผล';
+    }
+    const reason = this.replacementReasons.find((x) => x.code === code);
+    return reason ? `${reason.code} - ${reason.name}` : 'เลือกเหตุผล';
+  }
+
+  selectReplacementReason(reason: any) {
+    this.fgHeader.patchValue({ replacementReason: reason.code });
+    this.opened['replacementReason'] = false;
+  }
+
+  getBankNameLabel(bankCode: string): string {
+    if (!bankCode) {
+      return 'เลือกธนาคาร';
+    }
+    const bank = this.banks.find((b) => b.bankCode === bankCode);
+    return bank ? bank.bankNameTh : 'เลือกธนาคาร';
+  }
+
+  selectBank(bank: any) {
+    this.fgPayment.patchValue({ bankName: bank.bankCode });
+    this.opened['bankName'] = false;
+    this.onBankChange(bank.bankCode);
+  }
+
+
+  onBankChange(bankCode: string): void {
+    this.bankBranches = []; // Clear previous branches
+    // Reset branch control if it exists in the form
+    this.fgPayment.get('branch')?.setValue('');
+
+    if (bankCode) {
+      this.bankService.getBranches(bankCode).subscribe(response => {
+        if (response && response.result && response.result.data) {
+          this.bankBranches = response.result.data;
+        }
+      });
+    }
+  }
+
+  // Helper: Map frontend partyType to backend BuyerType
+  mapPartyTypeToBuyerType(partyType: string): string {
+    const mapping: { [key: string]: string } = {
+      'JURISTIC': 'JURISTIC',
+      'PERSON': 'PERSON',
+      'FOREIGNER': 'FOREIGN',
+      'OTHER': 'OTHER',
+    };
+    return mapping[partyType] || 'PERSON';
+  }
+
+  // Helper: Map backend BuyerType to frontend partyType
+  mapBuyerTypeToPartyType(buyerType: string): string {
+    const mapping: { [key: string]: string } = {
+      'JURISTIC': 'JURISTIC',
+      'PERSON': 'PERSON',
+      'FOREIGN': 'FOREIGNER',
+      'OTHER': 'OTHER',
+    };
+    return mapping[buyerType] || 'PERSON';
+  }
+
+  // Update validation for FOREIGNER based on hasThaiTIN toggle
+  updateForeignerValidation(): void {
+    const hasThaiTIN = this.fgCustomer.get('hasThaiTIN')?.value;
+    const taxIdControl = this.fgCustomer.get('taxId');
+    const passportNoControl = this.fgCustomer.get('passportNo');
+
+    if (!taxIdControl || !passportNoControl) return;
+
+    if (hasThaiTIN) {
+      // Has Thai TIN: taxId required (13 digits + checksum), passportNo optional
+      taxIdControl.setValidators([
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(13),
+        Validators.pattern(/^\d+$/),
+        thaiTaxIdValidator
+      ]);
+      passportNoControl.clearValidators();
+    } else {
+      // No Thai TIN: passportNo required (6-20 alphanumeric), taxId disabled
+      taxIdControl.clearValidators();
+      passportNoControl.setValidators([
+        Validators.required,
+        Validators.pattern(/^[A-Z0-9]+$/i) // Relaxed pattern
+      ]);
+    }
+
+    taxIdControl.updateValueAndValidity();
+    passportNoControl.updateValueAndValidity();
+  }
+
+  // Validator สำหรับเช็คว่าเป็นนิติบุคคล (ขึ้นต้นด้วย 0)
+  juristicTaxIdValidator(control: AbstractControl): { [key: string]: any } | null {
+    const value = (control.value || '').toString();
+    // ถ้ายังไม่ครบ 13 หลัก ให้ validator อื่นจัดการ
+    if (value.length !== 13) {
+      return null;
+    }
+    // เช็คตัวแรก
+    if (!value.startsWith('0')) {
+      return { notJuristic: true };
+    }
+    return null;
+  }
+
+  private findInvalidControls(form: FormGroup): string[] {
+    const invalid = [];
+    const controls = form.controls;
+    for (const name in controls) {
+      if (controls[name].invalid) {
+        invalid.push(name);
+      }
+    }
+    return invalid;
+  }
+  // Helper to format seller address from user profile
+  private getFormattedSellerAddress(): string {
+    if (!this.user || !this.user.sellerAddress) {
+      return '';
+    }
+    const addr = this.user.sellerAddress;
+    
+    // Resolve names from IDs if possible
+    let subdistrictName = this.subdistricts.find(s => String(s.code) === String(addr.subdistrictId))?.name_th || addr.subdistrictId || '';
+    let districtName = this.districts.find(d => String(d.code) === String(addr.districtId))?.name_th || addr.districtId || '';
+    let provinceName = this.provinces.find(p => String(p.code) === String(addr.provinceId))?.name_th || addr.provinceId || '';
+
+    // Smart Prefixes
+    const isBangkok = provinceName.includes('กรุงเทพ');
+    
+    // Clean up existing prefixes if they exist in data (to avoid double prefix)
+    subdistrictName = String(subdistrictName).replace(/^(แขวง|ต\.|ตำบล)/, '').trim();
+    districtName = String(districtName).replace(/^(เขต|อ\.|อำเภอ)/, '').trim();
+    provinceName = String(provinceName).replace(/^(จ\.|จังหวัด)/, '').trim();
+
+    const subPrefix = isBangkok ? 'แขวง' : 'ต.';
+    const districtPrefix = isBangkok ? 'เขต' : 'อ.';
+    const provincePrefix = isBangkok ? '' : 'จ.'; // Bangkok usually doesn't have a prefix, others use จ.
+
+    const parts = [
+      addr.buildingNo,
+      addr.addressDetailTh,
+      subdistrictName ? `${subPrefix}${subdistrictName}` : '',
+      districtName ? `${districtPrefix}${districtName}` : '',
+      provinceName ? `${provincePrefix}${provinceName}` : '',
+      addr.postalCode
+    ];
+    return parts.filter(p => p && p.trim() !== '').join(' ');
+  }
+
+  private refreshFormattedAddress() {
+    if (this.user && this.fgHeader) {
+      this.fgHeader.patchValue({
+         address: this.getFormattedSellerAddress()
+      });
+    }
   }
 }

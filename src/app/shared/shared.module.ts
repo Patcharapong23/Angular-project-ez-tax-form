@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 // Angular Material Modules
@@ -19,10 +19,22 @@ import { OverlayModule } from '@angular/cdk/overlay';
 
 // Directives
 import { NumberInputFormatterDirective } from './directives/number-input-formatter.directive';
+import { PhoneFormatDirective } from './directives/phone-format.directive';
+import { ThaiDatePipe } from './pipes/thai-date.pipe';
+
+// Dialogs
+import { SuccessDialogComponent } from './dialogs/success-dialog/success-dialog.component';
+import { ConfirmDialogComponent } from './dialogs/confirm-dialog/confirm-dialog.component';
+import { ErrorDialogComponent } from './dialogs/error-dialog/error-dialog.component';
 
 @NgModule({
   declarations: [
-    NumberInputFormatterDirective
+    NumberInputFormatterDirective,
+    PhoneFormatDirective,
+    ThaiDatePipe,
+    SuccessDialogComponent,
+    ConfirmDialogComponent,
+    ErrorDialogComponent
   ],
   imports: [
     CommonModule,
@@ -59,7 +71,11 @@ import { NumberInputFormatterDirective } from './directives/number-input-formatt
     MatSnackBarModule,
     MatTableModule,
     OverlayModule,
-    NumberInputFormatterDirective // Export the directive
-  ]
+    NumberInputFormatterDirective,
+    PhoneFormatDirective,
+    ThaiDatePipe
+  ],
+  providers: [DatePipe]
 })
 export class SharedModule { }
+

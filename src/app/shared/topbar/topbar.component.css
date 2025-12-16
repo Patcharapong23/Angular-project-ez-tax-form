@@ -2,7 +2,7 @@
   height: 64px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* Changed from flex-end */
   padding: 0 16px;
   background: #ffffff;
   border-radius: 8px;
@@ -12,15 +12,25 @@
 /* Hamburger Menu Button */
 .hamburger-menu-button {
   display: none; /* Hidden by default on desktop */
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 50%; /* Circle shape */
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  /* display: flex;  <-- REMOVED: Caused button to be always visible */
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   font-size: 24px;
-  color: #333;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  margin-right: 16px; /* Add some space between button and company info */
+  color: #5e5873; /* Softer color */
+  transition: background-color 0.2s ease, color 0.2s ease;
+  margin-right: 8px;
+}
+
+.hamburger-menu-button:hover {
+  background-color: #f3f4f6;
+  color: var(--primary-color);
 }
 
 /* Mobile Overlay */
@@ -42,9 +52,10 @@
   visibility: visible;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
+  /* Updated breakpoint to match LayoutComponent */
   .hamburger-menu-button {
-    display: block; /* Show on small screens */
+    display: flex; /* Show as flex on small screens */
   }
 }
 
@@ -63,6 +74,7 @@
   align-items: center;
   gap: 16px;
   position: relative;
+  margin-left: auto; /* Push to the right */
 }
 
 /* --- Flag --- */
@@ -93,7 +105,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #ffcc00;
+  background: var(--primary-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,7 +136,7 @@
 }
 .user-details .role {
   font-size: 12px;
-  color: #ffcc00;
+  color: var(--primary-color);
   font-weight: 700;
 }
 
@@ -161,6 +173,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  border-radius: 8px;
   padding: 10px 14px;
   font-size: 14px;
   color: #2b2f33;
@@ -168,5 +181,8 @@
   transition: background 0.2s ease;
 }
 .dropdown-item:hover {
-  background: #f6f7fb;
+  background: #ff2424;
+  border-radius: 8px;
+  color: #fff;
+  transition: background 0.2s ease;
 }
