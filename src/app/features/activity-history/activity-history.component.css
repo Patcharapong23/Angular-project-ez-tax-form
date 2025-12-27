@@ -1,0 +1,442 @@
+/* ===== พื้นหลังทั้งหน้า ===== */
+.buyers-page {
+  padding: 24px 0px 0px 0px;
+  background: #f7f7f9;
+}
+
+/* ===== HEADER ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* ===== SEARCH CARD ===== */
+.search-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 16px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.btn {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn[color="primary"] {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.button-clear {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 6px;
+  border: 1px solid #ef4444 !important;
+  color: #ef4444 !important;
+  font-weight: 500;
+  font-size: 14px;
+  background: transparent;
+}
+
+/* layout 3 ช่อง: รหัส / วันที่ / สถานะ */
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px 24px;
+  align-items: start;
+}
+
+/* layout 2 ช่อง: Basic search */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+  align-items: start;
+}
+
+/* Advanced filter toggle button */
+.advanced-toggle {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+
+.toggle-btn:hover {
+  color: #374151;
+}
+
+.toggle-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+}
+
+/* Filter count badge */
+.filter-count {
+  margin-left: 4px;
+  background: #ffc107;
+  color: #111827;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Margin utility */
+.mt-16 {
+  margin-top: 16px;
+}
+
+/* Advanced filter panel */
+.advanced-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #e5e7eb;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* STAFF simple status row */
+.staff-status-row {
+  margin-top: 16px;
+}
+
+.staff-status-row .status-field {
+  max-width: 200px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.field input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1f2937;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+
+.field input:hover {
+  border-color: #d1d5db;
+}
+
+.field input:focus {
+  border-color: #ffc107;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+}
+
+/* ===== ปุ่มค้นหา / เคลียร์ ===== */
+.action-row {
+  display: flex;
+  align-items: unset;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.grow {
+  flex: 1;
+}
+
+/* ===== TABLE ===== */
+
+.table-card {
+  background: #ffffff;
+  margin-top: 20px;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #e5e7eb;
+  border-bottom: 1px solid #d1d5db;
+}
+
+th {
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+  background: #ffffff;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.no-data {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* chip สถานะ */
+.status {
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status.warning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* Alignment helpers */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+th.text-center,
+td.text-center {
+  text-align: center;
+}
+
+th.text-left,
+td.text-left {
+  text-align: left;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.actions button:hover {
+  transform: scale(1.1);
+}
+
+.icon-view {
+  color: #06b6d4;
+}
+
+.icon-edit {
+  color: #f59e0b;
+}
+
+.icon-delete {
+  color: #ef4444;
+}
+
+.actions i {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+}
+
+/* pagination */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #ffffff;
+  border-top: 1px solid #f3f4f6;
+}
+
+.pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.items-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.items-per-page select {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  color: #374151;
+  outline: none;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.pagination-info {
+  color: #6b7280;
+  font-size: 14px;
+  text-align: unset;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+.page-number {
+  display: flex;
+  gap: 4px;
+}
+
+.page-number button {
+  border-radius: 4px;
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  background: #f3f4f6;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.page-number button:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.page-number button.active {
+  background: #ffc107;
+  color: #000000;
+  font-weight: 500;
+}
+
+.page-number button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-number mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

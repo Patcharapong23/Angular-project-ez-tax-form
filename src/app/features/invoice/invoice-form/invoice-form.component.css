@@ -529,8 +529,8 @@ textarea.form-control {
 }
 
 .note-textarea {
-  width: auto;
-  /* max-width: 500px; */
+  width: "auto";
+  max-width: 600px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   padding: 8px 10px;
@@ -1329,11 +1329,38 @@ button.ghost:hover:not(:disabled) {
 
 .check-details {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed #e5e7eb;
+  grid-template-columns: repeat(6, 1fr); /* 6 columns = LCM of 2 and 3 */
+  gap: 24px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  /* overflow: hidden removed - it hides dropdown panels */
+}
+
+/* Bank and Branch: First row, 50% each (span 3 columns out of 6) */
+.check-details .form-field:nth-child(1),
+.check-details .form-field:nth-child(2) {
+  grid-column: span 3;
+  min-width: 0; /* Fix grid overflow issue */
+}
+
+/* Check No, Date, Amount: Second row, 33% each (span 2 columns out of 6) */
+.check-details .form-field:nth-child(3),
+.check-details .form-field:nth-child(4),
+.check-details .form-field:nth-child(5) {
+  grid-column: span 2;
+  min-width: 0; /* Fix grid overflow issue */
+}
+
+/* Fix dropdown width inside check-details */
+.check-details .custom-dropdown {
+  width: 100%;
+  max-width: 100%;
+}
+
+.check-details .dropdown-trigger {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ---------------------------
@@ -1357,4 +1384,42 @@ button.ghost:hover:not(:disabled) {
 
 .view-mode .date-icon {
   color: #9ca3af;
+}
+
+/* Cancellation Banner */
+.cancellation-banner {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  color: #b91c1c;
+}
+
+.cancellation-banner .banner-icon {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.cancellation-banner .banner-info {
+  flex: 1;
+}
+
+.cancellation-banner h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.cancellation-banner .banner-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
 }

@@ -1,0 +1,130 @@
+<div class="role-content">
+  <!-- Search Row -->
+  <div class="search-row">
+    <div class="search-field">
+      <label>ค้นหา</label>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (input)="onSearch($event)"
+        placeholder="ค้นหารหัสหรือชื่อบทบาท"
+      />
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="role-table">
+      <thead>
+        <tr>
+          <th class="text-left">รหัส</th>
+          <th class="text-left">ชื่อ</th>
+          <th class="text-left">วันที่สร้าง</th>
+          <th class="text-left">วันที่แก้ไข</th>
+          <th class="text-center">สถานะ</th>
+          <th class="text-center">การดำเนินการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles">
+          <td class="text-left">{{ role.roleCode }}</td>
+          <td class="text-left">{{ role.roleName }}</td>
+          <td class="text-left">{{ role.createDate | date : "dd/MM/yyyy" }}</td>
+          <td class="text-left">{{ role.updateDate | date : "dd/MM/yyyy" }}</td>
+          <td class="text-center">
+            <span
+              class="status"
+              [ngClass]="role.enableFlag === 'Y' ? 'active' : 'inactive'"
+            >
+              {{ role.enableFlag === "Y" ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="actions">
+              <button
+                class="icon-view"
+                title="ดูรายละเอียด"
+                (click)="onView(role)"
+              >
+                <i class="ti ti-eye"></i>
+              </button>
+              <!-- Hide edit for system roles -->
+              <button
+                class="icon-edit"
+                title="แก้ไข"
+                (click)="onEdit(role)"
+                *ngIf="!isSystemRole(role)"
+              >
+                <i class="ti ti-edit"></i>
+              </button>
+              <!-- Hide delete for system roles -->
+              <button
+                class="icon-delete"
+                title="ลบ"
+                *ngIf="!isSystemRole(role)"
+                (click)="onDelete(role)"
+              >
+                <i class="ti ti-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="roles.length === 0 && !loading">
+          <td colspan="6" class="no-data">ไม่พบข้อมูล</td>
+        </tr>
+        <tr *ngIf="loading">
+          <td colspan="6" class="no-data">
+            <div class="spinner"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!loading">
+    <div class="pagination-left">
+      <div class="items-per-page">
+        <span>แสดง</span>
+        <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+        <span>รายการ</span>
+      </div>
+      <div class="pagination-info" *ngIf="totalElements > 0">
+        แสดง {{ currentPage * pageSize + 1 }} ถึง
+        {{
+          (currentPage + 1) * pageSize > totalElements
+            ? totalElements
+            : (currentPage + 1) * pageSize
+        }}
+        จาก {{ totalElements }} รายการ
+      </div>
+    </div>
+    <div class="pagination-controls" *ngIf="totalPages > 0">
+      <div class="page-number">
+        <button
+          (click)="onPageChange(currentPage - 1)"
+          [disabled]="currentPage === 0"
+        >
+          <i class="ti ti-chevron-left"></i>
+        </button>
+        <button
+          *ngFor="let p of getPageNumbers()"
+          (click)="onPageChange(p)"
+          [class.active]="currentPage === p"
+        >
+          {{ p + 1 }}
+        </button>
+        <button
+          (click)="onPageChange(currentPage + 1)"
+          [disabled]="currentPage >= totalPages - 1"
+        >
+          <i class="ti ti-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

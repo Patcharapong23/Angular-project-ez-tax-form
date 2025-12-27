@@ -11,6 +11,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../../shared/auth.service';
 import { firstValueFrom } from 'rxjs';
 import { thaiTaxIdValidator } from '../../../shared/validators/thai-taxid.validator';
+import {
+  noEnglishValidator,
+  noThaiValidator,
+} from '../../../shared/validators/language.validator';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { SwalService } from '../../../shared/services/swal.service';
 
@@ -110,8 +114,8 @@ export class RegisterComponent implements OnInit {
     confirmPassword: ['', [Validators.required]],
 
     company: this.fb.group({
-      sellerNameTh: ['', [Validators.required]],
-      sellerNameEn: [''],
+      sellerNameTh: ['', [Validators.required, noEnglishValidator()]],
+      sellerNameEn: ['', [noThaiValidator()]],
       branchCode: [
         '00000',
         [
@@ -121,8 +125,8 @@ export class RegisterComponent implements OnInit {
           Validators.pattern(/^\d+$/),
         ],
       ],
-      branchNameTh: ['สำนักงานใหญ่', [Validators.required]],
-      branchNameEn: ['Head office'],
+      branchNameTh: ['สำนักงานใหญ่', [Validators.required, noEnglishValidator()]],
+      branchNameEn: ['Head office', [noThaiValidator()]],
       sellerTaxId: [
         '',
         [
@@ -137,7 +141,7 @@ export class RegisterComponent implements OnInit {
       sellerPhoneNumber: ['', [Validators.pattern(/^\d*$/)]],
       addressTh: this.fb.group({
         buildingNo: ['', [Validators.required]],
-        addressDetailTh: [''],
+        addressDetailTh: ['', [noEnglishValidator()]],
         provinceId: [null as string | null, Validators.required],
         districtId: [null as string | null, Validators.required],
         subdistrictId: [null as string | null, Validators.required],
@@ -152,7 +156,7 @@ export class RegisterComponent implements OnInit {
         ],
       }),
       addressEn: this.fb.group({
-        addressDetailEn: [''],
+        addressDetailEn: ['', [noThaiValidator()]],
       }),
       acceptTos: [false, Validators.requiredTrue],
     }),
@@ -296,6 +300,7 @@ export class RegisterComponent implements OnInit {
       this.email?.markAsTouched();
       this.password?.markAsTouched();
       this.confirmPassword?.markAsTouched();
+      this.scrollToFirstInvalidControl();
       return;
     }
     this.step = 2;
@@ -805,6 +810,7 @@ export class RegisterComponent implements OnInit {
     this.step2Submitted = true; // Keep this for UI state
     if (this.form.invalid || this.isSubmitting) {
       this.form.markAllAsTouched();
+      this.scrollToFirstInvalidControl();
       return;
     }
 
@@ -913,5 +919,62 @@ export class RegisterComponent implements OnInit {
         console.error('Registration error:', err);
       },
     });
+  }
+
+  // ====================== Scroll to first invalid control ======================
+  private scrollToFirstInvalidControl(): void {
+    // Find the first invalid control in the form
+    const findInvalidControl = (group: FormGroup | AbstractControl, path: string[] = []): string | null => {
+      if (group instanceof FormGroup) {
+        for (const key of Object.keys(group.controls)) {
+          const control = group.get(key);
+          if (control && control.invalid) {
+            if (control instanceof FormGroup) {
+              const nestedPath = findInvalidControl(control, [...path, key]);
+              if (nestedPath) return nestedPath;
+            } else {
+              return [...path, key].join('.');
+            }
+          }
+        }
+      }
+      return null;
+    };
+
+    const invalidControlPath = findInvalidControl(this.form);
+    if (!invalidControlPath) return;
+
+    // Try to find the element by formControlName attribute or id
+    const controlName = invalidControlPath.split('.').pop();
+    let element: HTMLElement | null = null;
+
+    // Try formControlName first
+    element = document.querySelector(`[formControlName="${controlName}"]`);
+
+    // If not found, try by id
+    if (!element) {
+      element = document.getElementById(controlName || '');
+    }
+
+    // If still not found, try mat-form-field containing the control
+    if (!element) {
+      const formFields = document.querySelectorAll('mat-form-field');
+      for (const field of Array.from(formFields)) {
+        if (field.querySelector(`[formControlName="${controlName}"]`)) {
+          element = field as HTMLElement;
+          break;
+        }
+      }
+    }
+
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Focus the element if it's focusable
+      setTimeout(() => {
+        if (element && typeof (element as any).focus === 'function') {
+          (element as any).focus();
+        }
+      }, 500);
+    }
   }
 }

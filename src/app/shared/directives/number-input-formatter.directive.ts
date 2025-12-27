@@ -69,6 +69,14 @@ export class NumberInputFormatterDirective implements OnInit, OnDestroy {
   @HostListener('input', ['$event.target.value'])
   onInput(value: string) {
     if (this.control && this.control.control) {
+      // Don't update form control if user is still typing a decimal number
+      // (value ends with "." or has trailing zeros after decimal)
+      const cleanedValue = (value || '').replace(/,/g, '');
+      if (cleanedValue.endsWith('.')) {
+        // User just typed a decimal point, don't update yet
+        return;
+      }
+      
       const parsedValue = this.parseValue(value);
       const controlValue = this.control.control.value;
       if (parsedValue !== controlValue) {

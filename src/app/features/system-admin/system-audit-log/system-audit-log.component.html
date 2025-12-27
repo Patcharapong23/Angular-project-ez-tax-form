@@ -1,0 +1,79 @@
+<div class="system-audit-log">
+  <div class="page-header">
+    <h1><i class="ti ti-file-text"></i> System Audit Log</h1>
+    <div class="filters">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="ค้นหา username, action, traceId..."
+        (keyup.enter)="onSearch()"
+      />
+      <select [(ngModel)]="statusFilter" (change)="onSearch()">
+        <option value="">ทุกสถานะ</option>
+        <option value="SUCCESS">SUCCESS</option>
+        <option value="FAILED">FAILED</option>
+        <option value="DENIED">DENIED</option>
+      </select>
+      <button (click)="onSearch()">ค้นหา</button>
+    </div>
+  </div>
+
+  <div class="table-card" [class.loading]="loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Action</th>
+          <th>Category</th>
+          <th>IP Address</th>
+          <th>Status</th>
+          <th>Trace ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs">
+          <td class="mono">
+            {{ log.createdAt | date : "yyyy-MM-dd HH:mm:ss" }}
+          </td>
+          <td>{{ log.userName }}</td>
+          <td>{{ log.action }}</td>
+          <td>{{ log.activityCategory }}</td>
+          <td class="mono">{{ log.ipAddress }}</td>
+          <td>
+            <span
+              [class]="
+                log.status === 'SUCCESS'
+                  ? 'status-success'
+                  : log.status === 'FAILED'
+                  ? 'status-failed'
+                  : 'status-denied'
+              "
+            >
+              {{ log.status }}
+            </span>
+          </td>
+          <td class="trace-cell">
+            <span class="trace-id" *ngIf="log.traceId"
+              >{{ log.traceId | slice : 0 : 8 }}...</span
+            >
+            <button
+              class="copy-btn"
+              *ngIf="log.traceId"
+              (click)="copyTraceId(log.traceId)"
+              title="Copy Trace ID"
+            >
+              <i class="ti ti-copy"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="logs.length === 0 && !loading">
+          <td colspan="7" class="empty">ไม่พบข้อมูล</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination-info" *ngIf="totalElements > 0">
+      แสดง {{ logs.length }} จาก {{ totalElements }} รายการ
+    </div>
+  </div>
+</div>

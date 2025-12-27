@@ -1,0 +1,347 @@
+/* Match buyer-dialog and edit-general-info-dialog styles */
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  height: 100%;
+  max-height: 90vh;
+}
+
+/* ===== HEADER ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dialog-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #1e293b;
+}
+
+/* ===== BODY ===== */
+.dialog-body {
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px; /* Space for scrollbar */
+  flex: 1;
+}
+
+/* ===== LOGO SECTION (from edit-general-info) ===== */
+.logo-upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.logo-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px dashed #cbd5e1;
+  cursor: pointer;
+  padding: 8px;
+  transition: border-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-wrapper:hover {
+  border-color: #facc15;
+}
+
+.logo-wrapper:hover .overlay {
+  opacity: 1;
+}
+
+.current-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-text {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f59e0b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.upload-label {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f59e0b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+/* ===== GRID LAYOUT (from buyer-dialog) ===== */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 20px;
+}
+
+/* ===== FIELDS (from buyer-dialog) ===== */
+.dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dialog-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.dialog-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.dialog-field .required {
+  color: #ef4444;
+  margin-left: 2px;
+}
+
+.dialog-field input,
+.dialog-field textarea,
+.dialog-field select {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1f2937;
+  outline: none;
+  background: #fff;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.dialog-field input:focus,
+.dialog-field textarea:focus,
+.dialog-field select:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.15);
+}
+
+.dialog-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.dialog-field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3F%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* Error states */
+.dialog-field input.ng-invalid.ng-touched,
+.dialog-field select.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ===== RADIO BUTTONS (from buyer-dialog) ===== */
+.radio-group {
+  display: flex;
+  gap: 24px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.radio-label input[type="radio"] {
+  display: none;
+}
+
+.radio-custom {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom {
+  border-color: #facc15;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background: #facc15;
+  border-radius: 50%;
+}
+
+/* ===== ACTIONS ===== */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-save {
+  padding: 10px 24px;
+  background: #facc15;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+  background: #eab308;
+}
+
+.btn-save:disabled {
+  background: #e2e8f0;
+  cursor: not-allowed;
+  color: #94a3b8;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========================================= */
+/* PRIME NG DROPDOWN OVERRIDES             */
+/* ========================================= */
+:host ::ng-deep .p-dropdown {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+:host ::ng-deep .p-dropdown .p-dropdown-label {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #1f2937;
+  font-family: inherit;
+  margin-top: -2px; /* Slight adjustment for alignment */
+}
+
+:host ::ng-deep .p-dropdown.p-dropdown-open,
+:host ::ng-deep .p-dropdown:not(.p-disabled).p-focus {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.15);
+}
+
+:host ::ng-deep .p-dropdown.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+:host ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #374151;
+}
+
+:host
+  ::ng-deep
+  .p-dropdown-panel
+  .p-dropdown-items
+  .p-dropdown-item.p-highlight {
+  background-color: #fffbeb; /* Light yellow */
+  color: #d97706; /* Darker yellow text */
+}
+
+:host ::ng-deep .p-dropdown-panel .p-dropdown-header {
+  padding: 8px 14px;
+  background: #f9fafb;
+}
+
+:host ::ng-deep .p-inputtext {
+  font-family: inherit;
+}

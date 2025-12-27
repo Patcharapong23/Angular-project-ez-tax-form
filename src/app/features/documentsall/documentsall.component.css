@@ -119,34 +119,35 @@ tr:last-child td {
 }
 
 /* chip สถานะ */
+/* chip สถานะ */
 .status {
-  padding: 6px 16px;
-  border-radius: 9999px;
+  padding: 4px 10px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
   display: inline-block;
 }
 
 /* เอกสารใหม่ - สีฟ้า */
-.status.badge-blue {
-  background: #dbeafe;
-  color: #2563eb;
+.status-new {
+  background: #eff6ff;
+  color: #3b82f6;
 }
 
-/* อัพเดตล่าสุด - สีเหลือง/ส้ม */
-.status.badge-yellow {
+/* อัปเดตล่าสุด - สีเหลือง (ตาม Dashboard) */
+.status-updated {
   background: #fef3c7;
   color: #d97706;
 }
 
-/* ยกเลิกเอกสาร - สีชมพู/แดง */
-.status.badge-red {
-  background: #ffe4e6;
-  color: #e11d48;
+/* ยกเลิกเอกสาร - สีแดง */
+.status-cancelled {
+  background: #fef2f2;
+  color: #ef4444;
 }
 
 /* สถานะอื่นๆ - สีเทา */
-.status.badge-gray {
+.status-unknown {
   background: #f3f4f6;
   color: #6b7280;
 }
@@ -486,4 +487,15 @@ td.text-left {
 .modal-actions {
   display: flex;
   justify-content: center;
+}
+
+/* Header sortable styles */
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap; /* Ensure branding doesn't break */
+}
+
+th.sortable:hover {
+  background-color: #f3f4f6; /* Slightly lighter gray on hover */
 }

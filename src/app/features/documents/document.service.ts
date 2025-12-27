@@ -18,73 +18,56 @@ import {
 export class DocumentService {
   private readonly base = `${environment.apiBase}/documents`;
   
-  // Cache storage - keyed by JSON representation of params
-  private listCache: Map<string, Page<DocumentListItem>> = new Map();
-  private listRequests: Map<string, Observable<Page<DocumentListItem>>> = new Map();
+  // Cache for recent documents (used by dashboard)
+  private recentDocsCache$: Observable<Page<DocumentListItem>> | null = null;
+  private recentDocsCacheKey: string = '';
   
   constructor(private http: HttpClient) {}
 
-  private getCacheKey(params?: DocumentSearchParams): string {
-    return JSON.stringify(params || {});
-  }
-
   list(params?: DocumentSearchParams): Observable<Page<DocumentListItem>> {
-    const cacheKey = this.getCacheKey(params);
+    let httpParams = new HttpParams();
+    if (params?.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
+    if (params?.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
+    if (params?.docType) httpParams = httpParams.set('docType', params.docType);
+    if (params?.buyerTaxId) httpParams = httpParams.set('buyerTaxId', params.buyerTaxId);
+    if (params?.issueDateFrom) httpParams = httpParams.set('issueDateFrom', params.issueDateFrom);
+    if (params?.issueDateTo) httpParams = httpParams.set('issueDateTo', params.issueDateTo);
+    if (params?.createdFrom) httpParams = httpParams.set('createdFrom', params.createdFrom);
+    if (params?.createdTo) httpParams = httpParams.set('createdTo', params.createdTo);
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.docNo) httpParams = httpParams.set('docNo', params.docNo);
+    if (params?.sortBy) httpParams = httpParams.set('sortBy', params.sortBy);
+    if (params?.sortDir) httpParams = httpParams.set('sortDir', params.sortDir);
     
-    // Return cached data if available
-    if (this.listCache.has(cacheKey)) {
-      return of(this.listCache.get(cacheKey)!);
-    }
-    
-    // Share the same request if one is in-flight
-    if (!this.listRequests.has(cacheKey)) {
-      let httpParams = new HttpParams();
-      if (params?.page !== undefined) httpParams = httpParams.set('page', params.page.toString());
-      if (params?.size !== undefined) httpParams = httpParams.set('size', params.size.toString());
-      if (params?.docType) httpParams = httpParams.set('docType', params.docType);
-      if (params?.buyerTaxId) httpParams = httpParams.set('buyerTaxId', params.buyerTaxId);
-      if (params?.issueDateFrom) httpParams = httpParams.set('issueDateFrom', params.issueDateFrom);
-      if (params?.issueDateTo) httpParams = httpParams.set('issueDateTo', params.issueDateTo);
-      if (params?.createdFrom) httpParams = httpParams.set('createdFrom', params.createdFrom);
-      if (params?.createdTo) httpParams = httpParams.set('createdTo', params.createdTo);
-      if (params?.status) httpParams = httpParams.set('status', params.status);
-      
-      const request$ = this.http.get<Page<DocumentListItem>>(this.base, { params: httpParams }).pipe(
-        tap(data => {
-          this.listCache.set(cacheKey, data);
-          this.listRequests.delete(cacheKey);
-        }),
-        shareReplay(1)
+    return this.http.get<Page<DocumentListItem>>(this.base, { params: httpParams });
+  }
+
+  // Cached version for dashboard recent documents (prevents duplicate calls)
+  listRecentForDashboard(): Observable<Page<DocumentListItem>> {
+    const cacheKey = 'recent-dashboard';
+    if (!this.recentDocsCache$ || this.recentDocsCacheKey !== cacheKey) {
+      this.recentDocsCacheKey = cacheKey;
+      this.recentDocsCache$ = this.http.get<Page<DocumentListItem>>(this.base, { 
+        params: new HttpParams()
+          .set('page', '0')
+          .set('size', '20')
+          .set('sortBy', 'createdAt')
+          .set('sortDir', 'desc')
+      }).pipe(
+        shareReplay({ bufferSize: 1, refCount: true })
       );
-      
-      this.listRequests.set(cacheKey, request$);
     }
-    
-    return this.listRequests.get(cacheKey)!;
+    return this.recentDocsCache$;
   }
 
-  /**
-   * Force refresh documents list
-   */
-  refreshList(params?: DocumentSearchParams): Observable<Page<DocumentListItem>> {
-    const cacheKey = this.getCacheKey(params);
-    this.listCache.delete(cacheKey);
-    this.listRequests.delete(cacheKey);
-    return this.list(params);
-  }
-
-  /**
-   * Clear all cache (call after create/update/delete)
-   */
-  clearCache(): void {
-    this.listCache.clear();
-    this.listRequests.clear();
+  // Clear cache (call after document create/update/delete)
+  clearRecentDocsCache(): void {
+    this.recentDocsCache$ = null;
+    this.recentDocsCacheKey = '';
   }
 
   createDocument(payload: CreateDocumentRequest): Observable<CreateDocumentResponse> {
-    return this.http.post<CreateDocumentResponse>(this.base, payload).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.post<CreateDocumentResponse>(this.base, payload);
   }
 
   get(id: number): Observable<EzDocumentFull> {
@@ -109,21 +92,15 @@ export class DocumentService {
   }
 
   updateDocument(docUuid: string, payload: UpdateDocumentRequest): Observable<DocumentDto> {
-    return this.http.put<DocumentDto>(`${this.base}/${docUuid}`, payload).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.put<DocumentDto>(`${this.base}/${docUuid}`, payload);
   }
 
-  cancel(docUuid: string): Observable<void> {
-    return this.http.patch<void>(`${this.base}/${docUuid}/cancel`, {}).pipe(
-      tap(() => this.clearCache())
-    );
+  cancel(docUuid: string, reason: string, cancelledBy: string): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${docUuid}/cancel`, { reason, cancelledBy });
   }
 
   delete(docUuid: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${docUuid}`).pipe(
-      tap(() => this.clearCache())
-    );
+    return this.http.delete<void>(`${this.base}/${docUuid}`);
   }
 
   exportDocument(docUuid: string, type: 'pdf' | 'xml' | 'csv'): Observable<Blob> {

@@ -16,11 +16,14 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { MatRadioModule } from '@angular/material/radio';
 
 // Directives
 import { NumberInputFormatterDirective } from './directives/number-input-formatter.directive';
 import { PhoneFormatDirective } from './directives/phone-format.directive';
+import { HasPermissionDirective } from './directives/has-permission.directive';
 import { ThaiDatePipe } from './pipes/thai-date.pipe';
+import { PhonePipe } from './pipes/phone.pipe';
 
 // Dialogs
 import { SuccessDialogComponent } from './dialogs/success-dialog/success-dialog.component';
@@ -31,7 +34,9 @@ import { ErrorDialogComponent } from './dialogs/error-dialog/error-dialog.compon
   declarations: [
     NumberInputFormatterDirective,
     PhoneFormatDirective,
+    HasPermissionDirective,
     ThaiDatePipe,
+    PhonePipe,
     SuccessDialogComponent,
     ConfirmDialogComponent,
     ErrorDialogComponent
@@ -52,7 +57,9 @@ import { ErrorDialogComponent } from './dialogs/error-dialog/error-dialog.compon
     MatSelectModule,
     MatSnackBarModule,
     MatTableModule,
+    MatTableModule,
     OverlayModule,
+    MatRadioModule
   ],
   exports: [
     CommonModule,
@@ -71,9 +78,12 @@ import { ErrorDialogComponent } from './dialogs/error-dialog/error-dialog.compon
     MatSnackBarModule,
     MatTableModule,
     OverlayModule,
+    MatRadioModule,
     NumberInputFormatterDirective,
     PhoneFormatDirective,
-    ThaiDatePipe
+    HasPermissionDirective,
+    ThaiDatePipe,
+    PhonePipe
   ],
   providers: [DatePipe]
 })

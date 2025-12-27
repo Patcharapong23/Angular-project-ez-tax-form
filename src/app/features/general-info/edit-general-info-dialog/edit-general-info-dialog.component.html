@@ -1,0 +1,153 @@
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 class="dialog-title">แก้ไขข้อมูลทั่วไป</h2>
+    <button type="button" class="close-btn" (click)="close()">✕</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="dialog-body">
+      <!-- Logo Upload -->
+      <div class="logo-upload-section">
+        <div class="logo-wrapper" (click)="fileInput.click()">
+          <img
+            [src]="
+              imagePreview ||
+              'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY0NzQ4YiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIExvZ288L3RleHQ+Cjwvc3ZnPg=='
+            "
+            alt="Logo Preview"
+            class="current-logo"
+            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY0NzQ4YiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIExvZ288L3RleHQ+Cjwvc3ZnPg=='"
+          />
+          <div class="overlay">
+            <span class="upload-label">เปลี่ยน โลโก้บริษัท</span>
+          </div>
+          <input
+            #fileInput
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            style="display: none"
+          />
+        </div>
+        <div class="logo-hint">ขนาดไฟล์สูงสุด 2MB</div>
+        <div class="logo-error" *ngIf="logoError">{{ logoError }}</div>
+      </div>
+
+      <!-- Company Info Section -->
+      <div class="form-section-title">ข้อมูลบริษัท</div>
+
+      <div class="form-grid">
+        <!-- Name TH -->
+        <div class="form-field">
+          <label class="field-label"
+            >ชื่อบริษัท (ภาษาไทย) <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            class="custom-input"
+            formControlName="sellerNameTh"
+            (input)="blockEnglish($event)"
+            placeholder="กรอกชื่อบริษัทภาษาไทย"
+          />
+          <div
+            class="error-text"
+            *ngIf="
+              form.get('sellerNameTh')?.touched &&
+              form.get('sellerNameTh')?.hasError('required')
+            "
+          >
+            กรุณากรอกชื่อบริษัท
+          </div>
+          <div
+            class="error-text"
+            *ngIf="
+              form.get('sellerNameTh')?.touched &&
+              form.get('sellerNameTh')?.hasError('noEnglish')
+            "
+          >
+            กรุณากรอกเฉพาะภาษาไทย
+          </div>
+        </div>
+
+        <!-- Name EN -->
+        <div class="form-field">
+          <label class="field-label"
+            >ชื่อบริษัท (อังกฤษ) <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            class="custom-input"
+            formControlName="sellerNameEn"
+            (input)="blockThai($event)"
+            placeholder="Company name in English"
+          />
+          <div
+            class="error-text"
+            *ngIf="
+              form.get('sellerNameEn')?.touched &&
+              form.get('sellerNameEn')?.hasError('required')
+            "
+          >
+            กรุณากรอกชื่อบริษัท
+          </div>
+          <div
+            class="error-text"
+            *ngIf="
+              form.get('sellerNameEn')?.touched &&
+              form.get('sellerNameEn')?.hasError('noThai')
+            "
+          >
+            กรุณากรอกเฉพาะภาษาอังกฤษ
+          </div>
+        </div>
+
+        <!-- Tax ID -->
+        <div class="form-field">
+          <label class="field-label"
+            >เลขประจำตัวผู้เสียภาษีอากร <span class="required">*</span></label
+          >
+          <input
+            type="text"
+            class="custom-input"
+            formControlName="sellerTaxId"
+            (input)="sanitizeDigits($event)"
+            maxlength="13"
+            placeholder="กรอกเลข 13 หลัก"
+          />
+          <div
+            class="error-text"
+            *ngIf="form.get('sellerTaxId')?.touched && getTaxIdError()"
+          >
+            {{ getTaxIdError() }}
+          </div>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-field">
+          <label class="field-label">เบอร์ติดต่อธุรกิจ</label>
+          <input
+            type="text"
+            class="custom-input"
+            formControlName="sellerPhoneNumber"
+            (input)="sanitizePhone($event)"
+            placeholder="0XX-XXX-XXXX"
+            maxlength="12"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="dialog-footer">
+      <button
+        type="submit"
+        class="btn-save"
+        [disabled]="form.invalid || isSaving"
+      >
+        <span *ngIf="!isSaving">บันทึก</span>
+        <span *ngIf="isSaving">กำลังบันทึก...</span>
+      </button>
+    </div>
+  </form>
+</div>

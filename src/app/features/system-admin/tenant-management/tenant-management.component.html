@@ -1,0 +1,86 @@
+<div class="tenant-management">
+  <div class="page-header">
+    <h1>
+      <i class="ti ti-building"></i>
+      Tenant Management
+    </h1>
+    <div class="search-box">
+      <i class="ti ti-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="onSearch()"
+        placeholder="ค้นหาบริษัท..."
+      />
+      <button class="btn-search" (click)="onSearch()">ค้นหา</button>
+    </div>
+  </div>
+
+  <div class="table-card" [class.loading]="loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>เลขประจำตัวผู้เสียภาษี</th>
+          <th>ชื่อบริษัท</th>
+          <th>สาขา</th>
+          <th>ผู้ใช้</th>
+          <th>เอกสาร</th>
+          <th>สถานะ</th>
+          <th>วันที่สมัคร</th>
+          <th class="actions-col">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tenant of tenants">
+          <td class="mono">{{ tenant.sellerTaxId }}</td>
+          <td>{{ tenant.companyName }}</td>
+          <td class="center">{{ tenant.branchCount }}</td>
+          <td class="center">{{ tenant.userCount }}</td>
+          <td class="center">{{ tenant.documentCount }}</td>
+          <td class="center">
+            <span
+              class="status-badge"
+              [ngClass]="getStatusClass(tenant.status)"
+            >
+              {{ tenant.status === "ACTIVE" ? "เปิดใช้งาน" : "ระงับใช้งาน" }}
+            </span>
+          </td>
+          <td>{{ tenant.createdAt | date : "dd/MM/yyyy" }}</td>
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <button
+                class="btn-action btn-view"
+                (click)="viewDashboard(tenant)"
+                title="ดูแดชบอร์ด"
+              >
+                <i class="ti ti-chart-pie"></i>
+              </button>
+              <button
+                *ngIf="tenant.status === 'ACTIVE'"
+                class="btn-action btn-suspend"
+                (click)="suspendTenant(tenant)"
+                title="ระงับใช้งาน"
+              >
+                <i class="ti ti-ban"></i>
+              </button>
+              <button
+                *ngIf="tenant.status === 'SUSPENDED'"
+                class="btn-action btn-activate"
+                (click)="activateTenant(tenant)"
+                title="เปิดใช้งาน"
+              >
+                <i class="ti ti-check"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="tenants.length === 0 && !loading">
+          <td colspan="8" class="empty">ไม่พบข้อมูล</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination-info" *ngIf="totalElements > 0">
+      แสดง {{ tenants.length }} จาก {{ totalElements }} รายการ
+    </div>
+  </div>
+</div>

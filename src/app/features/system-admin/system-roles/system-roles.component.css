@@ -1,0 +1,84 @@
+.system-roles {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.page-header h1 i {
+  color: #f5a623;
+}
+.read-only-badge {
+  background: #f0f0f0;
+  color: #666;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+.table-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+  overflow-x: auto;
+}
+.table-card.loading {
+  opacity: 0.6;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.data-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+}
+.data-table td {
+  font-size: 0.9rem;
+}
+.data-table tbody tr:hover {
+  background: #fdf8ed;
+}
+.mono {
+  font-family: "Courier New", monospace;
+}
+.center {
+  text-align: center !important;
+}
+.type-system {
+  background: #fef9e7;
+  color: #f5a623;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.type-tenant {
+  background: #eaf4fc;
+  color: #3498db;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}

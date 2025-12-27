@@ -1,0 +1,293 @@
+/* Dialog Container - Match product-dialog style */
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ===== HEADER ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #1e293b;
+}
+
+/* ===== BODY ===== */
+.dialog-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 70vh;
+  padding-right: 4px;
+}
+
+/* Logo Upload Section - BIGGER */
+.logo-upload-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.logo-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  /* background: #f1f5f9; */
+  border: 2px dashed #cbd5e1;
+  cursor: pointer;
+  padding: 8px;
+  transition: border-color 0.2s;
+}
+
+.logo-wrapper:hover {
+  border-color: #facc15;
+}
+
+.logo-wrapper:hover .overlay {
+  opacity: 1;
+}
+
+.current-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: white;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.upload-label {
+  background: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #f59e0b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+}
+
+.logo-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.logo-error {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #ef4444;
+}
+
+/* Section Title - Match product-dialog */
+.form-section-title {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+/* ===== GRID LAYOUT - Match product-dialog ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ===== FORM FIELDS - Match product-dialog ===== */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 500;
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+.custom-input {
+  width: 100%;
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.12s ease;
+}
+
+.custom-input:hover {
+  border-color: #facc15;
+}
+
+.custom-input:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(255, 230, 0, 0.15);
+  background-color: #fff;
+}
+
+.custom-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Error styling for inputs */
+.custom-input.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+.custom-input.ng-invalid.ng-touched:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+/* Error text */
+.error-text {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* Specific styling for select to match input */
+select.custom-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3F%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* ===== ACTIONS - Match product-dialog ===== */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-right: 12px;
+}
+
+.btn-cancel:hover {
+  background: #f8fafc;
+}
+
+.btn-save {
+  padding: 10px 24px;
+  background: #facc15;
+  border: none;
+  border-radius: 6px;
+  color: #000;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.btn-save:hover {
+  background: #eab308;
+}
+
+.btn-save:disabled {
+  background: #e2e8f0;
+  cursor: not-allowed;
+  color: #94a3b8;
+}
+
+/* Full width field helper */
+.full-width {
+  grid-column: span 2;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .full-width {
+    grid-column: span 1;
+  }
+  .logo-wrapper {
+    width: 160px;
+    height: 160px;
+  }
+}

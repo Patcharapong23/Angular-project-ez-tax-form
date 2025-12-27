@@ -1,75 +1,949 @@
-.page {
-  padding: 24px 0px 0px 0px;
-  /* background: #f6f7fb; */
-  min-height: calc(100vh - 64px);
+/* Dashboard Page Styles */
+.dashboard-container {
+  padding: 24px;
+  background-color: #f8f9fa; /* Light gray background */
+  min-height: 100vh;
 }
 
-.header-card {
+/* Header with Title and Time Filters */
+.dashboard-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  background: #fff;
-  border-radius: 14px;
-  padding: 12px 14px;
-  margin: 4px 0 16px;
-  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04), 0 1px 3px rgba(17, 24, 39, 0.06);
-}
-
-.company-pill {
-  background: #f2f4f9;
-  color: #2b2f33;
-  border-radius: 12px;
-  padding: 10px 16px;
-  font-weight: 700;
-}
-
-.user-chip {
-  display: flex;
   align-items: center;
-  gap: 12px;
-  background: #fff;
-  border-radius: 999px;
-  box-shadow: 0 1px 0 rgba(17, 24, 39, 0.04), 0 1px 3px rgba(17, 24, 39, 0.06);
-  padding: 8px 12px;
-  cursor: pointer;
-}
-
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  display: grid;
-  place-items: center;
-  color: #1f2937;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.meta .name {
-  color: #2b2f33;
-  font-weight: 600;
-}
-
-.meta .role {
-  color: var(--primary-color);
-  font-weight: 600;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .page-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  color: #2b2f33;
-  margin: 8px 0 14px;
+  color: #1e293b;
+  margin: 0;
 }
 
-.quick-grid {
+/* Time Filter Buttons */
+.time-filter-buttons {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  padding: 6px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.time-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.time-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.time-btn.active {
+  background: var(--primary-color);
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(255, 204, 0, 0.4);
+}
+
+/* Stat Cards Grid */
+.stat-cards {
   display: grid;
-  /* grid-template-columns: repeat(3, minmax(220px, 1fr)); */
-  gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
 }
 
-.quick-card.placeholder {
-  height: 900px;
-  background: #ffffff;
+/* Stat Cards */
+.stat-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  /* Removed display: flex; align-items: flex-start; */
+  /* gap: 16px; - Moving gap to layout */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ... (keep border/shadow styles) ... */
+
+/* New Header Layout */
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px; /* Space between icon/number row and label */
+}
+
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.stat-icon i,
+.stat-icon mat-icon {
+  font-size: 24px;
+}
+
+/* Card Colors */
+/* เอกสารทั้งหมด - icon สีม่วง #7E73F1 พื้นหลัง #EAE8FD */
+.stat-card.total .stat-icon {
+  background: #eae8fd;
+  color: #7e73f1;
+  box-shadow: 0 0.25rem 1.125rem rgba(75, 70, 92, 0.1);
+}
+
+/* ส่ง E-TAX แล้ว - icon สีเขียว พื้นหลังเขียวอ่อน */
+.stat-card.revenue .stat-icon {
+  background: #d1fae5;
+  color: #10b981;
+  box-shadow: 0 0.25rem 1.125rem rgba(75, 70, 92, 0.1);
+}
+
+/* เอกสารใหม่ - icon สีฟ้า พื้นหลังฟ้าอ่อน */
+.stat-card.new .stat-icon {
+  background: #e0f2fe;
+  color: #0ea5e9;
+  box-shadow: 0 0.25rem 1.125rem rgba(75, 70, 92, 0.1);
+}
+
+/* เอกสารแก้ไข - icon สีเหลือง #FFC107 พื้นหลัง #FDFBE8 */
+.stat-card.edited .stat-icon {
+  background: #fdfbe8;
+  color: #ffc107;
+  box-shadow: 0 0.25rem 1.125rem rgba(75, 70, 92, 0.1);
+}
+
+/* เอกสารยกเลิก - icon สีแดง พื้นหลังแดงอ่อน */
+.stat-card.cancelled .stat-icon {
+  background: #fee2e2;
+  color: #ef4444;
+  box-shadow: 0 0.25rem 1.125rem rgba(75, 70, 92, 0.1);
+}
+
+.stat-content {
+  /* No longer main wrapper, but might still be used inside if needed */
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  display: block; /* Ensure new line */
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  /* height: 100%; Removed to allow natural height */
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-activity-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-top: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.recent-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recent-table th {
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 500;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.recent-table td {
+  padding: 12px;
+  font-size: 14px;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.recent-table tr:last-child td {
+  border-bottom: none;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-new {
+  background: #eff6ff;
+  color: #3b82f6;
+} /* Blue */
+.status-updated {
+  background: #fef3c7;
+  color: #d97706;
+} /* Yellow/Orange */
+.status-cancelled {
+  background: #fef2f2;
+  color: #ef4444;
+} /* Red */
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+}
+
+/* Empty state for charts */
+.empty-chart-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #94a3b8;
+  font-size: 14px;
+  text-align: center;
+}
+
+.empty-chart-state p {
+  margin: 0;
+  color: #64748b;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.stat-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px; /* Slightly larger for readability */
+  font-weight: 500;
+  white-space: nowrap; /* Prevent wrapping */
+  flex-wrap: nowrap;
+}
+
+.stat-change mat-icon {
+  font-size: 16px; /* Match text size better */
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-change.positive {
+  color: #16a34a;
+}
+
+.stat-change.negative {
+  color: #dc2626;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 24px 0;
+}
+
+/* Filter Row */
+.filter-row {
+  display: flex;
+  gap: 16px;
+  /* margin-bottom: 32px; */
+  flex-wrap: wrap;
+}
+
+/* Form Styles copied from invoice-form */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  width: 100%;
+  min-width: 200px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.form-control {
+  width: 100%;
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background-color: #fff;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.12s ease;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  /* Ensure select arrow is consistent */
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+.form-control:hover {
+  border-color: #facc15;
+}
+
+.form-control:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(255, 230, 0, 0.15);
+  background-color: #fff;
+}
+
+/* Chart Container */
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.chart-badge {
+  background: #dbeafe;
+  color: #2563eb;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ECharts Container */
+.echarts-wrapper {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.echarts-chart {
+  width: 100%;
+  height: 450px;
+}
+
+/* Segment Animation */
+.chart-segment {
+  cursor: pointer;
+  transform-origin: 190px 190px;
+  animation: segmentDraw 1s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+    filter 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+    opacity 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@keyframes segmentDraw {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Staggered animation delays - target g element containing path */
+g:nth-of-type(1) .chart-segment {
+  animation-delay: 0ms;
+}
+g:nth-of-type(2) .chart-segment {
+  animation-delay: 100ms;
+}
+g:nth-of-type(3) .chart-segment {
+  animation-delay: 200ms;
+}
+g:nth-of-type(4) .chart-segment {
+  animation-delay: 300ms;
+}
+g:nth-of-type(5) .chart-segment {
+  animation-delay: 400ms;
+}
+g:nth-of-type(6) .chart-segment {
+  animation-delay: 500ms;
+}
+g:nth-of-type(7) .chart-segment {
+  animation-delay: 600ms;
+}
+g:nth-of-type(8) .chart-segment {
+  animation-delay: 700ms;
+}
+
+g:nth-of-type(1) .segment-label {
+  animation-delay: 0.8s;
+}
+g:nth-of-type(2) .segment-label {
+  animation-delay: 0.9s;
+}
+g:nth-of-type(3) .segment-label {
+  animation-delay: 1s;
+}
+g:nth-of-type(4) .segment-label {
+  animation-delay: 1.1s;
+}
+g:nth-of-type(5) .segment-label {
+  animation-delay: 1.2s;
+}
+g:nth-of-type(6) .segment-label {
+  animation-delay: 1.3s;
+}
+g:nth-of-type(7) .segment-label {
+  animation-delay: 1.4s;
+}
+g:nth-of-type(8) .segment-label {
+  animation-delay: 1.5s;
+}
+
+/* Hover Effect */
+.chart-segment:hover,
+.chart-segment.hovered {
+  transform: scale(1.06);
+  filter: brightness(1.15) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Segment Label Animation */
+.segment-label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: white;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  animation: labelFadeIn 0.5s cubic-bezier(0.33, 1, 0.68, 1) 0.8s forwards;
+}
+
+@keyframes labelFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-center-label {
+  font-size: 14px;
+  fill: #64748b;
+}
+
+.chart-center-number {
+  font-size: 32px;
+  font-weight: 700;
+  fill: #1e293b;
+}
+
+/* Chart Tooltip */
+.chart-tooltip {
+  position: fixed;
+  background: #1f2a44;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(31, 42, 68, 0.4);
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.tooltip-label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tooltip-value {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.chart-total-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Legend */
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page {
+    padding: 12px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .time-filter-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .time-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .stat-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-header {
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .stat-icon i,
+  .stat-icon mat-icon {
+    font-size: 18px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .chart-section {
+    padding: 16px;
+  }
+
+  .echarts-chart {
+    height: 300px;
+  }
+
+  .echarts-wrapper {
+    max-width: 100%;
+  }
+
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .filter-field {
+    max-width: none;
+  }
+
+  .pie-chart-wrapper {
+    width: 250px;
+    height: 250px;
+  }
+
+  .chart-center {
+    width: 140px;
+    height: 140px;
+  }
+
+  .chart-total-number {
+    font-size: 28px;
+  }
+
+  .legend-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .recent-activity-card {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* Table responsive styles */
+  .recent-table th,
+  .recent-table td {
+    padding: 8px 6px;
+    font-size: 12px;
+  }
+
+  .status-badge {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  /* Hide customer column on mobile to save space */
+  .customer-cell,
+  .recent-table th:nth-child(3) {
+    display: none;
+  }
+
+  /* Make date column more compact */
+  .date-cell {
+    white-space: nowrap;
+    font-size: 11px !important;
+  }
+
+  /* Make document number more compact */
+  .docno-cell {
+    font-size: 11px !important;
+    font-weight: 500;
+  }
+
+  /* Make table scroll smoothly */
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Improve empty state */
+  .empty-state {
+    padding: 24px !important;
+    font-size: 13px;
+  }
+
+  /* Better card styling on mobile */
+  .recent-activity-card {
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Reduce chart height on mobile */
+  .echarts-chart {
+    height: 280px;
+  }
+}
+
+/* Tablet Responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .echarts-chart {
+    height: 350px;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1440px) {
+  .stat-cards {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* === Utility Classes === */
+.text-center {
+  text-align: center !important;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+/* ========================================= */
+/* Session Activity List Styles              */
+/* ========================================= */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+  background: #f1f5f9;
+}
+
+.activity-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px; /* Prevent shrinking */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1; /* Take remaining space */
+  overflow: hidden; /* For text truncation if needed */
+}
+
+.activity-action {
+  font-size: 14px;
+  color: #1e293b;
+  font-weight: 500;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.activity-entity-name {
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.empty-activity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: #f8fafc;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.activity-item:hover {
+  background: #f1f5f9;
+  transform: translateX(4px);
+}
+
+.activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.activity-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-action {
+  font-size: 14px;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.activity-entity-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.activity-time {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.empty-activity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+/* Mobile responsive for activity list */
+@media (max-width: 768px) {
+  .activity-item {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .activity-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .activity-action {
+    font-size: 13px;
+  }
+
+  .activity-time {
+    font-size: 11px;
+  }
+}
+
+/* Added for Expiring Documents Table Icons */
+.icon-view {
+  color: #06b6d4; /* Cyan/Blue */
+  font-size: 20px;
+}
+
+.icon-edit {
+  color: #f59e0b; /* Orange/Yellow */
+  font-size: 20px;
+}
+
+.icon-delete {
+  color: #ef4444; /* Red */
+  font-size: 20px;
+}
+
+.table-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }

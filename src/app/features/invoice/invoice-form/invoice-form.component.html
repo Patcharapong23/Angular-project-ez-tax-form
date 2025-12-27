@@ -1,5 +1,5 @@
 <!-- src/app/features/invoice/invoice-form/invoice-form.component.html -->
-<div class="page-header">
+<div class="page-header" *ngIf="!creationSuccess">
   <button
     type="button"
     class="icon-back"
@@ -32,7 +32,27 @@
     (ngSubmit)="saveInvoice()"
   >
     <!-- Header bar / ชื่อหน้า -->
-
+    <!-- Cancellation Banner -->
+    <div class="cancellation-banner" *ngIf="isCancelled">
+      <div class="banner-icon">
+        <i class="ti ti-ban"></i>
+      </div>
+      <div class="banner-info">
+        <h3>เอกสารฉบับนี้ถูกยกเลิกแล้ว</h3>
+        <div class="banner-details">
+          <span
+            ><strong>วันที่ยกเลิก:</strong>
+            {{ cancelledAt | thaiDate : "dd/MM/yyyy HH:mm" }}</span
+          >
+          <span><strong>ผู้ยกเลิก:</strong> {{ cancelledBy }}</span>
+          <span><strong>สาเหตุ:</strong> {{ cancelReason || "-" }}</span>
+          <span *ngIf="autoDeleteAt"
+            ><strong>จะถูกลบอัตโนมัติเมื่อ:</strong>
+            {{ autoDeleteAt | thaiDate : "dd/MM/yyyy HH:mm" }}</span
+          >
+        </div>
+      </div>
+    </div>
     <!-- ชื่อเอกสาร / ประเภทที่เลือก -->
     <div class="doc-heading" *ngIf="docTypeTh || docTypeEn || docTypeCode">
       <div class="th">
@@ -1070,7 +1090,7 @@
         <!-- rows -->
         <div
           class="item-row"
-          *ngFor="let it of itemForms; let i = index; trackBy: trackByIdx"
+          *ngFor="let it of itemForms; let i = index; trackBy: trackByItem"
           [formGroup]="it"
         >
           <!-- SKU -->
@@ -1184,7 +1204,7 @@
             (click)="addItem()"
           >
             <i class="ti ti-plus"></i>
-            <span>เพิ่มรายการ</span>
+            <span>เพิ่มรายการ ({{ itemForms.length }})</span>
           </button>
 
           <div class="note-block">
@@ -1236,28 +1256,37 @@
             </div>
           </div>
 
-          <div class="sum-row fee-edit-row" *ngIf="editingServiceFee">
-            <div class="sum-label">ค่าบริการ</div>
-            <div class="fee-input-wrap">
-              <input
-                class="fee-input"
-                type="text"
-                numberInputFormatter
-                [value]="serviceFee"
-                (input)="onServiceFeeInput($event)"
-                (keypress)="onlyAllowNumbers($event)"
-              />
-              <button
-                type="button"
-                class="fee-cancel-btn"
-                (click)="cancelServiceFee()"
-                aria-label="ยกเลิกค่าบริการ"
-                title="ยกเลิก"
-              >
-                <i class="ti ti-x"></i>
-              </button>
+          <ng-container *ngIf="editingServiceFee">
+            <div class="sum-row fee-edit-row">
+              <div class="sum-label">อัตราค่าบริการ (%)</div>
+              <div class="fee-input-wrap" style="justify-content: flex-end">
+                <input
+                  class="fee-input"
+                  type="text"
+                  style="width: 60px; text-align: center"
+                  [(ngModel)]="serviceFeeRate"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="onServiceFeeRateChange()"
+                  (keypress)="onlyAllowNumbers($event)"
+                  placeholder="0"
+                />
+                <button
+                  type="button"
+                  class="fee-cancel-btn"
+                  (click)="cancelServiceFee()"
+                  aria-label="ยกเลิกค่าบริการ"
+                  title="ยกเลิก"
+                  style="margin-left: 8px"
+                >
+                  <i class="ti ti-x"></i>
+                </button>
+              </div>
             </div>
-          </div>
+            <div class="sum-row">
+              <div class="sum-label">ค่าบริการ</div>
+              <div class="sum-value">{{ fmt(serviceFee) }}</div>
+            </div>
+          </ng-container>
 
           <div class="sum-row">
             <div class="sum-label">จำนวนเงินที่เสียภาษีมูลค่าเพิ่ม</div>
@@ -1369,21 +1398,55 @@
         </div>
         <div class="form-field">
           <label class="form-label">สาขา <span class="req">*</span></label>
-          <input
-            class="form-control"
-            type="text"
-            formControlName="branch"
-            placeholder="ระบุสาขา หรือเลือกจากรายการ"
-            [matAutocomplete]="autoBranch"
-          />
-          <mat-autocomplete #autoBranch="matAutocomplete">
-            <mat-option
-              *ngFor="let branch of bankBranches"
-              [value]="branch.branchNameTh"
+          <div class="custom-dropdown">
+            <div
+              class="dropdown-trigger"
+              style="
+                display: flex;
+                align-items: center;
+                padding: 0 10px;
+                cursor: text;
+              "
+              (click)="openBranchDropdown()"
+              [class.active]="opened['bankBranch']"
+              [class.disabled]="
+                mode === 'view' || !fgPayment.get('bankName')?.value
+              "
             >
-              {{ branch.branchNameTh }}
-            </mat-option>
-          </mat-autocomplete>
+              <input
+                type="text"
+                formControlName="branch"
+                placeholder="ระบุสาขา"
+                (input)="filterBranches($event)"
+                (focus)="openBranchDropdown()"
+                [attr.disabled]="
+                  mode === 'view' || !fgPayment.get('bankName')?.value
+                    ? true
+                    : null
+                "
+                style="
+                  flex: 1;
+                  border: none;
+                  outline: none;
+                  background: transparent;
+                  font-size: inherit;
+                  color: inherit;
+                  padding: 10px 0;
+                "
+              />
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </div>
+            <div class="dropdown-panel" [class.open]="opened['bankBranch']">
+              <button
+                type="button"
+                *ngFor="let branch of filteredBankBranches"
+                class="dropdown-option"
+                (click)="selectBankBranch(branch)"
+              >
+                {{ branch.branchNameTh }}
+              </button>
+            </div>
+          </div>
         </div>
         <div class="form-field">
           <label class="form-label"
@@ -1426,8 +1489,10 @@
             class="form-control"
             type="text"
             formControlName="amount"
-            placeholder="ระบุจำนวนเงิน"
+            placeholder="จำนวนเงิน (เท่ากับยอดรวม)"
             numberInputFormatter
+            [readonly]="true"
+            tabindex="-1"
           />
         </div>
       </div>
@@ -1447,19 +1512,33 @@
 
       <!-- Create/Edit Mode: Save buttons -->
       <ng-container *ngIf="mode !== 'view'">
-        <button type="button" class="ghost" [disabled]="isSaving">
-          บันทึกแบบร่างข้อมูล
-        </button>
-        <button
-          type="submit"
-          class="primary"
-          [disabled]="isSaving || (mode === 'edit' && !isFormDirty)"
-        >
-          <span *ngIf="!isSaving">{{
-            mode === "edit" ? "บันทึกการแก้ไข" : "บันทึก"
-          }}</span>
-          <span *ngIf="isSaving">กำลังบันทึก...</span>
-        </button>
+        <ng-container *hasPermission="'DOC_SAVE'">
+          <button type="button" class="ghost" [disabled]="isSaving">
+            บันทึกแบบร่างข้อมูล
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="mode === 'create'">
+          <ng-container *hasPermission="'DOC_CREATE'">
+            <button type="submit" class="primary" [disabled]="isSaving">
+              <span *ngIf="!isSaving">บันทึก</span>
+              <span *ngIf="isSaving">กำลังบันทึก...</span>
+            </button>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *ngIf="mode === 'edit'">
+          <ng-container *hasPermission="'DOC_EDIT'">
+            <button
+              type="submit"
+              class="primary"
+              [disabled]="isSaving || !isFormDirty"
+            >
+              <span *ngIf="!isSaving">บันทึกการแก้ไข</span>
+              <span *ngIf="isSaving">กำลังบันทึก...</span>
+            </button>
+          </ng-container>
+        </ng-container>
       </ng-container>
     </div>
   </form>

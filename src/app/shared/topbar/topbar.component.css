@@ -1,12 +1,36 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 990;
+  width: auto;
+  /* Restore floating padding */
+  padding: 16px 24px 0 24px;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 .main-header {
-  height: 64px;
+  height: 70px;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Changed from flex-end */
-  padding: 0 16px;
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px 0 rgba(17, 24, 39, 0.04);
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0 32px;
+  box-sizing: border-box;
+
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  /* Restore round corners for floating card */
+  border-radius: 16px;
+
+  width: 100%;
+  transition: all 0.3s ease;
 }
 
 /* Hamburger Menu Button */
@@ -185,4 +209,114 @@
   border-radius: 8px;
   color: #fff;
   transition: background 0.2s ease;
+}
+
+/* === Responsive Topbar Styles === */
+
+/* Tablet */
+@media (max-width: 1023px) {
+  :host {
+    padding: 12px 16px 0 16px;
+  }
+
+  .main-header {
+    height: 60px;
+    padding: 0 16px;
+    border-radius: 12px;
+  }
+
+  .header-actions {
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .initial {
+    font-size: 13px;
+  }
+
+  .lang-flag {
+    font-size: 20px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  :host {
+    padding: 8px 12px 0 12px;
+  }
+
+  .main-header {
+    height: 56px;
+    padding: 0 12px;
+    border-radius: 10px;
+  }
+
+  .header-actions {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .initial {
+    font-size: 12px;
+  }
+
+  .online-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* Hide user details text on mobile, show only avatar */
+  .user-details {
+    display: none;
+  }
+
+  .profile-arrow {
+    display: none;
+  }
+
+  .user-profile {
+    padding: 4px;
+    gap: 6px;
+  }
+
+  .lang-flag {
+    font-size: 18px;
+  }
+
+  .hamburger-menu-button {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    margin-right: 4px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  :host {
+    padding: 6px 8px 0 8px;
+  }
+
+  .main-header {
+    height: 50px;
+    padding: 0 10px;
+    border-radius: 8px;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .initial {
+    font-size: 11px;
+  }
 }

@@ -3,6 +3,7 @@ import {
   Product,
   ProductService,
 } from '../../../../shared/services/product.service';
+import { ProductStoreService } from '../../../../shared/services/product-store.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductDialogComponent } from '../../dialogs/product-dialog/product-dialog.component';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -32,6 +33,7 @@ export class ProductsListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
+    private productStoreService: ProductStoreService, // Injected Store Service
     public dialog: MatDialog,
     private fb: FormBuilder,
     private datePipe: DatePipe,
@@ -59,6 +61,26 @@ export class ProductsListComponent implements OnInit {
   get selectedStatus() {
     const val = this.searchForm.get('status')?.value;
     return this.statusOptions.find(s => s.value === val);
+  }
+
+  sortBy: string = 'updateDate';
+  sortDir: string = 'desc';
+
+  onSort(column: string): void {
+    if (this.sortBy === column) {
+      if (this.sortDir === 'desc') {
+        this.sortDir = 'asc';
+      } else {
+        // Reset to default
+        this.sortBy = 'updateDate';
+        this.sortDir = 'desc';
+      }
+    } else {
+      this.sortBy = column;
+      this.sortDir = 'desc';
+    }
+    this.currentPage = 1;
+    this.loadProducts();
   }
 
   // Pagination properties
@@ -92,8 +114,10 @@ export class ProductsListComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.productService.getProducts().subscribe((products) => {
-      console.log('API Response Products:', products);
+    // Use Store Service (get cached data, sort client-side)
+    this.productStoreService.getProducts$().subscribe((products) => {
+      if (!products) return; 
+
       this.allProducts = products.map(p => {
         const anyP = p as any;
         return {
@@ -101,8 +125,31 @@ export class ProductsListComponent implements OnInit {
           id: p.id || anyP.productId || anyP.product_id || anyP._id || ''
         };
       });
-      this.products = this.allProducts;
+      this.products = this.sortProducts(this.allProducts);
       this.updatePagination();
+    });
+  }
+
+  private sortProducts(data: Product[]): Product[] {
+    if (!data || data.length === 0) return data;
+
+    return [...data].sort((a: any, b: any) => {
+      let valA = a[this.sortBy];
+      let valB = b[this.sortBy];
+
+      // Handle date fields
+      if (this.sortBy === 'updateDate' || this.sortBy === 'createDate') {
+        valA = valA ? new Date(valA).getTime() : 0;
+        valB = valB ? new Date(valB).getTime() : 0;
+      }
+
+      // Handle string fields
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+
+      if (valA < valB) return this.sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDir === 'asc' ? 1 : -1;
+      return 0;
     });
   }
 
@@ -110,6 +157,7 @@ export class ProductsListComponent implements OnInit {
     const { sku, dateRange, status } = this.searchForm.value;
     const { start, end } = dateRange;
 
+    // Client-side filtering on cached data
     this.products = this.allProducts.filter((product) => {
       const skuMatch = sku
         ? product.productCode.toLowerCase().includes(sku.toLowerCase())
@@ -180,6 +228,8 @@ export class ProductsListComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        // Invalidate cache to force reload
+        this.productStoreService.invalidate();
         this.loadProducts();
         this.swalService.success('เพิ่มข้อมูลสินค้าสำเร็จ', 'ระบบได้เพิ่มข้อมูลสินค้าเรียบร้อย');
       }
@@ -194,6 +244,8 @@ export class ProductsListComponent implements OnInit {
     });
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        // Invalidate cache
+        this.productStoreService.invalidate();
         this.loadProducts();
         this.swalService.success('แก้ไขข้อมูลสินค้าสำเร็จ', 'ระบบได้แก้ไขข้อมูลสินค้าเรียบร้อย');
       }
@@ -215,6 +267,8 @@ export class ProductsListComponent implements OnInit {
     ).then((result) => {
       if (result.isConfirmed) {
         this.productService.deleteProduct(product.id).subscribe(() => {
+          // Invalidate cache
+          this.productStoreService.invalidate();
           this.loadProducts();
           this.swalService.success('ลบข้อมูลสินค้าสำเร็จ', 'ระบบได้ลบข้อมูลสินค้าเรียบร้อย');
         });

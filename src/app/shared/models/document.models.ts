@@ -8,6 +8,7 @@ export interface DocumentListItem {
   sellerName: string;
   buyerName: string;
   grandTotal: number;
+  totalAmount: number; // For compatibility
   buyerTaxId?: string;
   branchCode?: string;
   createdAt?: string;
@@ -16,6 +17,7 @@ export interface DocumentListItem {
   buyerTaxIdSnapshot?: string;
   buyerNameSnapshot?: string;
   buyerPassportNoSnapshot?: string;
+  selected?: boolean;
 }
 
 // payload สำหรับสร้างเอกสาร
@@ -206,14 +208,17 @@ export interface CreateDocumentResponse {
 export interface DocumentSearchParams {
   page?: number;
   size?: number;
-  docType?: string;
-  buyerTaxId?: string;
-  issueDateFrom?: string; // ISO Date
-  issueDateTo?: string; // ISO Date
-  createdFrom?: string; // ISO Date
-  createdTo?: string; // ISO Date
-  status?: string; // e.g., "APPROVED"
-  docNo?: string;
+  docType?: string | null;
+  buyerTaxId?: string | null;
+  issueDateFrom?: string | null; // ISO Date
+  issueDateTo?: string | null; // ISO Date
+  createdFrom?: string | null; // ISO Date
+  createdTo?: string | null; // ISO Date
+  status?: string | null; // e.g., "APPROVED"
+  docNo?: string | null;
+  // Sorting
+  sortBy?: string;
+  sortDir?: string;
 }
 
 export interface Page<T> {

@@ -5,6 +5,7 @@ import {
   Product,
   ProductService,
 } from '../../../../shared/services/product.service';
+import { ActivityService } from '../../../../shared/services/activity.service';
 
 import { Observable, of } from 'rxjs';
 import { startWith, map, switchMap } from 'rxjs/operators';
@@ -26,7 +27,8 @@ export class ProductDialogComponent implements OnInit {
     private fb: FormBuilder,
     private productService: ProductService,
     public dialogRef: MatDialogRef<ProductDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private activityService: ActivityService
   ) {
     console.log('ProductDialog Data:', this.data);
     this.taxRateOptions = [
@@ -102,10 +104,14 @@ export class ProductDialogComponent implements OnInit {
         this.productService
           .updateProduct(this.data.id, productData)
           .subscribe(() => {
+            // Log activity
+            this.activityService.logProductUpdate(formValue.name || formValue.productCode, this.data.id);
             this.dialogRef.close(true);
           });
       } else {
-        this.productService.createProduct(productData).subscribe(() => {
+        this.productService.createProduct(productData).subscribe((res: any) => {
+          // Log activity
+          this.activityService.logProductCreate(formValue.name || formValue.productCode, res?.id || '');
           this.dialogRef.close(true);
         });
       }

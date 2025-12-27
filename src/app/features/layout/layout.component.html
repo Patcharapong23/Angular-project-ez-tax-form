@@ -16,8 +16,8 @@
   [class.collapsed]="isCollapsed"
   [class.mobile-menu-open]="isMobileMenuOpen$ | async"
 >
+  <app-topbar></app-topbar>
   <main class="content-area">
-    <app-topbar></app-topbar>
     <router-outlet></router-outlet>
   </main>
 </div>

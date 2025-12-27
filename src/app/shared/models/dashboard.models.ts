@@ -1,7 +1,13 @@
 export interface DashboardSummary {
   totalDocuments: number;
-  totalSalesAmount: number;
-  pendingDocuments: number;
-  recentActivities: { type: string; id: string; timestamp: string }[];
-  // ... other relevant summary metrics
+  totalAmount: number;
+  draftCount: number;
+  confirmedCount: number;
+  cancelledCount: number;
+  newDocuments: number;
+  editedDocuments: number;
+  etaxSubmittedCount: number;
+  documentTypeBreakdown: { [key: string]: number };
+  branchRanking: { [key: string]: number };
 }
+

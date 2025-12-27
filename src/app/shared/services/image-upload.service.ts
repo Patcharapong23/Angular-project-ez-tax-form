@@ -148,4 +148,73 @@ export class ImageUploadService {
 
     return uploadSubject.asObservable();
   }
+
+  // Method to upload the processed branch logo
+  uploadBranchLogo(branchId: string, file: Blob): Observable<UploadProgress> {
+    const formData = new FormData();
+    formData.append('file', file, 'logo.webp');
+    formData.append('branchId', branchId);
+
+    const uploadSubject = new Subject<UploadProgress>();
+    const url = `${environment.apiBase}/uploads/branch-logo`;
+
+    let headers = new HttpHeaders();
+    const token = this.auth.token;
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    this.http
+      .post(`${url}`, formData, {
+        reportProgress: true,
+        observe: 'events',
+        headers: headers,
+      })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          let errorMessage = 'อัปโหลดล้มเหลว โปรดลองใหม่';
+          if (error.status === 400) {
+            errorMessage = 'รูปแบบการอัปโหลดไม่ถูกต้อง';
+          } else if (error.status === 401 || error.status === 403) {
+            errorMessage = 'ไม่ได้รับอนุญาตให้อัปโหลดโลโก้';
+          } else if (error.status === 404) {
+            errorMessage = 'ไม่พบสาขา';
+          } else if (error.status === 413) {
+            errorMessage = 'ขนาดไฟล์เกิน 6MB';
+          } else if (error.status === 415) {
+            errorMessage = 'ประเภทไฟล์ไม่รองรับ';
+          } else if (error.status === 422) {
+            errorMessage = 'ข้อมูลที่ส่งไม่ถูกต้อง';
+          } else if (error.status === 502) {
+            errorMessage = 'อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง';
+          }
+          uploadSubject.next({
+            state: 'ERROR',
+            progress: 0,
+            error: errorMessage,
+          });
+          uploadSubject.complete();
+          return throwError(() => new Error(errorMessage));
+        })
+      )
+      .subscribe((event: any) => {
+        switch (event.type) {
+          case HttpEventType.UploadProgress:
+            const progress = Math.round((100 * event.loaded) / event.total);
+            uploadSubject.next({ state: 'IN_PROGRESS', progress });
+            break;
+          case HttpEventType.Response:
+            uploadSubject.next({
+              state: 'DONE',
+              progress: 100,
+              url: event.body.url,
+              public_id: event.body.public_id,
+            });
+            uploadSubject.complete();
+            break;
+        }
+      });
+
+    return uploadSubject.asObservable();
+  }
 }

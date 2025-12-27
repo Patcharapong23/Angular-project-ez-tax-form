@@ -1,0 +1,53 @@
+<section class="user-management-page">
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>จัดการผู้ใช้และสิทธิ์</h1>
+    <button
+      *ngIf="activeTab === 'role'"
+      class="btn btn-primary"
+      (click)="addRole()"
+    >
+      <i class="ti ti-plus"></i> เพิ่มบทบาทและสิทธิ์การเข้าถึง
+    </button>
+    <button
+      *ngIf="activeTab === 'user'"
+      class="btn btn-primary"
+      (click)="addUser()"
+    >
+      <i class="ti ti-plus"></i> เพิ่มผู้ใช้
+    </button>
+  </div>
+
+  <!-- MAIN CARD (tabs + content in one card) -->
+  <div class="main-card">
+    <!-- TABS HEADER -->
+    <div class="tabs-header">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'role'"
+        (click)="activeTab = 'role'"
+      >
+        จัดการบทบาทและสิทธิ์
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'user'"
+        (click)="activeTab = 'user'"
+      >
+        จัดการผู้ใช้
+      </button>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <div class="tab-content" *ngIf="activeTab === 'role'">
+      <app-role-management
+        (viewRole)="viewRole($event)"
+        (editRole)="editRole($event)"
+      ></app-role-management>
+    </div>
+
+    <div class="tab-content" *ngIf="activeTab === 'user'">
+      <app-user-list></app-user-list>
+    </div>
+  </div>
+</section>

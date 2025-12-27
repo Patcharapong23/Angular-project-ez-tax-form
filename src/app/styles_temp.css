@@ -1,0 +1,39 @@
+/* Scroll to Top Button */
+.scroll-to-top-btn {
+  position: fixed !important;
+  bottom: 40px;
+  right: 40px;
+  z-index: 1000;
+  background-color: #fcebb6 !important;
+  color: #b45309 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.scroll-to-top-btn:hover {
+  background-color: #fffbeb !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Ensure button doesn't overlap on small screens */
+@media (max-width: 768px) {
+  .scroll-to-top-btn {
+    bottom: 24px;
+    right: 24px;
+    width: 48px !important;
+    height: 48px !important;
+  }
+}

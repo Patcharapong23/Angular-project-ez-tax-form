@@ -1,0 +1,69 @@
+<div class="page-container" *ngIf="user$ | async as user">
+  <div class="page-title"><h1>ข้อมูลทั่วไป</h1></div>
+
+  <!-- Company Info Card -->
+  <div class="info-card">
+    <ng-container *hasPermission="'GENERAL_EDIT'">
+      <div class="edit-btn" (click)="openEditDialog(user)">
+        <i class="ti ti-pencil"></i>
+      </div>
+    </ng-container>
+
+    <!-- Logo -->
+    <div class="logo-container">
+      <img
+        [src]="
+          user.logoUrl ||
+          'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY0NzQ4YiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIExvZ288L3RleHQ+Cjwvc3ZnPg=='
+        "
+        alt="Company Logo"
+        class="company-logo"
+        onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiB2aWV3Qm94PSIwIDAgMTUwIDE1MCI+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YzZjRmNiIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY0NzQ4YiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIExvZ288L3RleHQ+Cjwvc3ZnPg=='"
+      />
+      <!-- If you don't have a placeholder image, you might use an Icon instead or default -->
+    </div>
+
+    <!-- Details -->
+    <div class="company-details">
+      <div class="company-name-th">
+        {{ user.sellerNameTh || "ชื่อบริษัท (ภาษาไทย)" }}
+      </div>
+      <div class="company-name-en">
+        {{ user.sellerNameEn || "Company Name (English)" }}
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="detail-row">
+        เลขประจำตัวผู้เสียภาษีอากร: {{ user.sellerTaxId || "-" }}
+      </div>
+      <div class="detail-row">
+        ที่อยู่: {{ getFormattedAddress(user) || "-" }}
+      </div>
+      <div class="detail-row">
+        รหัสสาขา {{ user.branchCode || "00000" }} ชื่อสาขา:
+        {{ user.branchNameTh || "สำนักงานใหญ่" }}
+      </div>
+      <div class="detail-row">
+        โทรศัพท์: {{ (user.sellerPhoneNumber | phone) || "-" }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Branch Info Card -->
+  <div class="info-card">
+    <div class="branch-icon">
+      <!-- Use Tabler Icon or SVG. The image shows a building line art. ti-building-store is close. -->
+      <i class="ti ti-building-store" style="font-size: 100px"></i>
+    </div>
+
+    <div class="branch-details">
+      <div class="branch-title">สาขา</div>
+      <div class="divider" style="margin-top: 0"></div>
+
+      <div class="branch-stat">สาขาทั้งหมด: 50 สาขา</div>
+      <div class="branch-stat">สาขาที่เปิดใช้งานระบบ 40 สาขา</div>
+      <div class="branch-stat">สาขาที่ปิดใช้งานระบบ 10 สาขา</div>
+    </div>
+  </div>
+</div>

@@ -1,7 +1,7 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, AuthUser } from '../../shared/auth.service';
-import { SidebarService } from '../services/sidebar.service'; // Import SidebarService
+import { SidebarService } from '../services/sidebar.service';
 
 @Component({
   selector: 'app-topbar',
@@ -16,22 +16,9 @@ export class TopbarComponent {
     private el: ElementRef,
     private auth: AuthService,
     private router: Router,
-    private sidebarService: SidebarService // Inject SidebarService
+    private sidebarService: SidebarService
   ) {
-    // รับ user ล่าสุดเสมอ
     this.auth.user$.subscribe((u) => (this.user = u));
-    // ถ้ายังไม่มี role ใน storage ลอง decode จาก token แล้วอัปเดต
-    if (!this.user?.role) {
-      const claims = this.auth.decodeToken();
-      if (claims?.role) {
-        const u = this.user; // Use this.user directly
-        if (u) {
-          u.role = claims.role;
-          // เก็บกลับเข้า storage/stream
-          // (this as any).auth['setUser']?.(u); // Temporarily commented out
-        }
-      }
-    }
   }
 
   displayName(): string {
@@ -48,8 +35,25 @@ export class TopbarComponent {
   }
 
   roleLabel(): string {
-    // แปลงให้เหลือรูปแบบเดียว: เอา ROLE_ ออก, แทน - และช่องว่างเป็น _, ตัวพิมพ์ใหญ่
-    const r = (this.user?.role || '')
+    // 1. Prioritize Standardized Role Level (Type)
+    const level = this.user?.roleLevel || '';
+    if (level) {
+       switch (level) {
+        case 'HQ_ADMIN': return 'ผู้ดูแลสาขาสำนักงานใหญ่';
+        case 'BRANCH_ADMIN': return 'ผู้ดูแลสาขาย่อย';
+        case 'SYSTEM_ADMIN': return 'ผู้ดูแลระบบ';
+        case 'STAFF': return 'พนักงาน';
+       }
+    }
+
+    // 2. Fallback to Thai Name from Backend (if roleLevel not matched/standard)
+    if (this.user?.roleName) {
+      return this.user.roleName;
+    }
+
+    // 3. Fallback: Parse from roles array (Legacy logic)
+    const primaryRole = this.user?.roles?.[0] || '';
+    const r = primaryRole
       .toUpperCase()
       .replace(/^ROLE_/, '')
       .replace(/[-\s]/g, '_');
@@ -64,7 +68,8 @@ export class TopbarComponent {
       case 'STAFF':
         return 'พนักงาน';
       default:
-        return 'สมาชิก';
+        // Attempt to show the code itself if nothing else matches, or 'สมาชิก' as last resort
+        return r || 'สมาชิก';
     }
   }
 
@@ -81,7 +86,6 @@ export class TopbarComponent {
     this.sidebarService.toggleMobileMenu();
   }
 
-  // คลิกนอกเมนู เพื่อปิด dropdown
   @HostListener('document:click', ['$event'])
   onDocClick(e: MouseEvent) {
     if (!this.el.nativeElement.contains(e.target)) {

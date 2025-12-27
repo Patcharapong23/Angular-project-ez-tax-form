@@ -1,0 +1,292 @@
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ===== HEADER ===== */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dialog-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.icon-x {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.icon-x:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* ===== BODY ===== */
+.dialog-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 70vh; /* Reduced from 90vh to prevent full screen height */
+  padding-right: 4px;
+}
+
+/* Section Title */
+.section-title {
+  color: #111827;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+/* ===== GRID LAYOUT ===== */
+.section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 24px;
+  row-gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ===== FORM FIELDS (Custom) ===== */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.4;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.req {
+  color: #ef4444;
+  font-weight: 500;
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+.form-control {
+  width: 100%;
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  color: #111827;
+  outline: none;
+  box-sizing: border-box;
+  transition: all 0.12s ease;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.form-control:hover {
+  border-color: #facc15;
+}
+
+.form-control:focus {
+  border-color: #facc15;
+  box-shadow: 0 0 0 3px rgba(255, 230, 0, 0.15);
+  background-color: #fff;
+}
+
+textarea.form-control {
+  min-height: 80px;
+  max-height: 120px;
+  resize: vertical;
+  padding: 8px 12px;
+  height: auto;
+}
+
+.text-danger {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ===== RADIO GROUPS ===== */
+.status-group {
+  margin-bottom: 24px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.radio-item {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Custom Radio Button Color */
+::ng-deep
+  .mat-mdc-radio-button
+  .mat-mdc-radio-checked
+  .mat-mdc-radio-outer-circle,
+::ng-deep .mat-mdc-radio-button .mat-mdc-radio-inner-circle {
+  border-color: var(--primary-color) !important;
+}
+
+::ng-deep
+  .mat-mdc-radio-button
+  .mat-mdc-radio-checked
+  .mat-mdc-radio-inner-circle {
+  background-color: var(--primary-color) !important;
+}
+
+/* ===== ACTIONS ===== */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Password Field */
+.password-input {
+  position: relative;
+  width: 100%;
+}
+
+.password-input .form-control {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-input i {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 18px;
+}
+
+.password-input i:hover {
+  color: #4b5563;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .section-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* Disabled state */
+/* Disabled state (cleaner look for View mode) */
+input:disabled,
+textarea:disabled,
+select:disabled,
+.mat-mdc-select-disabled {
+  background-color: transparent !important; /* Remove gray background */
+  color: #111827 !important; /* Dark text for readability */
+  cursor: default;
+  border-color: #e5e7eb; /* Lighter border */
+  opacity: 1 !important; /* Ensure opacity isn't reduced */
+}
+
+/* Also target mat-select disabled explicitly if needed */
+::ng-deep .mat-mdc-select-disabled .mat-mdc-select-value {
+  color: #111827 !important;
+}
+
+/* Readonly form control (for audit fields in View Mode) */
+.form-control-readonly {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 1.4;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #6b7280;
+  box-sizing: border-box;
+}
+
+/* View Mode: All form controls should be gray */
+.view-mode .form-control,
+.view-mode .dropdown-trigger,
+.view-mode input,
+.view-mode select,
+.view-mode textarea {
+  background-color: #f9fafb !important;
+  color: #6b7280 !important;
+  border-color: #e5e7eb !important;
+  cursor: default;
+}
+
+.view-mode .form-control:hover,
+.view-mode .dropdown-trigger:hover {
+  border-color: #e5e7eb !important;
+  box-shadow: none !important;
+}
+
+/* Reset Password Button */
+.reset-password-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #dc2626;
+  background-color: #fff;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.reset-password-btn:hover {
+  background-color: #fef2f2;
+  border-color: #f87171;
+}
+
+.reset-password-btn i {
+  font-size: 16px;
+}

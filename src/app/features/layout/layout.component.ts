@@ -8,7 +8,7 @@ import { SidebarService } from '../../shared/services/sidebar.service';
   styleUrls: ['./layout.component.css'],
 })
 export class LayoutComponent {
-  isCollapsed = true;
+  isCollapsed = false;
   isMobileView = false;
   isMobileMenuOpen$ = this.sidebarService.isMobileMenuOpen$;
 

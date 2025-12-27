@@ -1,0 +1,164 @@
+/* ===== พื้นหลังทั้งหน้า ===== */
+.user-management-page {
+  padding: 24px 0px 0px 0px;
+  background: #f7f7f9;
+  min-height: 100vh;
+}
+
+/* ===== HEADER ===== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.page-header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+/* ===== BUTTON ===== */
+.btn {
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #ffc107 !important;
+  color: #000 !important;
+}
+
+.btn-primary:hover {
+  background-color: #e0a800 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+/* ===== MAIN CARD ===== */
+.main-card {
+  background: #ffffff;
+  border-radius: 8px;
+  margin-top: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== TABS ===== */
+.tabs-header {
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 16px 32px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.tab-btn:hover {
+  color: #111827;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.tab-btn.active {
+  color: #111827;
+  font-weight: 600;
+}
+
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #ffc107;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ===== TAB CONTENT ===== */
+.tab-content {
+  animation: fadeInContent 0.3s ease;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== COMING SOON ===== */
+.coming-soon {
+  padding: 80px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.coming-soon i {
+  font-size: 64px;
+  margin-bottom: 16px;
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.coming-soon p {
+  font-size: 16px;
+  margin: 0;
+}

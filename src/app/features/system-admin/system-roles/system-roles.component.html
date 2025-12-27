@@ -1,0 +1,33 @@
+<div class="system-roles">
+  <div class="page-header">
+    <h1><i class="ti ti-key"></i> System Roles</h1>
+    <span class="read-only-badge">Read Only</span>
+  </div>
+
+  <div class="table-card" [class.loading]="loading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Role Code</th>
+          <th>Role Name</th>
+          <th>Description</th>
+          <th>Users</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let role of roles">
+          <td class="mono">{{ role.roleCode }}</td>
+          <td>{{ role.roleName }}</td>
+          <td>{{ role.description }}</td>
+          <td class="center">{{ role.userCount }}</td>
+          <td class="center">
+            <span [class]="role.isSystemRole ? 'type-system' : 'type-tenant'">
+              {{ role.isSystemRole ? "System" : "Tenant" }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

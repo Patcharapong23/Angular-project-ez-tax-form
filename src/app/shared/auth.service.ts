@@ -5,20 +5,13 @@ import {
   BehaviorSubject,
   Observable,
   tap,
-  switchMap,
   map,
-  forkJoin,
   catchError,
   throwError,
-  of, // Import 'of'
+  of,
 } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-import {
-  UserProfile,
-  SellerInfo,
-  BranchInfo,
-} from '../shared/models/user.models';
 
 export interface AuthResponse {
   token: string;
@@ -27,14 +20,9 @@ export interface AuthResponse {
     username: string;
     fullName: string;
     email: string;
-    password?: string;
     branchId?: string;
     sellerId?: string;
     enableFlag?: boolean;
-    createBy?: string;
-    createDate?: string;
-    updateBy?: string;
-    updateDate?: string;
     authorities: { authority: string }[];
     permissions?: string[];
   };
@@ -44,7 +32,6 @@ export interface AuthResponse {
     sellerNameTh: string;
     sellerNameEn?: string;
     sellerPhoneNumber?: string;
-    sellerTypeTax?: string | null;
     logoUrl?: string;
   } | null;
   defaultBranch: {
@@ -53,44 +40,46 @@ export interface AuthResponse {
     branchNameTh?: string;
     branchNameEn?: string;
     addressDetailTh?: string;
-    addressDetailEn?: string;
-    buildingNo?: string;
-    subdistrictId?: string;
-    districtId?: string;
-    provinceId?: string;
-    zipCode?: string;
   } | null;
+  roleLevel?: string;
+  roleName?: string;
 }
 
-export type SellerAddress = {
-  buildingNo?: string;
-  addressDetailTh?: string;
-  addressDetailEn?: string;
-  provinceId?: string;
-  districtId?: string;
-  subdistrictId?: string;
-  postalCode?: string;
-};
-
+// Lightweight user data for UI (minimal sensitive info)
 export interface AuthUser {
   userId: string;
   userName: string;
   fullName: string;
   email: string;
-  role?: string;
-
-  sellerId?: string; // Add sellerId
+  roles: string[];
+  permissions?: string[];  // e.g. ['DASHBOARD_VIEW', 'DOC_ADD', 'DOC_EDIT']
+  roleLevel?: string;      // e.g. 'HQ_ADMIN', 'BRANCH_ADMIN'
+  roleName?: string;       // e.g. 'ผู้ดูแลสาขาสำนักงานใหญ่'
+  // Seller info
+  sellerId?: string;
   sellerNameTh?: string;
   sellerNameEn?: string;
   sellerTaxId?: string;
   sellerPhoneNumber?: string;
   logoUrl?: string;
+  // Branch info
+  branchId?: string;
   branchCode?: string;
   branchNameTh?: string;
   branchNameEn?: string;
-  sellerAddress?: SellerAddress;
-  fullAddressTh?: string;  // Full address built by backend
+  // Address info
+  sellerAddress?: {
+    buildingNo?: string;
+    addressDetailTh?: string;
+    addressDetailEn?: string;
+    provinceId?: string;
+    districtId?: string;
+    subdistrictId?: string;
+    postalCode?: string;
+  };
+  fullAddressTh?: string;
   fullAddressEn?: string;
+  mustChangePassword?: boolean;
 }
 
 export interface RegisterDto {
@@ -114,57 +103,64 @@ export interface RegisterDto {
   acceptTos: boolean;
 }
 
-const TOKEN_KEY = 'auth.token';
-const REFRESH_KEY = 'auth.refresh';
 const USER_KEY = 'auth.user';
 const LOGOUT_BC = 'logout.broadcast';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private base = environment.apiBase; // http://localhost:8080/api
+  private base = environment.apiBase;
+  
+  // Token stored in MEMORY only (not localStorage)
+  private _accessToken: string | null = null;
+  
+  // User data BehaviorSubject
   private _user$ = new BehaviorSubject<AuthUser | null>(readUserFromStorage());
   readonly user$ = this._user$.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
-    const legacy = localStorage.getItem('token');
-    const modern = localStorage.getItem(TOKEN_KEY);
-    if (legacy && !modern) {
-      localStorage.setItem(TOKEN_KEY, legacy);
-    }
-    if (legacy) localStorage.removeItem('token');
+  // Permissions BehaviorSubject (in memory)
+  private _permissions$ = new BehaviorSubject<string[]>([]);
+  readonly permissions$ = this._permissions$.asObservable();
 
+  // Refresh in progress flag (prevent duplicate calls)
+  private _refreshInProgress = false;
+
+  constructor(private http: HttpClient, private router: Router) {
+    // Listen for logout from other tabs
     window.addEventListener('storage', (e) => {
-      if (e.key === TOKEN_KEY && e.newValue === null) {
+      if (e.key === LOGOUT_BC) {
+        this._accessToken = null;
         this.clearUser();
         this.router.navigateByUrl('/login');
       }
     });
   }
 
-  // ---------- token ----------
+  // === TOKEN MANAGEMENT (Memory Only) ===
+  
   get token(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return this._accessToken;
   }
 
-  // refreshToken getter removed as it's no longer stored
-  // getTokenObject method is no longer needed in this form
-
-
   private setToken(accessToken: string) {
-    localStorage.setItem(TOKEN_KEY, accessToken);
+    this._accessToken = accessToken;
+    // Also clear legacy localStorage token if exists
+    localStorage.removeItem('auth.token');
     localStorage.removeItem('token');
   }
 
   public clearToken() {
     console.log('AuthService: clearToken() called');
-    localStorage.removeItem(TOKEN_KEY);
+    this._accessToken = null;
+    // Clear legacy
+    localStorage.removeItem('auth.token');
     localStorage.removeItem('token');
-    localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem('auth.refresh');
   }
 
-  // ---------- user in memory + localStorage ----------
+  // === USER MANAGEMENT (Minimal data in localStorage) ===
+  
   public setUser(u: AuthUser) {
-    console.log('AuthService: setUser() called with', u);
+    console.log('AuthService: setUser() called with', u.userName);
     localStorage.setItem(USER_KEY, JSON.stringify(u));
     this._user$.next(u);
   }
@@ -175,7 +171,12 @@ export class AuthService {
     this._user$.next(null);
   }
 
-  // ---------- jwt / login state ----------
+  get currentUser(): AuthUser | null {
+    return this._user$.value;
+  }
+
+  // === JWT VALIDATION ===
+  
   decodeToken(): any {
     const t = this.token;
     if (!t) return null;
@@ -195,17 +196,97 @@ export class AuthService {
     }
   }
 
-  isLoggedIn(): boolean {
-    const t = this.token;
-    if (!t) return false;
+  isTokenExpired(): boolean {
     const payload = this.decodeToken();
-    if (!payload || !payload.exp) return false;
-
+    if (!payload || !payload.exp) return true;
     const nowSec = Math.floor(Date.now() / 1000);
-    return payload.exp > nowSec;
+    return payload.exp <= nowSec;
   }
 
+  isLoggedIn(): boolean {
+    // Check if we have a valid token in memory
+    if (this._accessToken && !this.isTokenExpired()) {
+      return true;
+    }
+    // If no token but have user, might need refresh
+    if (this._user$.value) {
+      return true; // Will trigger rehydration
+    }
+    return false;
+  }
+
+  // === LOGIN ===
+  
+  login(userName: string, password: string): Observable<void> {
+    const body = { userName, password };
+    console.log('AuthService: login() called with', userName);
+
+    return this.http
+      .post<any>(`${this.base}/auth/login`, body, {
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+        withCredentials: true, // Important for HttpOnly cookie
+      })
+      .pipe(
+        tap((res) => {
+          // Store token in memory
+          this.setToken(res.token);
+
+          // Map to lightweight AuthUser
+          const seller = res.seller;
+          const branch = res.defaultBranch;
+          const authorities = res.user.authorities || [];
+
+          const u: AuthUser = {
+            userId: res.user.userId,
+            userName: res.user.username,
+            fullName: res.user.fullName,
+            email: res.user.email,
+            roles: authorities.map((a: any) => a.authority),
+            roleLevel: res.roleLevel,
+            roleName: res.roleName,
+            // Seller info
+            sellerId: seller?.sellerId,
+            sellerNameTh: seller?.sellerNameTh,
+            sellerNameEn: seller?.sellerNameEn,
+            sellerTaxId: seller?.sellerTaxId,
+            sellerPhoneNumber: seller?.sellerPhoneNumber,
+            logoUrl: seller?.logoUrl,
+            // Branch info
+            branchId: branch?.branchId,
+            branchCode: branch?.branchCode,
+            branchNameTh: branch?.branchNameTh,
+            branchNameEn: branch?.branchNameEn,
+            // Address info
+            sellerAddress: {
+              buildingNo: branch?.buildingNo,
+              addressDetailTh: branch?.addressDetailTh,
+              addressDetailEn: branch?.addressDetailEn,
+              provinceId: branch?.provinceId,
+              districtId: branch?.districtId,
+              subdistrictId: branch?.subdistrictId,
+              postalCode: branch?.zipCode,
+            },
+            fullAddressTh: (res as any).fullAddressTh,
+            fullAddressEn: (res as any).fullAddressEn,
+            mustChangePassword: (res.user as any).mustChangePassword
+          };
+
+          this.setUser(u);
+        }),
+        map(() => void 0)
+      );
+  }
+
+  // === LOGOUT ===
+  
   logout(broadcast = true): void {
+    // Call backend logout (clears cookie)
+    this.http.post(`${this.base}/auth/logout`, {}, { withCredentials: true })
+      .subscribe({
+        next: () => console.log('Backend logout successful'),
+        error: (err) => console.warn('Backend logout error:', err)
+      });
+
     this.clearToken();
     this.clearUser();
 
@@ -220,128 +301,50 @@ export class AuthService {
     this.router.navigateByUrl('/login');
   }
 
-  // ---------- New granular API calls (ยังใช้ได้ ถ้าคุณอยากใช้ภายหลัง) ----------
-  getMyProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.base}/users/me/profile`);
-  }
+  // === REHYDRATION (Restore session on page load) ===
+  
+  rehydrate(): Observable<boolean> {
+    if (this._refreshInProgress) {
+      console.log('AuthService: Refresh already in progress');
+      return of(false);
+    }
 
-  getMySeller(): Observable<SellerInfo> {
-    return this.http.get<SellerInfo>(`${this.base}/users/me/seller`);
-  }
-
-  getMyDefaultBranch(): Observable<BranchInfo> {
-    return this.http.get<BranchInfo>(`${this.base}/users/me/branch/default`);
-  }
-
-  fetchMe(): Observable<void> {
-    return forkJoin([
-      this.getMyProfile().pipe(
-        catchError((error) => {
-          console.error('fetchMe: Error fetching user profile', error);
-          return throwError(() => new Error('Failed to fetch user profile')); // Profile is essential, re-throw
-        })
-      ),
-      this.getMySeller().pipe(
-        catchError((error) => {
-          console.error('fetchMe: Error fetching seller info', error);
-          return throwError(() => new Error('Failed to fetch seller info')); // Re-throw error as seller info is essential
-        })
-      ),
-      this.getMyDefaultBranch().pipe(
-        catchError((error) => {
-          console.error('fetchMe: Error fetching branch info', error);
-          return throwError(() => new Error('Failed to fetch branch info')); // Re-throw error as branch info is essential
-        })
-      ),
-    ]).pipe(
-      tap(([profile, seller, branch]) => {
-        console.log('fetchMe: Profile', profile);
-        console.log('fetchMe: Seller', seller);
-        console.log('fetchMe: Branch', branch);
-
-        // If profile is null (shouldn't happen with the above catchError, but for safety)
-        if (!profile) {
-          console.error('fetchMe: Profile data is missing after successful forkJoin.');
-          this.clearUser();
-          return;
-        }
-
-        const u: AuthUser = {
-          userId: profile.userId,
-          userName: profile.username,
-          fullName: profile.fullName,
-          email: profile.email,
-          role: profile.primaryRole,
-          sellerId: seller?.sellerId,
-          sellerNameTh: seller?.sellerNameTh,
-          sellerNameEn: seller?.sellerNameEn,
-          sellerTaxId: seller?.sellerTaxId,
-          sellerPhoneNumber: seller?.sellerPhoneNumber,
-          logoUrl: seller?.logoUrl,
-          branchCode: branch?.branchCode,
-          branchNameTh: branch?.branchNameTh,
-          branchNameEn: branch?.branchNameEn,
-          sellerAddress: {
-            buildingNo: branch?.buildingNo,
-            addressDetailTh: branch?.addressDetailTh,
-            addressDetailEn: branch?.addressDetailEn,
-            provinceId: branch?.provinceId,
-            districtId: branch?.districtId,
-            subdistrictId: branch?.subdistrictId,
-            postalCode: branch?.zipCode,
-          },
-        };
-        this.setUser(u);
-      }),
-      catchError((error: any) => {
-        // This catchError will only be reached if getMyProfile() re-throws an error
-        console.error('fetchMe: Critical error during user data fetching, clearing user', error);
-        this.clearUser();
-        return throwError(() => new Error('Failed to fetch user details'));
-      }),
-      map(() => void 0)
-    );
-  }
-
-  uploadLogo(file: File, tenantTaxId: string) {
-    const form = new FormData();
-    form.append('file', file);
-    form.append('tenantTaxId', tenantTaxId);
-    return this.http.post<{ url: string }>(`${this.base}/files/logo`, form);
-  }
-
-  // ---------- API : LOGIN (ใช้ response ตั้งค่า user ทันที) ----------
-  login(userName: string, password: string): Observable<void> {
-    const body = { userName, password };
+    console.log('AuthService: Attempting rehydration via refresh');
+    this._refreshInProgress = true;
 
     return this.http
-      .post<any>(`${this.base}/auth/login`, body, {
-        headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
-      })
+      .post<any>(`${this.base}/auth/refresh`, {}, { withCredentials: true })
       .pipe(
         tap((res) => {
-          // 1) เก็บ token
+          console.log('AuthService: Rehydration successful');
           this.setToken(res.token);
-
-          // 2) map response -> AuthUser
+          
+          // Map to lightweight AuthUser (Same logic as login)
           const seller = res.seller;
           const branch = res.defaultBranch;
+          const authorities = res.user.authorities || [];
 
           const u: AuthUser = {
             userId: res.user.userId,
             userName: res.user.username,
             fullName: res.user.fullName,
             email: res.user.email,
-            role: res.user.authorities?.[0]?.authority,
+            roles: authorities.map((a: any) => a.authority),
+            roleLevel: (res as any).roleLevel,
+            roleName: (res as any).roleName,
+            // Seller info
             sellerId: seller?.sellerId,
             sellerNameTh: seller?.sellerNameTh,
-            sellerNameEn: seller?.sellerNameEn ?? undefined,
+            sellerNameEn: seller?.sellerNameEn,
             sellerTaxId: seller?.sellerTaxId,
             sellerPhoneNumber: seller?.sellerPhoneNumber,
             logoUrl: seller?.logoUrl,
+            // Branch info
+            branchId: branch?.branchId,
             branchCode: branch?.branchCode,
             branchNameTh: branch?.branchNameTh,
             branchNameEn: branch?.branchNameEn,
+            // Address info
             sellerAddress: {
               buildingNo: branch?.buildingNo,
               addressDetailTh: branch?.addressDetailTh,
@@ -351,30 +354,131 @@ export class AuthService {
               subdistrictId: branch?.subdistrictId,
               postalCode: branch?.zipCode,
             },
-            // Full address built by backend (buildingNo + addressDetail + subdistrict + district + province + zipCode)
             fullAddressTh: (res as any).fullAddressTh,
             fullAddressEn: (res as any).fullAddressEn,
           };
 
-          // 3) เก็บ user ลง localStorage + BehaviorSubject
           this.setUser(u);
+          this._refreshInProgress = false;
         }),
-        map(() => void 0)
+        map(() => true),
+        catchError((err) => {
+          console.warn('AuthService: Rehydration failed', err?.status);
+          this._refreshInProgress = false;
+          this.clearToken();
+          this.clearUser();
+          return of(false);
+        })
       );
   }
 
+  // === REFRESH TOKEN (For interceptor) ===
+  
+  refreshAccessToken(): Observable<string | null> {
+    if (this._refreshInProgress) {
+      console.log('AuthService: Refresh already in progress, waiting...');
+      return of(null);
+    }
+
+    this._refreshInProgress = true;
+
+    return this.http
+      .post<any>(`${this.base}/auth/refresh`, {}, { withCredentials: true })
+      .pipe(
+        tap((res) => {
+          console.log('AuthService: Token refreshed');
+          this.setToken(res.token);
+          this._refreshInProgress = false;
+        }),
+        map((res) => res.token),
+        catchError((err) => {
+          console.error('AuthService: Token refresh failed', err);
+          this._refreshInProgress = false;
+          this.logout(false);
+          return of(null);
+        })
+      );
+  }
+
+  // === REGISTER ===
+  
   register(formData: FormData): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.base}/auth/register`, formData)
       .pipe(
         tap((res) => {
-          // ไม่ต้อง setToken/setUser หลัง register ตามที่ตกลงไว้
+          // Don't auto-login after register
+        })
+      );
+  }
+
+  changePassword(newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/auth/change-password`, { newPassword }, { withCredentials: true });
+  }
+
+  // === PERMISSION CHECK ===
+  
+  hasRole(role: string): boolean {
+    const user = this._user$.value;
+    if (!user || !user.roles) return false;
+    return user.roles.includes(role);
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    return roles.some((r) => this.hasRole(r));
+  }
+
+  // Check if user has specific permission (e.g. 'DOC_ADD', 'CUSTOMER_DELETE')
+  hasPermission(permission: string): boolean {
+    const permissions = this._permissions$.value;
+    return permissions.includes(permission);
+  }
+
+  hasAnyPermission(permissions: string[]): boolean {
+    return permissions.some((p) => this.hasPermission(p));
+  }
+
+  hasAllPermissions(permissions: string[]): boolean {
+    return permissions.every((p) => this.hasPermission(p));
+  }
+
+  // Get current user's role level
+  get currentRoleLevel(): string | undefined {
+    const user = this._user$.value;
+    return user?.roleLevel;
+  }
+
+  // Load permissions from backend API
+  loadPermissions(): Observable<string[]> {
+    const user = this._user$.value;
+    if (!user) {
+      return of([]);
+    }
+
+    return this.http
+      .get<{ permissions: string[]; roles: string[] }>(`${this.base}/users/${user.userId}/permissions`)
+      .pipe(
+        tap((res) => {
+          console.log('AuthService: Loaded permissions', res.permissions?.length || 0);
+          this._permissions$.next(res.permissions || []);
+          
+          // Also update user with roleLevel if available
+          // FIX: Do NOT overwrite roleLevel with roleCode!
+          // if (res.roles && res.roles.length > 0) {
+          //   const updatedUser = { ...user, roleLevel: res.roles[0] };
+          //   this.setUser(updatedUser);
+          // }
+        }),
+        map((res) => res.permissions || []),
+        catchError((err) => {
+          console.warn('Failed to load permissions', err);
+          return of([]);
         })
       );
   }
 }
 
-// ---------- local helpers ----------
+// Helper function
 function readUserFromStorage(): AuthUser | null {
   try {
     const raw = localStorage.getItem(USER_KEY);

@@ -22,7 +22,8 @@
           "options": {
             "allowedCommonJsDependencies": [
               "@okta/okta-auth-js",
-              "tic-tac-toe-minimax"
+              "tic-tac-toe-minimax",
+              "sweetalert2"
             ],
             "outputPath": "dist/material-tic-tac-toe",
             "index": "src/index.html",
@@ -38,6 +39,7 @@
                 "input": "node_modules/@progress/kendo-theme-default/dist/all.css"
               },
               "src/custom-theme.scss",
+              "node_modules/sweetalert2/dist/sweetalert2.min.css",
               "src/styles.css"
             ],
             "scripts": []
@@ -112,6 +114,7 @@
                 "input": "node_modules/@progress/kendo-theme-default/dist/all.css"
               },
               "src/custom-theme.scss",
+              "node_modules/sweetalert2/dist/sweetalert2.min.css",
               "src/styles.css"
             ],
             "scripts": []

@@ -2,9 +2,11 @@
   <!-- HEADER -->
   <div class="page-header">
     <h1>ข้อมูลสินค้า</h1>
-    <button color="primary" (click)="createNewProduct()" class="btn">
-      <mat-icon>add</mat-icon> เพิ่มสินค้า
-    </button>
+    <ng-container *hasPermission="'PRODUCT_ADD'">
+      <button color="primary" (click)="createNewProduct()" class="btn">
+        <mat-icon>add</mat-icon> เพิ่มสินค้า
+      </button>
+    </ng-container>
   </div>
 
   <div class="search-card">
@@ -96,67 +98,141 @@
   </div>
 
   <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th class="text-left">รหัสสินค้า</th>
-          <th class="text-left">ชื่อสินค้า</th>
-          <th class="text-left">วันที่สร้าง</th>
-          <th class="text-left">วันที่แก้ไข</th>
-          <th class="text-center">สถานะ</th>
-          <th class="text-center">การดำเนินการ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let product of paginatedProducts">
-          <td class="text-left">{{ product.productCode }}</td>
-          <td class="text-left">{{ product.name }}</td>
-          <td class="text-left">
-            {{ product.createDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
-          </td>
-          <td class="text-left">
-            {{ product.updateDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
-          </td>
-          <td class="text-center">
-            <span
-              class="status"
-              [ngClass]="product.status === 'ACTIVE' ? 'active' : 'inactive'"
-            >
-              {{ product.status === "ACTIVE" ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
-            </span>
-          </td>
-          <td class="actions text-center">
-            <button
-              mat-icon-button
-              class="icon-view"
-              (click)="viewProduct(product)"
-              title="ดูรายละเอียด"
-            >
-              <i class="ti ti-eye"></i>
-            </button>
-            <button
-              mat-icon-button
-              class="icon-edit"
-              (click)="editProduct(product)"
-              title="แก้ไข"
-            >
-              <i class="ti ti-edit"></i>
-            </button>
-            <button
-              mat-icon-button
-              class="icon-delete"
-              (click)="deleteProduct(product)"
-              title="ลบ"
-            >
-              <i class="ti ti-trash"></i>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="products.length === 0">
-          <td colspan="6" class="no-data">ไม่พบข้อมูลสินค้า</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="text-left sortable" (click)="onSort('productCode')">
+              รหัสสินค้า
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'productCode' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="
+                    sortBy === 'productCode' && sortDir === 'desc'
+                  "
+                ></i>
+              </span>
+            </th>
+            <th class="text-left sortable" (click)="onSort('name')">
+              ชื่อสินค้า
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="
+                    sortBy === 'productNameTh' && sortDir === 'asc'
+                  "
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="
+                    sortBy === 'productNameTh' && sortDir === 'desc'
+                  "
+                ></i>
+              </span>
+            </th>
+            <th class="text-left sortable" (click)="onSort('createDate')">
+              วันที่สร้าง
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'createDate' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'createDate' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th class="text-left sortable" (click)="onSort('updateDate')">
+              วันที่แก้ไข
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'updateDate' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'updateDate' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th class="text-center sortable" (click)="onSort('status')">
+              สถานะ
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'enableFlag' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'enableFlag' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th class="text-center">การดำเนินการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of paginatedProducts">
+            <td class="text-left">{{ product.productCode }}</td>
+            <td class="text-left">{{ product.name }}</td>
+            <td class="text-left">
+              {{ product.createDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+            </td>
+            <td class="text-left">
+              {{ product.updateDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+            </td>
+            <td class="text-center">
+              <span
+                class="status"
+                [ngClass]="product.status === 'ACTIVE' ? 'active' : 'inactive'"
+              >
+                {{ product.status === "ACTIVE" ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+              </span>
+            </td>
+            <td class="actions text-center">
+              <ng-container *hasPermission="'PRODUCT_VIEW'">
+                <button
+                  mat-icon-button
+                  class="icon-view"
+                  (click)="viewProduct(product)"
+                  title="ดูรายละเอียด"
+                >
+                  <i class="ti ti-eye"></i>
+                </button>
+              </ng-container>
+              <ng-container *hasPermission="'PRODUCT_EDIT'">
+                <button
+                  mat-icon-button
+                  class="icon-edit"
+                  (click)="editProduct(product)"
+                  title="แก้ไข"
+                >
+                  <i class="ti ti-edit"></i>
+                </button>
+              </ng-container>
+              <ng-container *hasPermission="'PRODUCT_DELETE'">
+                <button
+                  mat-icon-button
+                  class="icon-delete"
+                  (click)="deleteProduct(product)"
+                  title="ลบ"
+                >
+                  <i class="ti ti-trash"></i>
+                </button>
+              </ng-container>
+            </td>
+          </tr>
+          <tr *ngIf="products.length === 0">
+            <td colspan="6" class="no-data">ไม่พบข้อมูลสินค้า</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="pagination">
       <div class="pagination-left">

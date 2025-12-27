@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { BuyerService, Buyer } from '../../../../shared/services/buyer.service';
-
+import { BuyerStoreService } from '../../../../shared/services/buyer-store.service';
 
 
 import { MatDialog } from '@angular/material/dialog';
@@ -35,6 +35,7 @@ export class BuyersListComponent implements OnInit {
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private buyerService: BuyerService,
+    private buyerStoreService: BuyerStoreService, // Injected Store
     private dialog: MatDialog,
     private swalService: SwalService
   ) {
@@ -62,6 +63,26 @@ export class BuyersListComponent implements OnInit {
     return this.statusOptions.find(s => s.value === val);
   }
 
+  sortBy: string = 'updateDate';
+  sortDir: string = 'desc';
+
+  onSort(column: string): void {
+    if (this.sortBy === column) {
+      if (this.sortDir === 'desc') {
+        this.sortDir = 'asc';
+      } else {
+        // Reset to default
+        this.sortBy = 'updateDate';
+        this.sortDir = 'desc';
+      }
+    } else {
+      this.sortBy = column;
+      this.sortDir = 'desc';
+    }
+    this.currentPage = 1;
+    this.loadBuyers();
+  }
+
   // Pagination properties
   currentPage = 1;
   itemsPerPage = 10;
@@ -80,11 +101,36 @@ export class BuyersListComponent implements OnInit {
   }
 
   loadBuyers(): void {
-    this.buyerService.getBuyers().subscribe((buyers) => {
-      console.log('API Response Buyers:', buyers);
+    // Use Store Service (get cached data, sort client-side)
+    this.buyerStoreService.getBuyers$().subscribe((buyers) => {
+      if (!buyers) return; 
+      
       this.allBuyers = buyers;
-      this.buyers = buyers;
+      this.buyers = this.sortBuyers(buyers);
       this.updatePagination();
+    });
+  }
+
+  private sortBuyers(data: Buyer[]): Buyer[] {
+    if (!data || data.length === 0) return data;
+
+    return [...data].sort((a: any, b: any) => {
+      let valA = a[this.sortBy];
+      let valB = b[this.sortBy];
+
+      // Handle date fields
+      if (this.sortBy === 'updateDate' || this.sortBy === 'createDate') {
+        valA = valA ? new Date(valA).getTime() : 0;
+        valB = valB ? new Date(valB).getTime() : 0;
+      }
+
+      // Handle string fields
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+
+      if (valA < valB) return this.sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDir === 'asc' ? 1 : -1;
+      return 0;
     });
   }
 
@@ -107,6 +153,8 @@ export class BuyersListComponent implements OnInit {
     const { customerCode, dateRange, status } = this.searchForm.value;
     const { start, end } = dateRange;
 
+    // Client-side filtering check?
+    // Note: If onSearch is triggered, currently it filters locally.
     this.buyers = this.allBuyers.filter((buyer) => {
       const codeMatch = customerCode
         ? (buyer.code || '').toLowerCase().includes(customerCode.toLowerCase())
@@ -176,6 +224,8 @@ export class BuyersListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        // Invalidate Cache
+        this.buyerStoreService.invalidate();
         this.loadBuyers();
         this.swalService.success('เพิ่มข้อมูลลูกค้าสำเร็จ', 'ระบบได้เพิ่มข้อมูลลูกค้าเรียบร้อย');
       }
@@ -200,6 +250,8 @@ export class BuyersListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
+        // Invalidate Cache
+        this.buyerStoreService.invalidate();
         this.loadBuyers();
         this.swalService.success('แก้ไขข้อมูลลูกค้าสำเร็จ', 'ระบบได้แก้ไขข้อมูลลูกค้าเรียบร้อย');
       }
@@ -213,6 +265,8 @@ export class BuyersListComponent implements OnInit {
     ).then((result) => {
       if (result.isConfirmed) {
         this.buyerService.deleteBuyer(buyer.id).subscribe(() => {
+          // Invalidate Cache
+          this.buyerStoreService.invalidate();
           this.loadBuyers();
           this.swalService.success('ลบข้อมูลสำเร็จ', 'ระบบได้ลบข้อมูลลูกค้าเรียบร้อย');
         });

@@ -1,6 +1,6 @@
 // src/app/shared/services/buyer.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -39,8 +39,17 @@ export class BuyerService {
    * - Subsequent calls: returns cached data
    * - Use refreshBuyers() to force refresh
    */
-  getBuyers(): Observable<Buyer[]> {
-    // Return cached data if available
+  getBuyers(sortBy?: string, sortDir?: string): Observable<Buyer[]> {
+    // If sorting is requested, bypass cache (or could implement sophisticated caching key)
+    if (sortBy) {
+      let params = new HttpParams().set('sortBy', sortBy);
+      if (sortDir) {
+        params = params.set('sortDir', sortDir);
+      }
+      return this.http.get<Buyer[]>(this.api, { params });
+    }
+
+    // Return cached data if available (default sort)
     if (this.buyersCache) {
       return of(this.buyersCache);
     }

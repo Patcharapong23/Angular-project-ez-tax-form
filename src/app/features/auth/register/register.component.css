@@ -6,7 +6,7 @@
 }
 
 .auth-shell {
-  min-height: 100vh;
+  /* min-height: 100vh; */
   display: grid;
   place-items: center;
   padding: clamp(16px, 4vw, 32px);
@@ -225,6 +225,7 @@ mat-checkbox ::ng-deep .mat-checkbox-layout .mat-checkbox-label {
   background: #fff;
   border-radius: 20px;
   padding: clamp(24px, 4vw, 40px);
+  padding-top: 100px; /* Offset for fixed step progress bar */
   text-align: center;
 }
 
@@ -341,4 +342,123 @@ button[mat-stroked-button]:hover {
     margin-bottom: 12px;
     /* Reduced margin on smaller screens */
   }
+}
+
+/* =========================
+   Step Progress Bar
+   ========================= */
+.step-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  border: 3px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #9e9e9e;
+  transition: all 0.3s ease;
+}
+
+.step-item.active .step-circle {
+  background: #ffcc00;
+  border-color: #ffcc00;
+  color: #111;
+  box-shadow: 0 4px 12px rgba(255, 204, 0, 0.4);
+}
+
+.step-item.completed .step-circle {
+  background: #4caf50;
+  border-color: #4caf50;
+  color: #fff;
+  box-shadow: 0 4px 12px #4caf50;
+}
+
+.step-circle mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #a0a0a0;
+  transition: color 0.3s ease;
+}
+
+.step-item.active .step-label {
+  color: #5e5873;
+}
+
+.step-item.completed .step-label {
+  color: #4caf50;
+}
+
+.step-line {
+  width: 60px;
+  height: 3px;
+  background: #e0e0e0;
+  margin: 0 12px;
+  margin-bottom: 28px;
+  border-radius: 2px;
+  transition: background 0.3s ease;
+}
+
+.step-line.active {
+  background: linear-gradient(90deg, #4caf50, #ffcc00);
+}
+
+/* =========================
+   Terms Section
+   ========================= */
+.terms-section {
+  margin: 16px 0;
+  text-align: left;
+}
+
+.terms-section mat-checkbox {
+  font-size: 14px;
+  color: #5e5873;
+}
+
+.terms-link {
+  color: #0c63e4;
+  text-decoration: none;
+  border-bottom: 1px dotted #0c63e4;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  color: #0052cc;
+  border-bottom-style: solid;
 }

@@ -1,0 +1,91 @@
+<div class="auth-security">
+  <div class="page-header">
+    <h1><i class="ti ti-shield"></i> Auth Security Monitor</h1>
+  </div>
+
+  <div class="stats-row" *ngIf="!loading">
+    <div class="stat-card">
+      <span class="stat-value danger">{{ stats.totalFailedAttempts }}</span>
+      <span class="stat-label">Login ล้มเหลว (24h)</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value warning">{{ stats.refreshDeniedCount }}</span>
+      <span class="stat-label">Refresh Denied</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ stats.recentLockouts.length }}</span>
+      <span class="stat-label">บัญชีถูกล็อค</span>
+    </div>
+  </div>
+
+  <div class="section" *ngIf="stats.topFailedUsernames.length > 0">
+    <h2><i class="ti ti-user-x"></i> Top Failed Usernames</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Failed Count</th>
+          <th>Last Attempt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of stats.topFailedUsernames">
+          <td>{{ item.username }}</td>
+          <td class="center">{{ item.failedCount }}</td>
+          <td class="mono">{{ item.lastAttempt }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section" *ngIf="stats.topFailedIps.length > 0">
+    <h2><i class="ti ti-world"></i> Top Failed IPs</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>IP Address</th>
+          <th>Attempts</th>
+          <th>Last Attempt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of stats.topFailedIps">
+          <td class="mono">{{ item.ipAddress }}</td>
+          <td class="center">{{ item.attemptCount }}</td>
+          <td class="mono">{{ item.lastAttempt }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2><i class="ti ti-lock"></i> ผู้ใช้ที่ถูกล็อค</h2>
+    <div class="table-card" [class.loading]="loading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>ล็อคเมื่อ</th>
+            <th>ความพยายามที่ล้มเหลว</th>
+            <th>การดำเนินการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of stats.recentLockouts">
+            <td>{{ user.username }}</td>
+            <td class="mono">{{ user.lockedAt }}</td>
+            <td class="center">{{ user.failedAttempts }}</td>
+            <td class="center">
+              <button class="btn-unlock" (click)="unlockUser(user.username)">
+                <i class="ti ti-lock-open"></i> ปลดล็อค
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="stats.recentLockouts.length === 0 && !loading">
+            <td colspan="4" class="empty">ไม่มีผู้ใช้ที่ถูกล็อค</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

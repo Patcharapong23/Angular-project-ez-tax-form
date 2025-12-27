@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -26,10 +26,14 @@ import { Observable, asyncScheduler, merge, of } from 'rxjs';
 import { startWith, debounceTime, switchMap, map, observeOn } from 'rxjs/operators';
 
 import { BankService } from '../../../core/services/bank.service';
-
+import { MasterDataService } from '../../../core/services/master-data.service';
+import { DocumentStoreService } from '../../../shared/services/document-store.service';
+import { BranchService, BranchDto } from '../../../shared/services/branch.service';
 
 import { Product, ProductService } from '../../../shared/services/product.service';
 import { CalculationService, CalculationTotals } from '../../../shared/services/calculation.service';
+import { ActivityService } from '../../../shared/services/activity.service';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 
 interface MeResponse {
   user: {
@@ -77,6 +81,13 @@ export class InvoiceFormComponent implements OnInit {
   isSaving = false;
   documentUuid: string | null = null;
   isFormDirty = false; // Track if form has changes (for edit mode)
+  
+  // ===== Cancellation State =====
+  isCancelled = false;
+  cancelledBy = '';
+  cancelledAt = '';
+  cancelReason = '';
+  autoDeleteAt = '';
 
   // ===== View mode customer data (for reliable display) =====
   viewCustomerData: {
@@ -109,22 +120,22 @@ export class InvoiceFormComponent implements OnInit {
 
   // ===== seller / header view state =====
   seller: any = null; // Add seller property
-  branches: { code: string; name: string }[] = [
-    { code: '00000', name: 'สำนักงานใหญ่' }
-  ];
+  branches: { code: string; name: string; id?: string }[] = [];
   logoUrl = '';
 
   // ===== items / totals state =====
 
-  editingServiceFee = false;
   showPaymentMethod = false; // Toggle for payment section
-  serviceFee = 0;
   filteredProducts: Observable<Product[]>[] = [];
   filteredRefDocs: Observable<DocumentListItem[]> = of([]); // Add this line
   banks: any[] = []; // Store fetched banks
   bankBranches: any[] = []; // Store fetched branches
+  filteredBankBranches: any[] = []; // Store filtered branches for search
 
 
+  serviceFeeRate: number = 0;
+  serviceFee: number = 0;
+  editingServiceFee: boolean = false;
   totals: CalculationTotals = {
     subtotal: 0,
     discount: 0,
@@ -191,6 +202,7 @@ export class InvoiceFormComponent implements OnInit {
   provinces: any[] = [];
   districts: any[] = [];
   subdistricts: any[] = [];
+  allBankBranches: any[] = [];
 
   countries: string[] = [
     'Afghanistan (อัฟกานิสถาน)', 'Albania (แอลเบเนีย)', 'Algeria (แอลจีเรีย)', 'Andorra (อันดอร์รา)', 'Angola (แองโกลา)', 'Antigua and Barbuda (แอนติกาและบาร์บูดา)', 'Argentina (อาร์เจนตินา)', 'Armenia (อาร์เมเนีย)', 'Australia (ออสเตรเลีย)', 'Austria (ออสเตรีย)',
@@ -220,6 +232,7 @@ export class InvoiceFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private docs: DocumentService,
+    private documentStoreService: DocumentStoreService,
     private org: OrgService,
     private auth: AuthService,
     private http: HttpClient,
@@ -227,8 +240,12 @@ export class InvoiceFormComponent implements OnInit {
     private productService: ProductService,
     private calculationService: CalculationService,
     private bankService: BankService,
+    private masterDataService: MasterDataService,
     private dialog: MatDialog,
-    private swalService: SwalService
+    private swalService: SwalService,
+    private activityService: ActivityService,
+    private branchService: BranchService,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -241,22 +258,100 @@ export class InvoiceFormComponent implements OnInit {
       this.documentUuid = docId;
     }
 
-    // Load buyers once
-    this.buyerService.getBuyers().subscribe(buyers => {
-      this.buyers = buyers;
-    });
+    // Bundle Master Data Loading
+    this.auth.user$.subscribe((user) => {
+      console.log('InvoiceFormComponent: Current User:', user);
+      const sellerIdToUse = user?.sellerTaxId || user?.userName;
+      console.log('InvoiceFormComponent: sellerIdToUse for MasterData:', sellerIdToUse);
+      
+      if (sellerIdToUse) {
+         this.masterDataService.getMasterData(sellerIdToUse.toString()).subscribe({
+            next: (data) => {
+               console.log('InvoiceFormComponent: MasterData Loaded:', data);
+               // Map API response to match Buyer interface (API uses buyerNameTh, buyerCode etc.)
+               this.buyers = (data.buyers || [])
+                 .filter((b: any) => b.enableFlag === 'ACTIVE')
+                 .map((b: any) => ({
+                   id: b.buyerId,
+                   code: b.buyerCode,
+                   name: b.buyerNameTh || b.buyerNameEn || '',
+                   taxId: b.buyerTaxId,
+                   branch: b.buyerBranchCode,
+                   address: b.buyerAddressTh || b.buyerAddressEn || '',
+                   zipCode: b.buyerZipCode,
+                   email: b.buyerEmail,
+                   telephone: b.buyerPhoneNumber,
+                   status: b.enableFlag,
+                   taxpayerType: b.type
+                 }));
+               console.log('InvoiceFormComponent: Mapped Buyers:', this.buyers.length, this.buyers);
+               
+               // Initialize filteredBuyers with valueChanges from BOTH code and name fields
+               const nameControl = this.fgCustomer.get('name');
+               const codeControl = this.fgCustomer.get('code');
+               
+               if (nameControl && codeControl) {
+                  this.filteredBuyers = merge(
+                    nameControl.valueChanges,
+                    codeControl.valueChanges
+                  ).pipe(
+                    startWith(''),
+                    map(value => {
+                      const searchTerm = typeof value === 'string' ? value : (value?.name || value?.code || '');
+                      return this._filterBuyers(searchTerm);
+                    })
+                  );
+                  // Trigger initial emission to show loaded list immediately
+                  nameControl.setValue(nameControl.value || '', { emitEvent: true });
+               } else {
+                  this.filteredBuyers = of([...this.buyers]);
+               }
 
-    // Load products once for validation
-    this.productService.getProducts().subscribe(products => {
-      this.products = products;
-    });
+               // Map API response to match Product interface (API uses productNameTh, productCode etc.)
+               this.products = (data.products || [])
+                 .filter((p: any) => p.enableFlag === 'Y')
+                 .map((p: any) => ({
+                   id: p.productId,
+                   productCode: p.productCode,
+                   name: p.productNameTh || p.productNameEn || '',
+                   description: p.description,
+                   price: p.productPrice,
+                   unit: p.productUnit,
+                   taxRate: p.taxRate,
+                   status: p.enableFlag === 'Y' ? 'active' : 'inactive'
+                 }));
+               console.log('InvoiceFormComponent: Mapped Products:', this.products.length, this.products);
+               // filteredProducts are initialized per-row in addItem(), no need to set here.
 
-    // Load banks
-    this.bankService.getBanks().subscribe(response => {
-      if (response && response.result && response.result.data) {
-        this.banks = response.result.data;
+               // Trigger refresh for Customer Name autocomplete (Juristic/Ordinary)
+               this.fgCustomer.get('name')?.updateValueAndValidity({ emitEvent: true });
+               this.fgCustomer.get('code')?.updateValueAndValidity({ emitEvent: true });
+
+               // Trigger refresh for all existing Product items
+               const items = this.itemsFA();
+               for (let i = 0; i < items.length; i++) {
+                   items.at(i).get('sku')?.updateValueAndValidity({ emitEvent: true });
+                   items.at(i).get('name')?.updateValueAndValidity({ emitEvent: true });
+               }
+
+               if (data.banks) {
+                   this.banks = data.banks;
+               }
+               if (data.bankBranches) {
+                   this.allBankBranches = data.bankBranches;
+               }
+               
+               // Re-trigger validity checks if needed
+               this.fgHeader.get('seller')?.updateValueAndValidity({ emitEvent: false });
+            },
+            error: (err) => console.error('Failed to load master data', err)
+         });
+      } else {
+         console.warn('InvoiceFormComponent: No sellerIdToUse found, skipping MasterData load.');
       }
     });
+
+    // Address data remains separate for now as static assets (or could be improved later)
 
     // Load Thai Address Data
     this.http.get<any[]>('assets/thai/provinces.json').subscribe(p => {
@@ -379,7 +474,7 @@ export class InvoiceFormComponent implements OnInit {
           branch: '',
           checkNo: '',
           checkDate: null,
-          amount: '',
+          amount: this.totals.grand,
         });
       }
     });
@@ -507,32 +602,36 @@ export class InvoiceFormComponent implements OnInit {
 
     // ----- preload seller/org (ชื่อบริษัท / ภาษี / สาขา / โลโก้ / ที่อยู่) -----
     this.auth.user$.subscribe((user) => {
-          if (user) {
-            this.user = user;
-            this.logoUrl = user.logoUrl ?? '';
-            this.branches = user.branchCode
-              ? [
-                  {
-                    code: user.branchCode,
-                    name: user.branchNameTh || user.branchNameEn || 'สำนักงานใหญ่',
-                  },
-                ]
-              : [];
-            
-            // Patch form with info - address comes directly from backend (full address built by AddressService)
-            this.fgHeader.patchValue({
-              companyName: user.sellerNameTh || user.sellerNameEn || '',
-              taxId: user.sellerTaxId || '',
-              branchCode: user.branchCode || '',
-              tel: user.sellerPhoneNumber || '',
-              seller: user.fullName || user.userName || '',
-              // Use getFormattedSellerAddress to ensure all parts are concatenated
-              address: this.getFormattedSellerAddress() || user.fullAddressTh || '',
-            });
-            
-            this.getDocNumberPreview();
-          }
+      if (user) {
+        this.user = user;
+        this.logoUrl = user.logoUrl ?? '';
+        this.branches = user.branchCode
+          ? [
+              {
+                code: user.branchCode,
+                name: user.branchNameTh || user.branchNameEn || 'สำนักงานใหญ่',
+              },
+            ]
+          : [];
+        
+        // Load all branches for the seller
+        this.branchService.getBranches().subscribe(branches => {
+           this.branches = branches.map(b => ({
+             id: b.branchId,
+             code: b.branchCode,
+             name: b.branchNameTh || b.branchNameEn || 'สาขา ' + b.branchCode
+           }));
+           // Ensure current user branch is selected/validated
         });
+
+        this.initUserForm(user);
+        
+        // Only call getDocNumberPreview if in create mode AND not loading an existing doc
+        if (this.mode === 'create' && !this.route.snapshot.paramMap.get('docNo')) {
+           this.getDocNumberPreview();
+        }
+      }
+    });
     
         // ----- route: สร้างใหม่หรือแก้ไข -----
         const docNo = this.route.snapshot.paramMap.get('docNo');
@@ -594,7 +693,19 @@ export class InvoiceFormComponent implements OnInit {
         }
       }
     
-      getDocNumberPreview(): void {
+      private initUserForm(user: AuthUser) {
+    this.fgHeader.patchValue({
+      companyName: user.sellerNameTh || user.sellerNameEn || '',
+      taxId: user.sellerTaxId || '',
+      branchCode: user.branchCode || '',
+      tel: user.sellerPhoneNumber || '',
+      seller: user.fullName || user.userName || '',
+      // Use getFormattedSellerAddress to ensure all parts are concatenated
+      address: this.getFormattedSellerAddress() || user.fullAddressTh || '',
+    });
+  }
+
+  getDocNumberPreview(): void {
         const isCreateMode = !this.route.snapshot.paramMap.get('docNo');
                                 if (isCreateMode && this.docTypeCode && this.user?.branchCode && this.user?.sellerTaxId) {
                                   this.docs
@@ -642,6 +753,21 @@ export class InvoiceFormComponent implements OnInit {
         // Use SHARED logic from docTypeMap/docTypeEnMap to ensure consistency with Create mode
         this.docTypeTh = this.docTypeMap[this.docTypeCode] || doc.docType?.thName || this.docTypeCode;
         this.docTypeEn = this.docTypeEnMap[this.docTypeCode] || doc.docType?.enName || '';
+
+        // Check cancellation status
+        this.isCancelled = (doc.status === 'CANCELLED');
+        if (this.isCancelled) {
+            this.cancelledBy = doc.cancelledBy || '';
+            this.cancelledAt = doc.cancelledAt || '';
+            this.cancelReason = doc.cancelReason || '';
+            
+            // Calculate auto delete date (30 days from cancelledAt)
+            if (this.cancelledAt) {
+              const cDate = new Date(this.cancelledAt);
+              cDate.setDate(cDate.getDate() + 30);
+              this.autoDeleteAt = cDate.toISOString();
+            }
+        }
 
         // Patch header form
         this.fgHeader.patchValue({
@@ -694,6 +820,14 @@ export class InvoiceFormComponent implements OnInit {
         
         console.log('After patch - fgCustomer values:', this.fgCustomer.getRawValue());
 
+        // IMPORTANT: Set vatType BEFORE adding items so the amount calculation is correct
+        // vatType must be loaded from document first, otherwise calculation defaults to 'exclude'
+        const docVatType = doc.vatType || 'exclude';
+        console.log('Loading vatType from document:', docVatType);
+        this.form.patchValue({
+          vatType: docVatType
+        });
+
         // Populate items - use correct field names from DocumentItem entity
         const itemsFormArray = this.itemsFA();
         itemsFormArray.clear();
@@ -718,15 +852,47 @@ export class InvoiceFormComponent implements OnInit {
           remark: doc.remark || doc.note || doc.remarkOther || '',
         });
 
-        // Populate fees - use 'description' field to match backend
-        this.serviceFee = doc.charges?.find((c: any) => c.description === 'service')?.amount || 0;
+       // Populate fees - use 'description' field to match backend
+        const loadedServiceFee = doc.charges?.find((c: any) => c.description === 'service')?.amount || 0;
         
-        // If there's a service fee, show the edit view (input field) instead of the add button
-        if (this.serviceFee > 0) {
-          this.editingServiceFee = true;
+        // Populate Payments
+        if (doc.payments && doc.payments.length > 0) {
+           const p = doc.payments[0]; // Assume single payment for now
+           this.showPaymentMethod = true;
+           this.fgPayment.patchValue({
+             paymentType: p.type || '',
+             bankName: p.bankName || '',
+             branch: p.branch || '',
+             checkNo: p.chequeNo || p.reference || '',
+             checkDate: p.chequeDate ? new Date(p.chequeDate) : null,
+             amount: p.amount || 0
+           });
+        }
+        
+        // Calculate temp totals to determine base for rate calculation
+        const vatType = this.form.get('vatType')?.value || 'exclude';
+        const headerTax = Number(this.fgHeader.get('taxRate')?.value ?? 0);
+        const tempTotals = this.calculationService.calculateTotals(
+            this.itemsFA().controls as FormGroup[],
+            vatType,
+            0,
+            0,
+            headerTax,
+            false
+        );
+        
+        // Reverse calculate rate
+        if (loadedServiceFee > 0 && tempTotals.netAfterDiscount > 0) {
+           this.serviceFeeRate = (loadedServiceFee / tempTotals.netAfterDiscount) * 100;
+           this.serviceFee = loadedServiceFee;
+           this.editingServiceFee = true;
+        } else {
+           this.serviceFeeRate = 0;
+           this.serviceFee = 0;
+           this.editingServiceFee = false;
         }
 
-        // Recalculate totals
+        // Recalculate totals (will use the rate we just set)
         this.calculateTotals();
 
         // Disable form for view mode - use setTimeout to ensure values are rendered first
@@ -809,15 +975,47 @@ export class InvoiceFormComponent implements OnInit {
 
   calculateTotals() {
     const headerTax = Number(this.fgHeader.get('taxRate')?.value ?? 0);
+    const vatType = this.form.get('vatType')?.value || 'exclude';
 
+    // 1. Calculate base amount (Subtotal - Discount) manually to determine Service Fee
+    //    We iterate items because totals.subtotal/discount are computed by service, but we need them *before* passing service fee.
+    //    Or simpler: Call service with 0 fee first.
+    
+    const tempTotals = this.calculationService.calculateTotals(
+      this.itemForms,
+      vatType,
+      0, // Temp service fee 0
+      0, 
+      headerTax,
+      false
+    );
+
+    // 2. Calculate Service Fee based on Rate
+    if (this.serviceFeeRate > 0) {
+      // For Exclude VAT: Base = netAfterDiscount (Basis)
+      // For Include VAT: Base = grand (Gross Amount) - because netAfterDiscount is now TaxBase (e.g. 100/1.07)
+      // We want Fee on the "Amount After Discount" which is the Gross amount in Include mode.
+      const base = (vatType === 'include') ? tempTotals.grand : tempTotals.netAfterDiscount;
+      this.serviceFee = Math.max(0, base) * (this.serviceFeeRate / 100);
+    } else {
+       // If rate is 0, we assume fee should be 0 (enforcing strict percentage mode)
+       this.serviceFee = 0;
+    }
+
+    // 3. Final Calculation
     this.totals = this.calculationService.calculateTotals(
       this.itemForms,
-      this.form.get('vatType')?.value || 'exclude',
+      vatType,
       this.serviceFee,
       0, // shippingFee removed
       headerTax,
       false
     );
+
+    // Sync Payment Amount with Grand Total
+    if (this.fgPayment) {
+      this.fgPayment.patchValue({ amount: this.totals.grand }, { emitEvent: false });
+    }
   }
 
   // private round(v: number) {
@@ -834,30 +1032,48 @@ export class InvoiceFormComponent implements OnInit {
   // }
 
   addItem(init?: any) {
+    // Calculate correct amount from qty, price, discount based on vatType
+    const initQty = Number(init?.qty ?? 1);
+    const initPrice = Number(init?.price ?? 0);
+    const initDiscount = Number(init?.discount ?? 0);
+    const initTaxRate = Number(init?.taxRate ?? init?.vatRate ?? 7);
+    const vatType = this.form?.get('vatType')?.value || 'exclude';
+    
+    // User Requirement: Amount always = qty * price - discount
+    let calculatedAmount = initQty * initPrice - initDiscount;
+    if (calculatedAmount < 0) calculatedAmount = 0;
+    
     const fg = this.fb.group({
       sku: [init?.sku || '', [Validators.required, this.productValidator.bind(this)]],
       name: [init?.name || '', [Validators.required, this.productValidator.bind(this)]],
-      qty: [init?.qty ?? 1],
-      price: [init?.price ?? 0],
-      discount: [init?.discount ?? 0],
-      taxRate: [init?.taxRate ?? init?.vatRate ?? 7],
-      amount: [{ value: init?.amount ?? 0, disabled: true }],
+      qty: [initQty],
+      price: [initPrice],
+      discount: [initDiscount],
+      taxRate: [initTaxRate],
+      amount: [{ value: this.calculationService.round(calculatedAmount, false), disabled: true }],
     });
 
     // autocalc amount + sync taxRate
     fg.valueChanges.subscribe((v) => {
       const qty = Number(v.qty) || 0;
       const price = Number(v.price) || 0;
-      const discount = Number(v.discount) || 0;
+      let discount = Number(v.discount) || 0;
       const taxRate = Number(v.taxRate ?? 0);
       const vatType = this.form.get('vatType')?.value || 'exclude';
 
+      // Cap discount: cannot exceed qty * price
+      const maxDiscount = qty * price;
+      if (discount > maxDiscount) {
+        discount = maxDiscount;
+        fg.get('discount')?.setValue(discount, { emitEvent: false });
+      }
+
+      // User Requirement: Amount always = qty * price - discount
       let amount = qty * price - discount;
 
-      // ถ้าราคาไม่รวมภาษี (exclude) = แสดงราคาเดิม ไม่บวก VAT (VAT จะคำนวณแยกในยอดรวม)
-      // ถ้าราคารวมภาษี (include) = ต้องบวก VAT เข้าไปในจำนวนเงิน
-      if (vatType === 'include' && taxRate > 0) {
-        amount = amount * (1 + taxRate / 100);
+      // Ensure amount is not negative (minimum 0)
+      if (amount < 0) {
+        amount = 0;
       }
 
       // Update amount control
@@ -908,17 +1124,26 @@ export class InvoiceFormComponent implements OnInit {
       const v = fg.getRawValue();
       const qty = Number(v.qty) || 0;
       const price = Number(v.price) || 0;
-      const discount = Number(v.discount) || 0;
+      let discount = Number(v.discount) || 0;
       const taxRate = Number(v.taxRate ?? 0);
       const vatType = this.form.get('vatType')?.value || 'exclude';
 
+      // Cap discount: cannot exceed qty * price
+      const maxDiscount = qty * price;
+      if (discount > maxDiscount) {
+        discount = maxDiscount;
+        fg.get('discount')?.setValue(discount, { emitEvent: false });
+      }
+
       let amount = qty * price - discount;
 
-      // ถ้าราคาไม่รวมภาษี (exclude) = แสดงราคาเดิม ไม่บวก VAT (VAT จะคำนวณแยกในยอดรวม)
-      // ถ้าราคารวมภาษี (include) = ต้องบวก VAT เข้าไปในจำนวนเงิน
-      if (vatType === 'include' && taxRate > 0) {
-        amount = amount * (1 + taxRate / 100);
+      // Ensure amount is not negative (minimum 0)
+      if (amount < 0) {
+        amount = 0;
       }
+
+      // Remove extra VAT addition block - standard formula (Price * Qty) - Discount
+
 
       const amountControl = fg.get('amount');
       if (amountControl) {
@@ -938,6 +1163,10 @@ export class InvoiceFormComponent implements OnInit {
     return i;
   }
 
+  trackByItem(index: number, item: any): any {
+    return item;
+  }
+
   private _filterProducts(value: string | Product, currentIndex: number): Observable<Product[]> {
     const filterValue = typeof value === 'string' ? value.toLowerCase() : value.name.toLowerCase();
     
@@ -955,6 +1184,10 @@ export class InvoiceFormComponent implements OnInit {
       // Filter by name or sku
       return product.name.toLowerCase().includes(filterValue) ||
              product.productCode.toLowerCase().includes(filterValue);
+    }).sort((a, b) => {
+      const codeA = a.productCode || '';
+      const codeB = b.productCode || '';
+      return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
     });
     return of(filteredProducts);
   }
@@ -998,16 +1231,19 @@ export class InvoiceFormComponent implements OnInit {
     
     // Update cache
     this.lastValidProducts[index] = selectedProduct;
+    
+    // Robustly find price: try defaultPrice, then price, then unitPrice, default to 0
+    const price = selectedProduct.defaultPrice !== undefined ? selectedProduct.defaultPrice 
+                : (selectedProduct as any).price !== undefined ? (selectedProduct as any).price 
+                : (selectedProduct as any).unitPrice !== undefined ? (selectedProduct as any).unitPrice
+                : 0;
 
     itemFormGroup.patchValue({
       sku: selectedProduct.productCode,
       name: selectedProduct.name,
-      price: selectedProduct.defaultPrice, // Use defaultPrice from Product interface if available, or price
+      price: price, 
       taxRate: selectedProduct.taxRate,
     });
-    
-    // If price is not in Product interface, check what was used before.
-    // Previous code used: price: selectedProduct.defaultPrice
   }
 
   onInputBlur(index: number, field: 'sku' | 'name') {
@@ -1037,14 +1273,14 @@ export class InvoiceFormComponent implements OnInit {
   stopEditServiceFee() {
     this.editingServiceFee = false;
   }
-  onServiceFeeInput(e: Event) {
-    const rawValue = (e.target as HTMLInputElement).value || '0';
-    // ลบ comma และอักขระที่ไม่ใช่ตัวเลขออก
-    const cleanValue = rawValue.replace(/,/g, '').replace(/[^0-9.-]/g, '');
-    this.serviceFee = Number(cleanValue) || 0;
-    this.calculateTotals();
+  onServiceFeeRateChange() {
+    // If input is empty string, ngModel might set it to null or string. Ensure it's number.
+    // this.serviceFeeRate is bound.
+    this.recalculateAllAmounts(); 
   }
+
   cancelServiceFee() {
+    this.serviceFeeRate = 0;
     this.serviceFee = 0;
     this.editingServiceFee = false;
     this.calculateTotals();
@@ -1102,6 +1338,7 @@ export class InvoiceFormComponent implements OnInit {
       this.form.markAllAsTouched();
       this.fgHeader.markAllAsTouched();
       this.fgCustomer.markAllAsTouched();
+      this.scrollToFirstInvalidControl();
       return;
     }
     this.isSaving = true;
@@ -1175,12 +1412,34 @@ export class InvoiceFormComponent implements OnInit {
     const payments = [];
     if (this.showPaymentMethod) {
         const pVal = this.fgPayment.getRawValue();
-        // PaymentRequest: type, amount, reference
+        // PaymentRequest: type, amount, reference, and details
         payments.push({
             type: pVal.paymentType,
-            amount: totals.grand, // Assuming full payment
-            reference: pVal.paymentType === 'CHECK' ? pVal.checkNo : null
+            amount: totals.grand,
+            reference: pVal.paymentType === 'CHECK' ? pVal.checkNo : null,
+            bankName: pVal.bankName || '',
+            branch: pVal.branch || '',
+            chequeNo: pVal.checkNo || '',
+            chequeDate: pVal.checkDate ? this.formatLocalDate(pVal.checkDate) : null
         });
+
+
+        // 4.1 Auto-save new branch if not exists
+        if (pVal.paymentType === 'CHECK' && pVal.bankName && pVal.branch) {
+             // Check if branch exists in currently loaded list
+             // Ensure bankBranches is an array before checking
+             const currentBranches = Array.isArray(this.bankBranches) ? this.bankBranches : [];
+             const branchExists = currentBranches.some((b: any) => 
+                (b.branchNameTh || '').trim() === (pVal.branch || '').trim()
+             );
+
+             if (!branchExists) {
+                 this.bankService.createBranch(pVal.bankName, pVal.branch).subscribe({
+                     next: (res) => console.log('Auto-created new branch:', res),
+                     error: (err) => console.warn('Failed to auto-create branch:', err)
+                 });
+             }
+        }
     }
 
     const payload = {
@@ -1191,7 +1450,8 @@ export class InvoiceFormComponent implements OnInit {
         // Document info (use correct field names for DocumentRequest DTO)
         docNo: header.docNo || '',
         docTypeCode: this.docTypeCode,  // String, not object
-        docIssueDate: new Date(header.issueDate).toISOString().split('T')[0], // LocalDate YYYY-MM-DD
+        // Use local date format to avoid timezone shift (toISOString converts to UTC)
+        docIssueDate: this.formatLocalDate(header.issueDate),
         
         // Seller snapshot info
         sellerTaxId: this.user?.sellerTaxId || header.taxId || '',
@@ -1209,14 +1469,14 @@ export class InvoiceFormComponent implements OnInit {
         // TaxId is always from taxId field for all types (รวมถึงชาวต่างชาติ)
         // If Foreigner and no Tax ID, use Passport Number as Tax ID per user request
         buyerTaxId: customer.taxId || (customer.partyType === 'FOREIGNER' ? (customer.passportNo || '') : ''),
-        buyerBranchCode: customer.branchCode || '00000',
-        buyerAddress: customer.address || '',
+        buyerBranchCode: customer.partyType === 'JURISTIC' ? (customer.branchCode || '00000') : null,
+        buyerAddress: this.buildBuyerAddress(customer),
         buyerType: this.mapPartyTypeToBuyerType(customer.partyType),
         buyerZipCode: customer.zip || '',
         // Additional snapshot fields for email, phone, country
         buyerEmail: customer.email || '',
         buyerPhone: customer.tel || '',
-        buyerCountry: customer.country || '',
+        buyerCountry: (customer.partyType === 'FOREIGNER' || customer.partyType === 'OTHER') ? (customer.country || '') : null,
         // Passport number for foreigners only (เฉพาะชาวต่างชาติ)
         buyerPassportNo: customer.partyType === 'FOREIGNER' ? (customer.passportNo || '') : null,
         
@@ -1224,6 +1484,11 @@ export class InvoiceFormComponent implements OnInit {
         salesperson: header.seller || '',
         currency: 'THB',
         note: this.form.get('remark')?.value || '',
+
+        // Reference Document Fields
+        refDocNo: header.refDocNo || '',
+        refDocDate: header.refDocDate ? this.formatLocalDate(header.refDocDate) : null,
+        refDocType: header.refDocType || '',
 
         reference: header.refDocNo || '',
         status: 'NEW',
@@ -1233,7 +1498,11 @@ export class InvoiceFormComponent implements OnInit {
         charges: [
           { description: 'service', amount: this.serviceFee || 0 }
         ],
-        payments: payments
+        payments: payments,
+        // VAT calculation mode (include = price includes VAT, exclude = VAT added on top)
+        vatType: this.form.get('vatType')?.value || 'exclude',
+        // Send createdBy using fullName if available, otherwise userName
+        createdBy: this.user?.fullName || this.user?.userName || null
     };
 
     console.log('Sending Payload:', payload);
@@ -1245,6 +1514,11 @@ export class InvoiceFormComponent implements OnInit {
         next: (res: any) => {
           console.log('Updated document:', res);
           this.isSaving = false;
+          this.documentStoreService.invalidate();
+          
+          // Log activity for session tracking
+          const docNo = this.fgHeader.get('docNo')?.value || res.docNo || '';
+          this.activityService.logDocumentUpdate(docNo, res.id || this.documentUuid || '');
           
           // Navigate back to documents list and show success dialog
           this.router.navigate(['/documentsall']).then(() => {
@@ -1278,8 +1552,14 @@ export class InvoiceFormComponent implements OnInit {
                this.swalService.warning('คำเตือน', 'สร้างเอกสารสำเร็จ แต่ไม่พบ UUID การดาวน์โหลดอาจไม่ทำงาน');
           }
 
+          this.documentStoreService.invalidate();
           this.creationSuccess = true;
           this.isSaving = false;
+          
+          // Log activity for session tracking
+          const docNo = this.fgHeader.get('docNo')?.value || res.docNo || '';
+          this.activityService.logDocumentCreate(docNo, this.documentUuid || res.id || '');
+          
           this.swalService.success('สร้างเอกสารสำเร็จ', 'ระบบได้สร้างเอกสารเรียบร้อยแล้ว');
         },
         error: (err) => {
@@ -1330,16 +1610,33 @@ export class InvoiceFormComponent implements OnInit {
     this.fgCustomer.reset();
     this.itemsFA().clear();
     this.addItem();
+    
     this.fgHeader.patchValue({
       issueDate: new Date(),
+      taxRate: 7,
+      branchCode: '00000'
     });
+    
+    // Restore user info
+    if (this.user) {
+      this.initUserForm(this.user);
+    }
+    
+    // Get new doc number
+    if (this.mode === 'create') {
+        this.getDocNumberPreview();
+    }
+
     this.removePaymentMethod(); // Reset payment method
   }
 
   // Payment Method Logic
   addPaymentMethod() {
     this.showPaymentMethod = true;
-    this.fgPayment.reset({ paymentType: '' });
+    this.fgPayment.reset({ 
+      paymentType: '',
+      amount: this.totals.grand 
+    });
   }
 
   removePaymentMethod() {
@@ -1356,7 +1653,12 @@ export class InvoiceFormComponent implements OnInit {
     return this.buyers.filter(buyer => 
       buyer.name.toLowerCase().includes(filterValue) || 
       (buyer.code && buyer.code.toLowerCase().includes(filterValue))
-    );
+    ).sort((a, b) => {
+      const codeA = a.code || '';
+      const codeB = b.code || '';
+      // Natural sort: AUST-001, CUST-001, CUST-002, CUST-10
+      return codeA.localeCompare(codeB, undefined, { numeric: true, sensitivity: 'base' });
+    });
   }
 
   displayBuyer(buyer: Buyer | string): string {
@@ -1440,9 +1742,56 @@ export class InvoiceFormComponent implements OnInit {
     this.opened[key] = !this.opened[key];
   }
 
-  selectBranch(branch: { code: string; name: string }) {
+  selectBranch(branch: { code: string; name: string; id?: string }) {
     this.fgHeader.patchValue({ branchCode: branch.code });
     this.opened['branch'] = false;
+    
+    // Fetch full branch details to update address and logo
+    if (branch.id) {
+        this.branchService.getBranchById(branch.id).subscribe(fullBranch => {
+            const formattedAddress = this.formatBranchAddress(fullBranch);
+            this.fgHeader.patchValue({
+                address: formattedAddress
+            });
+            
+            // Update Logo: use branch logo if available, else fallback to company logo
+            if (fullBranch.logoUrl) {
+                this.logoUrl = fullBranch.logoUrl;
+            } else {
+                this.logoUrl = this.user?.logoUrl || '';
+            }
+        });
+    }
+  }
+
+  // Helper to format branch address similar to seller address
+  private formatBranchAddress(branch: BranchDto): string {
+    // Resolve names from IDs if possible
+    let subdistrictName = this.subdistricts.find(s => String(s.code) === String(branch.subdistrictId))?.name_th || branch.subdistrictId || '';
+    let districtName = this.districts.find(d => String(d.code) === String(branch.districtId))?.name_th || branch.districtId || '';
+    let provinceName = this.provinces.find(p => String(p.code) === String(branch.provinceId))?.name_th || branch.provinceId || '';
+
+    // Smart Prefixes
+    const isBangkok = provinceName.includes('กรุงเทพ');
+    
+    // Clean up existing prefixes
+    subdistrictName = String(subdistrictName).replace(/^(แขวง|ต\.|ตำบล)/, '').trim();
+    districtName = String(districtName).replace(/^(เขต|อ\.|อำเภอ)/, '').trim();
+    provinceName = String(provinceName).replace(/^(จ\.|จังหวัด)/, '').trim();
+
+    const subPrefix = isBangkok ? 'แขวง' : 'ต.';
+    const districtPrefix = isBangkok ? 'เขต' : 'อ.';
+    const provincePrefix = isBangkok ? '' : 'จ.'; 
+
+    const parts = [
+      branch.buildingNo,
+      branch.addressDetailTh,
+      subdistrictName ? `${subPrefix}${subdistrictName}` : '',
+      districtName ? `${districtPrefix}${districtName}` : '',
+      provinceName ? `${provincePrefix}${provinceName}` : '',
+      branch.zipCode
+    ];
+    return parts.filter(p => p && p.trim() !== '').join(' ');
   }
 
   selectPartyType(type: { value: string; label: string }) {
@@ -1515,16 +1864,53 @@ export class InvoiceFormComponent implements OnInit {
 
   onBankChange(bankCode: string): void {
     this.bankBranches = []; // Clear previous branches
-    // Reset branch control if it exists in the form
     this.fgPayment.get('branch')?.setValue('');
-
+    
     if (bankCode) {
-      this.bankService.getBranches(bankCode).subscribe(response => {
-        if (response && response.result && response.result.data) {
-          this.bankBranches = response.result.data;
-        }
-      });
+      if (this.allBankBranches && this.allBankBranches.length > 0) {
+        this.bankBranches = this.allBankBranches.filter(b => b.bankCode === bankCode);
+        this.filteredBankBranches = [...this.bankBranches];
+      } else {
+          this.bankService.getBranches(bankCode).subscribe(res => {
+            if (res && res.result && res.result.data) {
+              this.bankBranches = res.result.data;
+            } else if (Array.isArray(res)) {
+              this.bankBranches = res;
+            } else if (res && res.data) {
+               this.bankBranches = res.data;
+            }
+            this.filteredBankBranches = [...this.bankBranches];
+          });
+      }
+    } else {
+        this.bankBranches = [];
+        this.filteredBankBranches = [];
     }
+  }
+
+  filterBranches(event: any) {
+    const query = (event.target as HTMLInputElement).value || '';
+    if (!query) {
+      this.filteredBankBranches = [...this.bankBranches];
+    } else {
+      const lowerQuery = query.toLowerCase();
+      this.filteredBankBranches = this.bankBranches.filter(b => 
+        (b.branchNameTh || '').toLowerCase().includes(lowerQuery) ||
+        (b.name || '').toLowerCase().includes(lowerQuery)
+      );
+    }
+    this.opened['bankBranch'] = true; 
+  }
+
+  openBranchDropdown() {
+      this.opened['bankBranch'] = true;
+  }
+
+  selectBankBranch(branch: any) {
+    // Assuming branch object has branchNameTh or name
+    const branchName = branch.branchNameTh || branch.name || '';
+    this.fgPayment.patchValue({ branch: branchName });
+    this.opened['bankBranch'] = false;
   }
 
   // Helper: Map frontend partyType to backend BuyerType
@@ -1536,6 +1922,34 @@ export class InvoiceFormComponent implements OnInit {
       'OTHER': 'OTHER',
     };
     return mapping[partyType] || 'PERSON';
+  }
+
+  // Helper: Build buyer address, appending country (in English) for FOREIGNER/OTHER types
+  private buildBuyerAddress(customer: any): string {
+    let address = customer.address || '';
+    
+    // For FOREIGNER or OTHER, append country in English if provided
+    if ((customer.partyType === 'FOREIGNER' || customer.partyType === 'OTHER') && customer.country) {
+      // Extract English name from country like "Switzerland (สวิตเซอร์แลนด์)"
+      const countryEnglish = this.extractEnglishCountryName(customer.country);
+      if (countryEnglish && !address.toLowerCase().includes(countryEnglish.toLowerCase())) {
+        address = address.trim() + ', ' + countryEnglish;
+      }
+    }
+    
+    return address;
+  }
+
+  // Helper: Extract English country name from format "Switzerland (สวิตเซอร์แลนด์)"
+  private extractEnglishCountryName(country: string): string {
+    if (!country) return '';
+    
+    // If format is "English (Thai)", extract English part
+    const match = country.match(/^([^(]+)/);
+    if (match) {
+      return match[1].trim();
+    }
+    return country.trim();
   }
 
   // Helper: Map backend BuyerType to frontend partyType
@@ -1645,5 +2059,163 @@ export class InvoiceFormComponent implements OnInit {
          address: this.getFormattedSellerAddress()
       });
     }
+  }
+
+  // ====================== Scroll to first invalid control ======================
+  private scrollToFirstInvalidControl(): void {
+    // Helper to find first invalid control path
+    const findInvalidControl = (group: FormGroup | AbstractControl, path: string[] = []): string | null => {
+      if (group instanceof FormGroup) {
+        for (const key of Object.keys(group.controls)) {
+          const control = group.get(key);
+          if (control && control.invalid) {
+            if (control instanceof FormGroup) {
+              const nestedPath = findInvalidControl(control, [...path, key]);
+              if (nestedPath) return nestedPath;
+            } else {
+              return [...path, key].join('.');
+            }
+          }
+        }
+      }
+      return null;
+    };
+
+    // Check all form groups for invalid controls
+    let invalidControlPath = findInvalidControl(this.fgHeader);
+    if (!invalidControlPath) {
+      invalidControlPath = findInvalidControl(this.fgCustomer);
+    }
+    if (!invalidControlPath) {
+      invalidControlPath = findInvalidControl(this.form);
+    }
+    
+    if (!invalidControlPath) return;
+
+    // Try to find the element by formControlName attribute or id
+    const controlName = invalidControlPath.split('.').pop();
+    let element: HTMLElement | null = null;
+
+    // Try formControlName first
+    element = document.querySelector(`[formControlName="${controlName}"]`);
+
+    // If not found, try by id
+    if (!element) {
+      element = document.getElementById(controlName || '');
+    }
+
+    // If still not found, try mat-form-field containing the control
+    if (!element) {
+      const formFields = document.querySelectorAll('mat-form-field');
+      for (const field of Array.from(formFields)) {
+        if (field.querySelector(`[formControlName="${controlName}"]`)) {
+          element = field as HTMLElement;
+          break;
+        }
+      }
+    }
+
+    // Also check for ng-invalid class if nothing found
+    if (!element) {
+      element = document.querySelector('.ng-invalid:not(form)');
+    }
+
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Focus the element if it's focusable
+      setTimeout(() => {
+        if (element && typeof (element as any).focus === 'function') {
+          (element as any).focus();
+        }
+      }, 500);
+    }
+  }
+
+  // ===== Exit Confirmation Guard =====
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnloadHandler(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges() && this.mode === 'create') {
+      event.preventDefault();
+      event.returnValue = '';
+    }
+  }
+
+  /**
+   * Check if the form has unsaved data (for create mode)
+   * Returns true if customer name or any item has data
+   */
+  hasUnsavedChanges(): boolean {
+    // Only check in create mode and when not already saved
+    if (this.mode !== 'create' || this.creationSuccess) {
+      return false;
+    }
+    
+    // Check customer name
+    const customerName = this.fgCustomer.get('name')?.value;
+    if (customerName && customerName.trim().length > 0) {
+      return true;
+    }
+    
+    // Check if any item has product name or sku
+    const items = this.itemsFA().controls;
+    for (const item of items) {
+      const name = item.get('name')?.value;
+      const sku = item.get('sku')?.value;
+      if ((name && name.trim().length > 0) || (sku && sku.trim().length > 0)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * CanDeactivate guard integration
+   * Shows SweetAlert2 confirmation dialog when navigating away with unsaved changes
+   */
+  canDeactivate(): boolean | Promise<boolean> {
+    // No changes, allow navigation
+    if (!this.hasUnsavedChanges()) {
+      return true;
+    }
+    
+    // Return a Promise that resolves based on dialog result
+    return new Promise<boolean>((resolve) => {
+      // Run outside Angular zone to prevent issues
+      this.ngZone.runOutsideAngular(() => {
+        Swal.fire({
+          icon: 'question',
+          title: 'ต้องการออกจากหน้าสร้างเอกสารหรือไม่?',
+          text: 'ข้อมูลที่กรอกจะหายไป หากคุณออกจากหน้านี้',
+          showCancelButton: true,
+          confirmButtonColor: '#f8bb86',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: 'ยืนยัน',
+          cancelButtonText: 'ยกเลิก',
+          reverseButtons: true,
+          heightAuto: false,
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        }).then((result) => {
+          // Run inside Angular zone to trigger change detection
+          this.ngZone.run(() => {
+            resolve(result.isConfirmed);
+          });
+        });
+      });
+    });
+  }
+
+  /**
+   * Format date to YYYY-MM-DD using local timezone (not UTC)
+   * This prevents date shift issues when the user is in a timezone ahead of UTC
+   */
+  private formatLocalDate(dateValue: any): string {
+    if (!dateValue) return '';
+    const d = new Date(dateValue);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

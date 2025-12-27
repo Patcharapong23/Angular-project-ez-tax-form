@@ -1,5 +1,27 @@
 <div class="auth-shell">
   <div class="auth-card">
+    <!-- Step Progress Bar -->
+    <div class="step-progress">
+      <div
+        class="step-item"
+        [class.active]="step >= 1"
+        [class.completed]="step > 1"
+      >
+        <div class="step-circle">
+          <span *ngIf="step <= 1">1</span>
+          <mat-icon *ngIf="step > 1">check</mat-icon>
+        </div>
+        <span class="step-label">ข้อมูลบัญชี</span>
+      </div>
+      <div class="step-line" [class.active]="step > 1"></div>
+      <div class="step-item" [class.active]="step >= 2">
+        <div class="step-circle">
+          <span>2</span>
+        </div>
+        <span class="step-label">ข้อมูลธุรกิจ</span>
+      </div>
+    </div>
+
     <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
 
     <h1 class="title">ลงทะเบียนใช้งานฟรี สำหรับธุรกิจ</h1>
@@ -213,11 +235,19 @@
           <mat-error *ngIf="company.get('sellerNameTh')?.hasError('required')">
             กรุณากรอกชื่อบริษัท (ภาษาไทย)
           </mat-error>
+          <mat-error
+            *ngIf="company.get('sellerNameTh')?.hasError('hasEnglish')"
+          >
+            กรุณากรอกภาษาไทยเท่านั้น (ห้ามมีตัวอักษรภาษาอังกฤษ)
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อบริษัท (ภาษาอังกฤษ)</mat-label>
           <input matInput formControlName="sellerNameEn" />
+          <mat-error *ngIf="company.get('sellerNameEn')?.hasError('hasThai')">
+            Please enter English only (No Thai characters)
+          </mat-error>
         </mat-form-field>
 
         <div class="grid-2">
@@ -252,12 +282,20 @@
             >
               กรุณากรอกชื่อสาขา (ภาษาไทย)
             </mat-error>
+            <mat-error
+              *ngIf="company.get('branchNameTh')?.hasError('hasEnglish')"
+            >
+              กรุณากรอกภาษาไทยเท่านั้น (ห้ามมีตัวอักษรภาษาอังกฤษ)
+            </mat-error>
           </mat-form-field>
         </div>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อสาขา (อังกฤษ)</mat-label>
           <input matInput formControlName="branchNameEn" />
+          <mat-error *ngIf="company.get('branchNameEn')?.hasError('hasThai')">
+            Please enter English only (No Thai characters)
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
@@ -307,6 +345,11 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>ชื่ออาคาร/ชั้นที่/ซอย/ถนน (ภาษาไทย)</mat-label>
             <input matInput formControlName="addressDetailTh" />
+            <mat-error
+              *ngIf="addressTh.get('addressDetailTh')?.hasError('hasEnglish')"
+            >
+              กรุณากรอกภาษาไทยเท่านั้น (ห้ามมีตัวอักษรภาษาอังกฤษ)
+            </mat-error>
           </mat-form-field>
 
           <!-- จังหวัด -->
@@ -452,12 +495,33 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>เลขที่อาคาร/ถนน/ซอย (English)</mat-label>
             <input matInput formControlName="addressDetailEn" />
+            <mat-error
+              *ngIf="addressEn.get('addressDetailEn')?.hasError('hasThai')"
+            >
+              Please enter English only (No Thai characters)
+            </mat-error>
           </mat-form-field>
         </div>
 
-        <mat-checkbox formControlName="acceptTos"
-          >ยอมรับเงื่อนไขและข้อกำหนดการใช้งานระบบ</mat-checkbox
-        >
+        <div class="terms-section">
+          <mat-checkbox
+            formControlName="acceptTos"
+            color="primary"
+            class="checkbox"
+          >
+            ฉันยอมรับ
+            <a
+              routerLink="/legal/privacy-policy"
+              target="_blank"
+              class="terms-link"
+              >นโยบายความเป็นส่วนตัว</a
+            >
+            และ
+            <a routerLink="/legal/terms" target="_blank" class="terms-link"
+              >เงื่อนไขการใช้บริการ</a
+            >
+          </mat-checkbox>
+        </div>
         <div
           class="tiny-error"
           *ngIf="

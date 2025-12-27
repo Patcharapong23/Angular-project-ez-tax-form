@@ -1,0 +1,145 @@
+/* 🟡 CSS reused from login.component.css */
+
+/* ------- Typography ------- */
+h1 {
+  text-align: center;
+  margin-top: 2rem;
+  color: var(--1-theme-color-heading-display-text, #5e5873);
+  font-feature-settings: "liga" off, "clig" off;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.title {
+  margin: 0 0 0px;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  font-feature-settings: "liga" off, "clig" off;
+  text-align: center;
+  color: var(--1-theme-color-heading-display-text, #5e5873);
+}
+
+.subtitle {
+  margin: 0 0 20px;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  font-feature-settings: "liga" off, "clig" off;
+  text-align: center;
+  color: var(--Light-Typography-Color-Heading-Text, #4b465c);
+}
+
+/* ------- Layout ------- */
+:host {
+  display: block;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 32px);
+  background: #f8f8f8; /* Might differ slightly from login but good for standard bg */
+}
+
+.auth-card {
+  width: min(480px, 92vw);
+  background: #fff;
+  border-radius: 16px;
+  padding: clamp(20px, 4vw, 32px);
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.brand {
+  width: 150px;
+  max-width: 80%;
+  margin: 8px auto 16px;
+  display: block;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-form-field.full-width {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+/* ------- Buttons ------- */
+button.btn {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* =========================
+   Password strength + checklist
+   ========================= */
+.pwd-strength {
+  margin: 8px 0 12px;
+}
+
+.strength-bar {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0;
+  transition: width 0.2s ease;
+}
+
+.strength-fill.idle {
+  width: 0;
+  background: #cfd8dc;
+}
+
+.strength-fill.weak {
+  background: #e53935;
+}
+
+.strength-fill.medium {
+  background: #fbc02d;
+}
+
+.strength-fill.strong {
+  background: #2e7d32;
+}
+
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0; /* Increased top margin slightly */
+}
+
+.checklist li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 6px 0;
+}
+
+.checklist li.ok {
+  color: #2e7d32;
+}
+
+.checklist mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}

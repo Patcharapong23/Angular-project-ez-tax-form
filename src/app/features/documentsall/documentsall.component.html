@@ -8,9 +8,11 @@
     "
   >
     <h1 class="page-title" style="margin: 0">รายการเอกสารทั้งหมด</h1>
-    <button color="primary" (click)="createNewDocument()" class="btn">
-      <mat-icon>add</mat-icon> สร้างเอกสารใหม่
-    </button>
+    <ng-container *hasPermission="'DOC_CREATE'">
+      <button color="primary" (click)="createNewDocument()" class="btn">
+        <mat-icon>add</mat-icon> สร้างเอกสารใหม่
+      </button>
+    </ng-container>
   </div>
   <div class="quick-grid">
     <div class="quick-card placeholder search-card">
@@ -152,92 +154,211 @@
   </div>
 
   <div class="table-card">
-    <table>
-      <thead>
-        <tr>
-          <th class="text-center"><input type="checkbox" /></th>
-          <th class="text-left">เลขที่เอกสาร</th>
-          <th class="text-left">เลขที่ผู้เสียภาษี</th>
-          <th class="text-left">ชื่อผู้ซื้อ</th>
-          <th class="text-center">รหัสสาขา</th>
-          <th class="text-center">ประเภทเอกสาร</th>
-          <th class="text-left">วันที่ออกเอกสาร</th>
-          <th class="text-left">วันที่สร้างเอกสาร</th>
-          <th class="text-center">สถานะเอกสาร</th>
-          <th class="text-center">การดำเนินการ</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let r of paginatedRows">
-          <td class="text-center"><input type="checkbox" /></td>
-          <td class="text-left">{{ r.docNo }}</td>
-          <td class="text-left">
-            {{
-              r.buyerTaxId || r.buyerTaxIdSnapshot || r.buyerPassportNoSnapshot
-            }}
-          </td>
-          <td class="text-left">{{ r.buyerName || r.buyerNameSnapshot }}</td>
-          <td class="text-center">{{ r.branchCode }}</td>
-          <td class="text-center">{{ getDocTypeName(r.docTypeCode) }}</td>
-          <td class="text-left">
-            {{ r.issueDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
-          </td>
-          <td class="text-left">
-            {{ r.createdAt | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
-          </td>
-          <td class="text-center">
-            <span class="status" [ngClass]="getStatusClass(r.status)">
-              {{ getStatusText(r.status) }}
-            </span>
-          </td>
-          <td class="actions text-center">
-            <button
-              mat-icon-button
-              class="icon-view"
-              title="ดู"
-              (click)="viewDocument(r.docUuid)"
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="checkbox">
+              <input type="checkbox" (change)="toggleAll()" color="primary" />
+            </th>
+            <th
+              class="text-left sortable"
+              (click)="onSort('docNo')"
+              title="เรียงลำดับ"
             >
-              <i class="ti ti-eye"></i>
-            </button>
-            <button
-              mat-icon-button
-              class="icon-edit"
-              title="แก้ไข"
-              (click)="editDocument(r.docUuid)"
+              เลขที่เอกสาร
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'docNo' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'docNo' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th
+              class="text-left sortable"
+              (click)="onSort('taxId')"
+              title="เรียงลำดับ"
             >
-              <i class="ti ti-edit"></i>
-            </button>
-            <button
-              mat-icon-button
-              class="icon-view"
-              title="ดาวน์โหลด"
-              (click)="openDownloadModal(r.docUuid, r.docNo)"
+              เลขที่ผู้เสียภาษี
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'taxId' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'taxId' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th
+              class="text-left sortable"
+              (click)="onSort('buyerName')"
+              title="เรียงลำดับ"
             >
-              <i class="ti ti-download"></i>
-            </button>
-            <button
-              mat-icon-button
-              class="icon-delete"
-              title="ยกเลิก"
-              (click)="cancelInvoice(r.docUuid)"
+              ชื่อผู้ซื้อ
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'buyerName' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'buyerName' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th class="text-center">รหัสสาขา</th>
+            <th class="text-center">ประเภทเอกสาร</th>
+            <th
+              class="text-left sortable"
+              (click)="onSort('issueDate')"
+              title="เรียงลำดับ"
             >
-              <i class="ti ti-ban"></i>
-            </button>
-            <button
-              mat-icon-button
-              class="icon-delete"
-              title="ลบ"
-              (click)="deleteDocument(r.docUuid)"
+              วันที่ออกเอกสาร
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'issueDate' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'issueDate' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th
+              class="text-left sortable"
+              (click)="onSort('createdAt')"
+              title="เรียงลำดับ"
             >
-              <i class="ti ti-trash"></i>
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="rows.length === 0">
-          <td colspan="10" class="no-data">ไม่พบข้อมูลเอกสาร</td>
-        </tr>
-      </tbody>
-    </table>
+              วันที่สร้างเอกสาร
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'createdAt' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'createdAt' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th
+              class="text-center sortable"
+              (click)="onSort('status')"
+              title="เรียงลำดับ"
+            >
+              สถานะเอกสาร
+              <span class="sort-icon-wrapper">
+                <i
+                  class="ti ti-caret-up-filled"
+                  [class.active]="sortBy === 'status' && sortDir === 'asc'"
+                ></i>
+                <i
+                  class="ti ti-caret-down-filled"
+                  [class.active]="sortBy === 'status' && sortDir === 'desc'"
+                ></i>
+              </span>
+            </th>
+            <th class="text-center">การดำเนินการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of paginatedRows">
+            <td class="text-center"><input type="checkbox" /></td>
+            <td class="text-left">{{ r.docNo }}</td>
+            <td class="text-left">
+              {{
+                r.buyerTaxId ||
+                  r.buyerTaxIdSnapshot ||
+                  r.buyerPassportNoSnapshot
+              }}
+            </td>
+            <td class="text-left">{{ r.buyerName || r.buyerNameSnapshot }}</td>
+            <td class="text-center">{{ r.branchCode }}</td>
+            <td class="text-center">{{ getDocTypeName(r.docTypeCode) }}</td>
+            <td class="text-left">
+              {{ r.issueDate | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+            </td>
+            <td class="text-left">
+              {{ r.createdAt | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+            </td>
+            <td class="text-center">
+              <span class="status" [ngClass]="getStatusClass(r.status)">
+                {{ getStatusText(r.status) }}
+              </span>
+            </td>
+            <td class="actions text-center">
+              <ng-container *hasPermission="'DOC_VIEW'">
+                <button
+                  mat-icon-button
+                  class="icon-view"
+                  title="ดู"
+                  (click)="viewDocument(r.docUuid)"
+                >
+                  <i class="ti ti-eye"></i>
+                </button>
+              </ng-container>
+
+              <ng-container *hasPermission="'DOC_EDIT'">
+                <button
+                  mat-icon-button
+                  class="icon-edit"
+                  title="แก้ไข"
+                  (click)="editDocument(r.docUuid)"
+                  *ngIf="r.status !== 'CANCELLED'"
+                >
+                  <i class="ti ti-edit"></i>
+                </button>
+              </ng-container>
+
+              <ng-container *hasPermission="'DOC_EXPORT'">
+                <button
+                  mat-icon-button
+                  class="icon-view"
+                  title="ดาวน์โหลด"
+                  (click)="openDownloadModal(r.docUuid, r.docNo)"
+                >
+                  <i class="ti ti-download"></i>
+                </button>
+              </ng-container>
+
+              <ng-container *hasPermission="'DOC_CANCEL'">
+                <button
+                  mat-icon-button
+                  class="icon-delete"
+                  title="ยกเลิก"
+                  (click)="cancelInvoice(r.docUuid)"
+                  *ngIf="r.status !== 'CANCELLED'"
+                >
+                  <i class="ti ti-ban"></i>
+                </button>
+              </ng-container>
+
+              <ng-container *hasPermission="'DOC_DELETE'">
+                <button
+                  mat-icon-button
+                  class="icon-delete"
+                  title="ลบ"
+                  (click)="deleteDocument(r.docUuid)"
+                  *ngIf="r.status !== 'CANCELLED'"
+                >
+                  <i class="ti ti-trash"></i>
+                </button>
+              </ng-container>
+            </td>
+          </tr>
+          <tr *ngIf="rows.length === 0">
+            <td colspan="10" class="no-data">ไม่พบข้อมูลเอกสาร</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="pagination">
       <div class="pagination-left">

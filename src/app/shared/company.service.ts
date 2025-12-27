@@ -39,4 +39,14 @@ export class CompanyService {
       params: { type, branchCode },
     });
   }
+
+  updateSeller(taxId: string, data: any) {
+    return this.http.put<CompanyProfile>(`${this.base}/sellers/${taxId}`, data);
+  }
+
+  uploadLogo(taxId: string, file: File) {
+    const formData = new FormData();
+    formData.append('logo', file);
+    return this.http.post<{ url: string; publicId: string }>(`${this.base}/sellers/${taxId}/logo`, formData);
+  }
 }

@@ -1,0 +1,122 @@
+<div class="auth-shell">
+  <div class="auth-card">
+    <img class="brand" src="assets/logo-ez-tax.svg" alt="EZ Tax Form" />
+
+    <h1 class="title">เปลี่ยนรหัสผ่าน</h1>
+    <p class="subtitle">
+      เนื่องจากเป็นการเข้าสู่ระบบครั้งแรก<br />กรุณากำหนดรหัสผ่านใหม่
+    </p>
+
+    <form (ngSubmit)="onSubmit()" #f="ngForm">
+      <!-- New Password -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>รหัสผ่านใหม่</mat-label>
+        <input
+          matInput
+          [type]="hideNewPass ? 'password' : 'text'"
+          name="newPassword"
+          [(ngModel)]="newPassword"
+          required
+          minlength="6"
+          (input)="onPasswordInput()"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hideNewPass = !hideNewPass"
+          [attr.aria-pressed]="!hideNewPass"
+          title="แสดง/ซ่อนรหัสผ่าน"
+        >
+          <mat-icon>{{
+            hideNewPass ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Password Strength -->
+      <div class="pwd-strength">
+        <div class="strength-bar">
+          <div
+            class="strength-fill"
+            [ngClass]="strengthClass"
+            [style.width.%]="passwordScore * 100"
+          ></div>
+        </div>
+
+        <ul class="checklist">
+          <li [class.ok]="rules.minLen">
+            <mat-icon>{{
+              rules.minLen ? "check_circle" : "radio_button_unchecked"
+            }}</mat-icon>
+            ตัวอักษรภาษาอังกฤษอย่างน้อย 8 ตัวอักษร
+          </li>
+          <li [class.ok]="rules.hasUpper">
+            <mat-icon>{{
+              rules.hasUpper ? "check_circle" : "radio_button_unchecked"
+            }}</mat-icon>
+            ตัวพิมพ์ใหญ่อย่างน้อย 1 ตัวอักษร เช่น A-Z
+          </li>
+          <li [class.ok]="rules.hasLower">
+            <mat-icon>{{
+              rules.hasLower ? "check_circle" : "radio_button_unchecked"
+            }}</mat-icon>
+            ตัวพิมพ์เล็กอย่างน้อย 1 ตัวอักษร เช่น a-z
+          </li>
+          <li [class.ok]="rules.hasDigit">
+            <mat-icon>{{
+              rules.hasDigit ? "check_circle" : "radio_button_unchecked"
+            }}</mat-icon>
+            ตัวเลข อย่างน้อย 1 ตัวอักษร เช่น 0-9
+          </li>
+          <li [class.ok]="rules.hasSpecial">
+            <mat-icon>{{
+              rules.hasSpecial ? "check_circle" : "radio_button_unchecked"
+            }}</mat-icon>
+            อักขระพิเศษ อย่างน้อย 1 ตัวอักษร เช่น ! @ . # $ * & - _
+          </li>
+          <li [class.ok]="rules.match">
+            <mat-icon>{{
+              rules.match ? "check_circle" : "radio_button_unchecked"
+            }}</mat-icon>
+            รหัสผ่านตรงกัน
+          </li>
+        </ul>
+      </div>
+
+      <!-- Confirm Password -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>ยืนยันรหัสผ่านใหม่</mat-label>
+        <input
+          matInput
+          [type]="hideConfirmPass ? 'password' : 'text'"
+          name="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          required
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="hideConfirmPass = !hideConfirmPass"
+          [attr.aria-pressed]="!hideConfirmPass"
+          title="แสดง/ซ่อนรหัสผ่าน"
+        >
+          <mat-icon>{{
+            hideConfirmPass ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        class="btn full-width"
+        type="submit"
+        [disabled]="isSubmitting || f.invalid"
+      >
+        {{ isSubmitting ? "กำลังบันทึก..." : "เปลี่ยนรหัสผ่าน" }}
+      </button>
+    </form>
+  </div>
+</div>

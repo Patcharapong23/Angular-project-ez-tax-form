@@ -1,6 +1,46 @@
+@import "../node_modules/sweetalert2/dist/sweetalert2.min.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================== */
+/* SweetAlert2 Global Overrides                   */
+/* ============================================== */
+.swal2-container {
+  z-index: 99999 !important; /* Above CDK overlays (1000) and Material dialogs */
+}
+
+.swal2-popup {
+  font-family: "Noto Sans Thai", sans-serif !important;
+  border-radius: 16px !important;
+}
+
+.swal2-title {
+  font-family: "Noto Sans Thai", sans-serif !important;
+  font-weight: 700 !important;
+}
+
+.swal2-html-container {
+  font-family: "Noto Sans Thai", sans-serif !important;
+}
+
+.swal2-confirm {
+  font-family: "Noto Sans Thai", sans-serif !important;
+  border-radius: 8px !important;
+}
+
+/* Red delete button for confirmation dialogs */
+.swal2-confirm-red,
+.swal2-confirm.swal2-confirm-red,
+button.swal2-confirm-red {
+  background-color: #dc3545 !important;
+  color: white !important;
+  border: none !important;
+}
+
+.swal2-confirm-red:hover {
+  background-color: #c82333 !important;
+}
 
 html,
 body {
@@ -9,10 +49,19 @@ body {
   margin: 0;
   font-family: "Noto Sans Thai", sans-serif;
   line-height: 1.5;
+  /* Global zoom reset to 1.0 (Standard) */
+  /* zoom: 0.9; Removed */
+  overflow-x: hidden; /* Prevent horizontal scroll causing whitespace */
+}
+
+app-root {
+  display: block;
 }
 
 :root {
   --primary-color: #ffcc00;
+  --bg: #f8f9fa; /* Define global background to match dashboard gray */
+  /* Zoom handled in body */
 }
 
 * {
@@ -23,6 +72,17 @@ input,
 label,
 .form-label {
   line-height: 1.5;
+}
+
+.mat-autocomplete-panel {
+  border-radius: 10px !important;
+  /* Push dropdown down forcefully to avoid overlapping input (Large fix for Floating Issue) */
+  margin-top: 48px !important;
+}
+
+/* Scale global overlays to 90% */
+.cdk-overlay-pane {
+  /* Inherits zoom from body, explicitly ensuring no transform conflict */
 }
 
 /* Override default Material line-height (1.125) which clips Thai tone marks */
@@ -102,8 +162,9 @@ label,
 }
 
 .page {
-  padding: 16px 0 24px;
-  min-height: calc(100vh - var(--topbar-h));
+  padding: 0 0 24px;
+  /* Compensate vh for 0.9 scale: 100vh / 0.9 = 111.1111vh */
+  min-height: calc(111.1111vh - var(--topbar-h));
 }
 
 .page-title {
@@ -313,7 +374,7 @@ label,
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(240px, 1fr));
-  gap: 14px 16px;
+  gap: 16px 24px;
 }
 
 /* field + input/select */
@@ -446,37 +507,76 @@ label,
   background: #fff;
   border-radius: 16px;
   margin-top: 16px;
-  overflow: auto;
-  box-shadow: 0 4px 18px rgba(17, 24, 39, 0.04),
-    0 1px 3px rgba(17, 24, 39, 0.06);
   border: 1px solid #eceff5;
+
+  /* Flexbox for sticky footer/pagination */
+  display: flex;
+  flex-direction: column;
+  /* Adjust height to fit screen */
+  max-height: 65vh;
+  overflow: hidden;
 }
 
-.doc-table {
+/* Wrapper for the table to handle scrolling */
+.table-responsive {
+  flex: 1;
+  overflow: auto; /* Handle both vertical and horizontal scroll */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom Scrollbar for Table Responsive Wrapper */
+.table-responsive::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.table-responsive table,
+.table-card table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
 }
 
-.doc-table thead th {
+.table-responsive table thead th,
+.table-card table thead th {
   position: sticky;
   top: 0;
   background: #f8fafc;
-  z-index: 1;
+  z-index: 10;
   text-align: left;
   font-weight: 700;
   color: #374151;
-  padding: 12px;
+  padding: 12px 16px;
   border-bottom: 1px solid #e5e7eb;
+  /* Prevent wrapping in headers */
+  white-space: nowrap;
 }
 
-.doc-table tbody td {
-  padding: 12px;
+.table-responsive table tbody td,
+.table-card table tbody td {
+  padding: 12px 16px;
   border-bottom: 1px solid #f1f5f9;
   color: #374151;
+  /* Prevent wrapping in data cells */
+  white-space: nowrap;
 }
 
-.doc-table tbody tr:hover {
+.table-responsive table tbody tr:hover,
+.table-card table tbody tr:hover {
   background: #fafafa;
 }
 
@@ -1193,4 +1293,72 @@ label,
   border-top: 1px solid #f3f4f6 !important;
   margin-top: 16px !important;
   padding-top: 16px !important;
+}
+
+/* Global Sort Icon Styles */
+.sort-icon-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 6px;
+  position: relative;
+  height: 14px;
+  width: 14px;
+  justify-content: center;
+}
+
+.sort-icon-wrapper i {
+  font-size: 14px;
+  height: 7px;
+  line-height: 7px;
+  overflow: hidden;
+  color: #d1d5db;
+  transition: color 0.2s;
+  display: block;
+}
+
+.sort-icon-wrapper .ti-caret-up-filled {
+  position: absolute;
+  top: -3px;
+}
+
+.sort-icon-wrapper .ti-caret-down-filled {
+  position: absolute;
+  bottom: -3px;
+}
+
+.sort-icon-wrapper i.active,
+.sort-icon-wrapper.asc .ti-caret-up-filled,
+.sort-icon-wrapper.desc .ti-caret-down-filled {
+  color: #111827;
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+th.sortable:hover {
+  background-color: #f3f4f6;
+}
+
+/* =========================================
+   ROLE DIALOG PANEL (Global)
+   ========================================= */
+.role-dialog-panel {
+  max-width: 1100px !important;
+}
+
+.role-dialog-panel .mat-mdc-dialog-container {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.role-dialog-panel .mdc-dialog__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
 }

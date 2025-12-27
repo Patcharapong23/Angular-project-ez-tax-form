@@ -1,0 +1,279 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h1 class="dialog-title">
+      {{
+        isViewMode
+          ? "รายละเอียดสาขา"
+          : data.branchId
+          ? "แก้ไขข้อมูลสาขา"
+          : "เพิ่มข้อมูลสาขา"
+      }}
+    </h1>
+    <button mat-icon-button (click)="onCancel()" class="close-btn">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSave()" class="dialog-body">
+    <!-- Logo Section -->
+    <div class="logo-upload-section" *ngIf="!isViewMode">
+      <div class="logo-wrapper" (click)="fileInput.click()">
+        <img *ngIf="imagePreview" [src]="imagePreview" class="current-logo" />
+        <div *ngIf="!imagePreview" class="upload-placeholder">
+          <!-- Placeholder SVG or standard text -->
+          <span class="upload-text">เลือกไฟล์รูปภาพ</span>
+        </div>
+        <div class="overlay" *ngIf="imagePreview">
+          <span class="upload-label">เปลี่ยน โลโก้</span>
+        </div>
+        <input
+          #fileInput
+          type="file"
+          (change)="onFileSelected($event)"
+          accept="image/*"
+          hidden
+        />
+      </div>
+    </div>
+
+    <div class="logo-upload-section" *ngIf="isViewMode">
+      <div class="logo-wrapper" style="border: none; cursor: default">
+        <img *ngIf="imagePreview" [src]="imagePreview" class="current-logo" />
+        <div *ngIf="!imagePreview" class="upload-placeholder">
+          <span
+            class="upload-text"
+            style="background: #f3f4f6; color: #9ca3af; box-shadow: none"
+            >ไม่มีโลโก้</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 24px">
+      <h3
+        style="
+          font-size: 16px;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 12px;
+        "
+      >
+        ข้อมูลสาขา
+      </h3>
+
+      <div class="grid-2">
+        <!-- ชื่อสาขา (TH) -->
+        <div class="dialog-field">
+          <label>ชื่อสาขา (ภาษาไทย) <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="branchNameTh"
+            placeholder="กรอกชื่อสาขา(ภาษาไทย)"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('branchNameTh')?.invalid &&
+              form.get('branchNameTh')?.touched
+            "
+          >
+            กรุณากรอกชื่อสาขา (ภาษาไทย)
+          </div>
+        </div>
+
+        <!-- ชื่อสาขา (EN) -->
+        <div class="dialog-field">
+          <label>ชื่อสาขา (ภาษาอังกฤษ) <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="branchNameEn"
+            placeholder="กรอกชื่อสาขา(ภาษาอังกฤษ)"
+          />
+        </div>
+
+        <!-- รหัสสาขา -->
+        <div class="dialog-field full-width">
+          <label>รหัสสาขา 5 หลัก <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="branchCode"
+            placeholder="กรอกรหัสสาขา"
+            (input)="validateNumericInput($event, 5)"
+            maxlength="5"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('branchCode')?.invalid && form.get('branchCode')?.touched
+            "
+          >
+            กรุณากรอกรหัสสาขา 5 หลัก
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 24px">
+      <h3
+        style="
+          font-size: 16px;
+          font-weight: 600;
+          color: #111827;
+          margin-bottom: 12px;
+        "
+      >
+        ที่อยู่สาขา
+      </h3>
+
+      <div class="grid-2">
+        <!-- เลขที่ -->
+        <div class="dialog-field">
+          <label>เลขที่ <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="buildingNo"
+            placeholder="กรอกเลขที่"
+          />
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('buildingNo')?.invalid && form.get('buildingNo')?.touched
+            "
+          >
+            กรุณากรอกเลขที่
+          </div>
+        </div>
+
+        <!-- รายละเอียดที่อยู่ -->
+        <div class="dialog-field">
+          <label>รายละเอียดที่อยู่</label>
+          <input
+            type="text"
+            formControlName="addressDetailTh"
+            placeholder="กรอกหมู่"
+          />
+        </div>
+
+        <!-- จังหวัด -->
+        <div class="dialog-field">
+          <label>จังหวัด <span class="required">*</span></label>
+          <select
+            formControlName="provinceId"
+            (change)="onProvinceChange($any($event.target).value)"
+          >
+            <option value="">เลือกจังหวัด</option>
+            <option *ngFor="let p of provinces" [value]="p.code">
+              {{ p.name_th }}
+            </option>
+          </select>
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('provinceId')?.invalid && form.get('provinceId')?.touched
+            "
+          >
+            กรุณาเลือกจังหวัด
+          </div>
+        </div>
+
+        <!-- เขต/อำเภอ -->
+        <div class="dialog-field">
+          <label>เขต / อำเภอ <span class="required">*</span></label>
+          <select
+            formControlName="districtId"
+            (change)="onDistrictChange($any($event.target).value)"
+          >
+            <option value="">เลือกเขต/อำเภอ</option>
+            <option *ngFor="let d of districts" [value]="d.code">
+              {{ d.name_th }}
+            </option>
+          </select>
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('districtId')?.invalid && form.get('districtId')?.touched
+            "
+          >
+            กรุณาเลือกเขต/อำเภอ
+          </div>
+        </div>
+
+        <!-- แขวง/ตำบล -->
+        <div class="dialog-field">
+          <label>แขวง / ตำบล <span class="required">*</span></label>
+          <select
+            formControlName="subdistrictId"
+            (change)="onSubdistrictChange($any($event.target).value)"
+          >
+            <option value="">เลือกแขวง/ ตําบล</option>
+            <option *ngFor="let s of subdistricts" [value]="s.code">
+              {{ s.name_th }}
+            </option>
+          </select>
+          <div
+            class="error-message"
+            *ngIf="
+              form.get('subdistrictId')?.invalid &&
+              form.get('subdistrictId')?.touched
+            "
+          >
+            กรุณาเลือกแขวง/ ตําบล
+          </div>
+        </div>
+
+        <!-- รหัสไปรษณีย์ -->
+        <div class="dialog-field">
+          <label>รหัสไปรษณีย์ <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="zipCode"
+            placeholder="กรอกรหัสไปรษณีย์"
+            maxlength="5"
+          />
+          <div
+            class="error-message"
+            *ngIf="form.get('zipCode')?.invalid && form.get('zipCode')?.touched"
+          >
+            กรุณากรอกรหัสไปรษณีย์
+          </div>
+        </div>
+
+        <!-- รายละเอียดที่อยู่ (EN) -->
+        <div class="dialog-field full-width">
+          <label>รายละเอียดที่อยู่ (ภาษาอังกฤษ)</label>
+          <input
+            type="text"
+            formControlName="addressDetailEn"
+            placeholder="กรอก รายละเอียดที่อยู่ (ภาษาอังกฤษ)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- สถานะ -->
+    <div style="margin-top: 20px">
+      <label
+        style="display: block; margin-bottom: 8px; color: #666; font-size: 14px"
+        >สถานะ:</label
+      >
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" formControlName="enableFlag" [value]="true" />
+          <span class="radio-custom"></span>
+          <span>เปิดการใช้งาน</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" formControlName="enableFlag" [value]="false" />
+          <span class="radio-custom"></span>
+          <span>ปิดการใช้งาน</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="dialog-actions" *ngIf="!isViewMode">
+      <button type="submit" class="btn-save" [disabled]="form.invalid">
+        บันทึก
+      </button>
+    </div>
+  </form>
+</div>

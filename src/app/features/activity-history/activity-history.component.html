@@ -1,0 +1,536 @@
+<section class="buyers-page">
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+  </div>
+
+  <!-- SEARCH CARD -->
+  <div class="search-card">
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+      <!-- BASIC FILTERS - Always visible -->
+      <div class="grid-2">
+        <!-- คำค้นหา -->
+        <div class="field">
+          <label>{{
+            userRole === "STAFF"
+              ? "ค้นหา (หน้า / กิจกรรม)"
+              : "คำค้น (ผู้ใช้ / หน้า / กิจกรรม / เลขเอกสาร)"
+          }}</label>
+          <input
+            type="text"
+            formControlName="search"
+            [placeholder]="
+              userRole === 'STAFF' ? 'พิมพ์คำค้นหา...' : 'ค้นหาทั้งหมด...'
+            "
+          />
+        </div>
+
+        <!-- วันที่สร้าง (เริ่มต้น-สิ้นสุด) -->
+        <div formGroupName="dateRange" class="date-range-wrapper">
+          <label>วันที่ (เริ่มต้น-สิ้นสุด)</label>
+          <div
+            class="date-display"
+            (click)="picker.open()"
+            [class.active]="picker.opened"
+          >
+            <span [class.placeholder]="!dateRangeText">
+              {{ dateRangeText || "เลือกวันที่เริ่มต้น - วันที่สิ้นสุด" }}
+            </span>
+            <mat-icon>event</mat-icon>
+          </div>
+          <mat-date-range-input
+            [rangePicker]="picker"
+            class="hidden-range-input"
+          >
+            <input matStartDate formControlName="start" />
+            <input matEndDate formControlName="end" />
+          </mat-date-range-input>
+          <mat-date-range-picker
+            #picker
+            [panelClass]="'ez-datepicker-panel'"
+          ></mat-date-range-picker>
+        </div>
+      </div>
+
+      <!-- ADVANCED FILTERS TOGGLE - For BRANCH_ADMIN+ -->
+      <div class="advanced-toggle" *ngIf="canShowAdvanced">
+        <button type="button" class="toggle-btn" (click)="toggleAdvanced()">
+          <mat-icon>{{
+            showAdvancedFilters ? "expand_less" : "expand_more"
+          }}</mat-icon>
+          <span>{{
+            showAdvancedFilters ? "ซ่อนตัวกรองขั้นสูง" : "ตัวกรองขั้นสูง"
+          }}</span>
+          <span class="filter-count" *ngIf="activeFilterCount > 0"
+            >({{ activeFilterCount }})</span
+          >
+        </button>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- SYSTEM_ADMIN: Full Advanced Search Panel -->
+      <!-- ============================================== -->
+      <div
+        class="advanced-panel"
+        *ngIf="userRole === 'SYSTEM_ADMIN' && showAdvancedFilters"
+      >
+        <!-- Row 1: ผู้ใช้ / Role / บริษัท -->
+        <div class="grid-3">
+          <div class="field">
+            <label>ผู้ใช้งาน</label>
+            <input
+              type="text"
+              formControlName="searchUsername"
+              placeholder="กรอกชื่อผู้ใช้"
+            />
+          </div>
+
+          <div class="field">
+            <label>Role</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('role')"
+                [class.active]="opened['role']"
+              >
+                <span [class.placeholder]="!selectedRole.value">
+                  {{ selectedRole.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['role']">
+                <button
+                  type="button"
+                  *ngFor="let r of roleOptions"
+                  class="dropdown-option"
+                  (click)="selectRole(r)"
+                >
+                  <span>{{ r.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>บริษัท</label>
+            <input
+              type="text"
+              formControlName="searchSeller"
+              placeholder="ชื่อบริษัท"
+            />
+          </div>
+        </div>
+
+        <!-- Row 2: สาขา / ประเภทกิจกรรม / สถานะ -->
+        <div class="grid-3 mt-16">
+          <div class="field">
+            <label>สาขา</label>
+            <input
+              type="text"
+              formControlName="searchBranch"
+              placeholder="ชื่อสาขา"
+            />
+          </div>
+
+          <div class="field">
+            <label>ประเภทกิจกรรม</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('category')"
+                [class.active]="opened['category']"
+              >
+                <span [class.placeholder]="!selectedCategory.value">
+                  {{ selectedCategory.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['category']">
+                <button
+                  type="button"
+                  *ngFor="let c of categoryOptions"
+                  class="dropdown-option"
+                  (click)="selectCategory(c)"
+                >
+                  <span>{{ c.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>สถานะ</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('status')"
+                [class.active]="opened['status']"
+              >
+                <span [class.placeholder]="!selectedStatus.value">
+                  {{ selectedStatus.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['status']">
+                <button
+                  type="button"
+                  *ngFor="let s of fullStatusOptions"
+                  class="dropdown-option"
+                  (click)="selectStatus(s)"
+                >
+                  <span>{{ s.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Transaction ID / IP Address / Device -->
+        <div class="grid-3 mt-16">
+          <div class="field">
+            <label>Transaction ID</label>
+            <input
+              type="text"
+              formControlName="searchTransactionId"
+              placeholder="Trace ID / Transaction ID"
+            />
+          </div>
+
+          <div class="field">
+            <label>IP Address</label>
+            <input
+              type="text"
+              formControlName="searchIpAddress"
+              placeholder="192.168.x.x"
+            />
+          </div>
+
+          <div class="field">
+            <label>Device / Browser</label>
+            <input
+              type="text"
+              formControlName="searchDevice"
+              placeholder="Chrome / Firefox / Safari"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- HQ_ADMIN: Organization Search Panel -->
+      <!-- ============================================== -->
+      <div
+        class="advanced-panel"
+        *ngIf="userRole === 'HQ_ADMIN' && showAdvancedFilters"
+      >
+        <div class="grid-3">
+          <div class="field">
+            <label>ผู้ใช้งาน</label>
+            <input
+              type="text"
+              formControlName="searchUsername"
+              placeholder="กรอกชื่อผู้ใช้"
+            />
+          </div>
+
+          <div class="field">
+            <label>สาขา</label>
+            <input
+              type="text"
+              formControlName="searchBranch"
+              placeholder="ชื่อสาขา"
+            />
+          </div>
+
+          <div class="field">
+            <label>ประเภทกิจกรรม</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('category')"
+                [class.active]="opened['category']"
+              >
+                <span [class.placeholder]="!selectedCategory.value">
+                  {{ selectedCategory.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['category']">
+                <button
+                  type="button"
+                  *ngFor="let c of categoryOptions"
+                  class="dropdown-option"
+                  (click)="selectCategory(c)"
+                >
+                  <span>{{ c.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-3 mt-16">
+          <div class="field">
+            <label>สถานะ</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('status')"
+                [class.active]="opened['status']"
+              >
+                <span [class.placeholder]="!selectedStatus.value">
+                  {{ selectedStatus.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['status']">
+                <button
+                  type="button"
+                  *ngFor="let s of fullStatusOptions"
+                  class="dropdown-option"
+                  (click)="selectStatus(s)"
+                >
+                  <span>{{ s.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field"></div>
+          <div class="field"></div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- BRANCH_ADMIN: Branch Search Panel -->
+      <!-- ============================================== -->
+      <div
+        class="advanced-panel"
+        *ngIf="userRole === 'BRANCH_ADMIN' && showAdvancedFilters"
+      >
+        <div class="grid-3">
+          <div class="field">
+            <label>ผู้ใช้งาน</label>
+            <input
+              type="text"
+              formControlName="searchUsername"
+              placeholder="กรอกชื่อผู้ใช้"
+            />
+          </div>
+
+          <div class="field">
+            <label>ประเภทกิจกรรม</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('category')"
+                [class.active]="opened['category']"
+              >
+                <span [class.placeholder]="!selectedCategory.value">
+                  {{ selectedCategory.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['category']">
+                <button
+                  type="button"
+                  *ngFor="let c of categoryOptions"
+                  class="dropdown-option"
+                  (click)="selectCategory(c)"
+                >
+                  <span>{{ c.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>สถานะ</label>
+            <div class="custom-dropdown">
+              <button
+                type="button"
+                class="dropdown-trigger"
+                (click)="toggleDropdown('status')"
+                [class.active]="opened['status']"
+              >
+                <span [class.placeholder]="!selectedStatus.value">
+                  {{ selectedStatus.name || "ทั้งหมด" }}
+                </span>
+                <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+              </button>
+              <div class="dropdown-panel" [class.open]="opened['status']">
+                <button
+                  type="button"
+                  *ngFor="let s of fullStatusOptions"
+                  class="dropdown-option"
+                  (click)="selectStatus(s)"
+                >
+                  <span>{{ s.name }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAFF: Simple status filter (Success/Fail only) -->
+      <div class="staff-status-row" *ngIf="userRole === 'STAFF'">
+        <div class="field status-field">
+          <label>สถานะ</label>
+          <div class="custom-dropdown">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="toggleDropdown('status')"
+              [class.active]="opened['status']"
+            >
+              <span [class.placeholder]="!selectedStatus.value">
+                {{ selectedStatus.name || "ทั้งหมด" }}
+              </span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['status']">
+              <button
+                type="button"
+                *ngFor="let s of statusOptions"
+                class="dropdown-option"
+                (click)="selectStatus(s)"
+              >
+                <span>{{ s.name }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="grow"></div>
+        <button color="primary" type="submit" class="btn">ค้นหา</button>
+        <button
+          mat-stroked-button
+          type="button"
+          class="button-clear"
+          (click)="onClear()"
+        >
+          เคลียร์
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- TABLE CARD - only show after search -->
+  <div class="table-card" *ngIf="hasSearched">
+    <!-- Loading overlay -->
+    <div class="loading-overlay" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="text-left" *ngIf="userRole !== 'STAFF'">ชื่อผู้ใช้</th>
+            <th class="text-left">กิจกรรม</th>
+            <th class="text-left">รายละเอียด</th>
+            <th class="text-left">วันเวลา</th>
+            <th class="text-center">สถานะ</th>
+            <th class="text-center">การดำเนินการ</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let activity of activities">
+            <td class="text-left" *ngIf="userRole !== 'STAFF'">
+              {{ activity.userName || "ไม่ระบุ" }}
+            </td>
+            <td class="text-left">{{ getActionLabel(activity.action) }}</td>
+            <td class="text-left">{{ activity.entityName || "-" }}</td>
+            <td class="text-left">
+              {{ activity.createdAt | thaiDate : "dd/MM/yyyy HH:mm:ss" }}
+            </td>
+            <td class="text-center">
+              <span class="status" [ngClass]="getStatusClass(activity.status)">
+                {{ getStatusLabel(activity.status) }}
+              </span>
+            </td>
+            <td class="actions text-center">
+              <button
+                mat-icon-button
+                class="icon-view"
+                title="ดู"
+                (click)="viewDetail(activity)"
+              >
+                <i class="ti ti-eye"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="activities.length === 0 && !loading">
+            <td [attr.colspan]="userRole === 'STAFF' ? 5 : 6" class="no-data">
+              {{
+                userRole === "STAFF"
+                  ? "ไม่พบประวัติการใช้งาน"
+                  : "ไม่พบข้อมูลประวัติการทำรายการ"
+              }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <div class="pagination-left">
+        <div class="items-per-page">
+          <span>แสดง</span>
+          <select
+            (change)="onPageSizeChange()"
+            [(ngModel)]="pageSize"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            <option [value]="10">10</option>
+            <option [value]="20">20</option>
+            <option [value]="50">50</option>
+          </select>
+          <span>รายการ</span>
+        </div>
+
+        <div class="pagination-info">
+          แสดง {{ startItemIndex }} ถึง {{ endItemIndex }} จาก
+          {{ totalElements }} รายการ
+        </div>
+      </div>
+
+      <div class="pagination-controls">
+        <div class="page-number">
+          <button
+            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 0"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <button
+            *ngFor="let page of getPageNumbers()"
+            (click)="goToPage(page)"
+            [class.active]="currentPage === page"
+          >
+            {{ page + 1 }}
+          </button>
+
+          <button
+            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage >= totalPages - 1"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

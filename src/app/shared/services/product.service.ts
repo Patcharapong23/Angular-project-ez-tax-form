@@ -1,6 +1,6 @@
 // src/app/shared/services/product.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { tap, shareReplay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -39,7 +39,13 @@ export class ProductService {
   /**
    * Get products with caching
    */
-  getProducts(): Observable<Product[]> {
+  getProducts(sortBy?: string, sortDir?: string): Observable<Product[]> {
+    if (sortBy) {
+        let params = new HttpParams().set('sortBy', sortBy);
+        if (sortDir) params = params.set('sortDir', sortDir);
+        return this.http.get<Product[]>(this.api, { params });
+    }
+
     if (this.productsCache) {
       return of(this.productsCache);
     }

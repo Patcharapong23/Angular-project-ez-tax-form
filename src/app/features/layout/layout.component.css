@@ -1,6 +1,8 @@
 .main-content {
   margin-left: 260px;
   transition: margin-left 0.3s ease-in-out;
+  background-color: #f8f9fa; /* Global background */
+  min-height: 100vh;
 }
 .main-content.collapsed {
   margin-left: 80px;
@@ -35,61 +37,43 @@
   .main-content.collapsed {
     margin-left: 0 !important;
   }
+
+  /* Reset topbar left position on mobile since sidebar is overlay */
+  app-topbar {
+    left: 0 !important;
+  }
 }
 
 /* --- (*** เพิ่ม/แก้ไขส่วนนี้ทั้งหมด ***) --- */
-/* --- Header (Navbar) --- */
-.main-header {
-  height: 70px;
-  padding: 0 24px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  position: sticky; /* ทำให้ Header อยู่กับที่ตอน scroll */
+app-sidebar {
+  /* No zoom here - inherited from global */
+}
+
+app-topbar {
+  position: fixed;
   top: 0;
-  z-index: 900;
+  right: 0;
+  left: 260px; /* Match standard sidebar width */
+  z-index: 990;
+  transition: left 0.3s ease-in-out;
 }
 
-.header-button {
-  color: #555;
-}
-.header-button i {
-  font-size: 22px;
+.main-content.collapsed app-topbar {
+  left: 80px; /* Match collapsed sidebar width */
 }
 
-.header-actions {
-  margin-left: auto; /* ดันไปทางขวาสุด */
-  display: flex;
-  align-items: center;
-  gap: 16px;
+/* Ensure content doesn't get hidden behind fixed header (86px total visual height) */
+.content-area {
+  padding: 24px; /* Restore side padding for floating content */
+  margin-top: 86px; /* Match (70px header + 16px top padding) */
 }
 
-.separator {
-  width: 1px;
-  height: 24px;
-  background-color: #e5e7eb;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-}
-
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-}
+/* ... (keep existing media queries/classes) ... */
 
 /* --- Content Area --- */
 .content-area {
   padding: 24px;
-  background-color: #f8f7fa; /* เพิ่มสีพื้นหลังให้เนื้อหา */
-  min-height: calc(100vh - 70px); /* คำนวณความสูงให้เต็มจอ */
+  /* Transform removed */
 }
 :root {
   --sidebar-open: 260px;

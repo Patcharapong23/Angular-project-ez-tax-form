@@ -40,7 +40,7 @@ h1 {
 }
 
 .auth-shell {
-  min-height: 100vh;
+  /* min-height: 100vh; */
   display: grid;
   place-items: center;
   padding: clamp(16px, 4vw, 32px);
@@ -168,4 +168,25 @@ mat-form-field.full-width {
   .subtitle {
     font-size: 16px;
   }
+}
+
+/* ------- Legal Consent ------- */
+.legal-consent {
+  margin-top: 48px;
+  font-size: 14px;
+  color: #a0a0a0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.legal-consent a {
+  color: #808080;
+  text-decoration: none;
+  border-bottom: 1px dotted #a0a0a0;
+  transition: all 0.2s;
+}
+
+.legal-consent a:hover {
+  color: #0c63e4;
+  border-bottom-style: solid;
 }

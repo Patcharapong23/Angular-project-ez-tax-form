@@ -1,0 +1,133 @@
+.system-audit-log {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.page-header h1 i {
+  color: #f5a623;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filters input {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 250px;
+}
+.filters select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.filters button {
+  background: #f5a623;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.filters button:hover {
+  background: #e09612;
+}
+
+.table-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+  overflow-x: auto;
+}
+.table-card.loading {
+  opacity: 0.6;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.data-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+}
+.data-table td {
+  font-size: 0.9rem;
+}
+.data-table tbody tr:hover {
+  background: #fdf8ed;
+}
+.mono {
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+}
+.empty {
+  text-align: center !important;
+  color: #999;
+  padding: 40px !important;
+}
+.status-success {
+  color: #27ae60;
+  font-weight: 500;
+}
+.status-failed {
+  color: #e74c3c;
+  font-weight: 500;
+}
+.status-denied {
+  color: #f39c12;
+  font-weight: 500;
+}
+.trace-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.trace-id {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #666;
+}
+.copy-btn {
+  background: transparent;
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.copy-btn:hover {
+  background: #f5f5f5;
+}
+.pagination-info {
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+  color: #666;
+  font-size: 0.9rem;
+}

@@ -1,11 +1,306 @@
 <section class="page">
-  <!-- Header card -->
+  <!-- Header with Time Filter Buttons -->
+  <div class="dashboard-header">
+    <h1 class="page-title">แดชบอร์ด</h1>
+    <div class="time-filter-buttons">
+      <button
+        class="time-btn"
+        [class.active]="selectedTimeFilter === 'daily'"
+        (click)="setTimeFilter('daily')"
+      >
+        รายวัน
+      </button>
+      <button
+        class="time-btn"
+        [class.active]="selectedTimeFilter === 'weekly'"
+        (click)="setTimeFilter('weekly')"
+      >
+        รายสัปดาห์
+      </button>
+      <button
+        class="time-btn"
+        [class.active]="selectedTimeFilter === 'monthly'"
+        (click)="setTimeFilter('monthly')"
+      >
+        รายเดือน
+      </button>
+    </div>
+  </div>
 
-  <!-- Title -->
-  <h1 class="page-title">แดชบอร์ด</h1>
+  <!-- Stat Cards -->
+  <!-- Stat Cards -->
+  <div class="stat-cards">
+    <!-- Total Documents -->
+    <div class="stat-card total">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-description"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardSummary?.totalDocuments || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารทั้งหมด</div>
+      <!-- <div class="stat-change positive">
+        <mat-icon>trending_up</mat-icon>
+        <span>เพิ่มขึ้น 5% <span class="text-muted">ในสัปดาห์นี้</span></span>
+      </div> -->
+    </div>
 
-  <!-- Placeholder Cards -->
-  <div class="quick-grid">
-    <div class="quick-card placeholder"></div>
+    <!-- E-TAX Submitted -->
+    <div class="stat-card revenue">
+      <div class="stat-header">
+        <div class="stat-icon" style="color: #10b981; background: #ecfdf5">
+          <i class="ti ti-cloud-upload"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardSummary?.etaxSubmittedCount || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารที่ถูกส่ง E-TAX แล้ว</div>
+      <!-- <div class="stat-change positive">
+        <i class="ti ti-check-double"></i>
+        <span>ยืนยันเรียบร้อย</span>
+      </div> -->
+    </div>
+
+    <!-- New Documents -->
+    <div class="stat-card new">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-plus"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardSummary?.newDocuments || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารใหม่ในระบบ</div>
+      <!-- <div class="stat-change positive">
+        <mat-icon>trending_up</mat-icon>
+        <span>เพิ่มขึ้น 12% <span class="text-muted">ในสัปดาห์นี้</span></span>
+      </div> -->
+    </div>
+
+    <!-- Updated Documents -->
+    <div class="stat-card edited">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-pencil"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardSummary?.editedDocuments || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารที่ถูกแก้ไขล่าสุด</div>
+      <!-- <div class="stat-change positive">
+        <mat-icon>activity</mat-icon>
+        <span>มีการเคลื่อนไหว</span>
+      </div> -->
+    </div>
+
+    <!-- Cancelled Documents -->
+    <div class="stat-card cancelled">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-off"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardSummary?.cancelledCount || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารที่ถูกยกเลิก</div>
+      <!-- <div class="stat-change negative">
+        <i class="ti ti-alert-circle"></i>
+        <span>ตรวจสอบแล้ว</span>
+      </div> -->
+    </div>
+  </div>
+
+  <!-- Dashboard Grid Layout -->
+  <div class="dashboard-layout">
+    <!-- Left: Document Type Breakdown (Existing Pie) -->
+    <div class="chart-section">
+      <h2 class="section-title">สัดส่วนเอกสารตามประเภท</h2>
+
+      <!-- Filters can be kept here or moved up if global -->
+      <div class="filter-row">
+        <div class="form-field">
+          <label class="form-label">สาขา</label>
+          <input
+            type="text"
+            class="form-control"
+            [formControl]="branchControl"
+            [matAutocomplete]="auto"
+          />
+          <mat-autocomplete #auto="matAutocomplete">
+            <mat-option
+              *ngFor="let branch of filteredBranches | async"
+              [value]="branch"
+            >
+              {{ branch }}
+            </mat-option>
+          </mat-autocomplete>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <div class="echarts-wrapper">
+          <div echarts [options]="chartOptions" class="echarts-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Branch Ranking (Bar Race) -->
+    <div class="chart-section">
+      <div class="section-header">
+        <h2 class="section-title">อันดับสาขาที่ E-TAX แล้ว</h2>
+      </div>
+      <div class="chart-container">
+        <!-- Show chart only when there's data -->
+        <div
+          *ngIf="barRaceOptions?.series?.[0]?.data?.length > 0; else noBarData"
+          echarts
+          [options]="barRaceOptions"
+          class="echarts-chart"
+        ></div>
+        <ng-template #noBarData>
+          <div class="empty-chart-state">
+            <i
+              class="ti ti-chart-bar"
+              style="font-size: 48px; color: #cbd5e1; margin-bottom: 12px"
+            ></i>
+            <p>ไม่มีข้อมูลอันดับสาขา</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tables Grid Layout -->
+  <div class="dashboard-layout" style="grid-template-columns: 1fr 1fr">
+    <!-- Session Activity Section -->
+    <div class="recent-activity-card" style="margin-top: 0">
+      <div class="section-header">
+        <h2 class="section-title">
+          <i class="ti ti-activity" style="margin-right: 8px"></i>
+          กิจกรรมในเซสชันนี้
+        </h2>
+      </div>
+
+      <!-- Activity List -->
+      <div class="activity-list" *ngIf="sessionActivities.length > 0">
+        <div class="activity-item" *ngFor="let activity of sessionActivities">
+          <div
+            class="activity-icon"
+            [style.background]="(activity.iconBg || '#6366f1') + '20'"
+            [style.color]="activity.iconBg || '#6366f1'"
+          >
+            <i [class]="'ti ' + (activity.icon || 'ti-activity')"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-action">
+              {{
+                activityService.getActionLabel(activity.action, activity.entity)
+              }}
+              <span class="activity-entity-name">{{
+                activity.entityName
+              }}</span>
+            </div>
+            <div class="activity-time">
+              {{ activityService.getRelativeTime(activity.timestamp) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-activity" *ngIf="sessionActivities.length === 0">
+        <i
+          class="ti ti-history"
+          style="font-size: 32px; color: #cbd5e1; margin-bottom: 8px"
+        ></i>
+        <p style="color: #94a3b8; margin: 0">ยังไม่มีกิจกรรมในเซสชันนี้</p>
+        <p style="color: #cbd5e1; font-size: 12px; margin-top: 4px">
+          กิจกรรมจะแสดงเมื่อคุณสร้าง แก้ไข หรือดาวน์โหลดเอกสาร
+        </p>
+      </div>
+    </div>
+
+    <!-- Expiring Documents Section -->
+    <div
+      class="recent-activity-card"
+      style="border: 1px solid #fee2e2; margin-top: 0"
+    >
+      <div class="section-header">
+        <h2
+          class="section-title"
+          style="color: #ef4444; display: flex; align-items: center; gap: 8px"
+        >
+          <i class="ti ti-alert-triangle"></i>
+          เอกสารที่กำลังจะถูกลบ
+        </h2>
+      </div>
+      <div class="table-responsive">
+        <table class="recent-table">
+          <thead>
+            <tr>
+              <th>เลขที่เอกสาร</th>
+              <th>เวลาที่เหลือ</th>
+              <th>ตัวเลือก</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let doc of expiringDocuments">
+              <td style="font-weight: 500">{{ doc.docNo }}</td>
+              <td style="color: #ef4444; font-weight: 600; font-size: 13px">
+                {{ doc.remainingTime }}
+              </td>
+              <td>
+                <div class="table-actions">
+                  <button
+                    mat-icon-button
+                    class="icon-view"
+                    title="ดูเอกสาร"
+                    (click)="viewDocument(doc.id)"
+                  >
+                    <i class="ti ti-eye"></i>
+                  </button>
+                  <button
+                    mat-icon-button
+                    class="icon-view"
+                    title="ดาวน์โหลด"
+                    (click)="downloadDocument(doc.id, doc.docNo)"
+                  >
+                    <i class="ti ti-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="expiringDocuments.length === 0">
+              <td
+                colspan="3"
+                class="empty-state"
+                style="text-align: center; padding: 32px; color: #64748b"
+              >
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                  "
+                >
+                  <i
+                    class="ti ti-check-circle"
+                    style="font-size: 24px; color: #10b981"
+                  ></i>
+                  <span>ไม่มีเอกสารที่กำลังจะถูกลบในเร็วๆ นี้</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </section>

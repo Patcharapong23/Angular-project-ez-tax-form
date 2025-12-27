@@ -1,0 +1,304 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h1 class="dialog-title">{{ dialogTitle }}</h1>
+    <button type="button" class="icon-x" (click)="onClose()">✕</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSave()">
+    <div class="dialog-body" [class.view-mode]="isViewMode">
+      <!-- Section 1: ข้อมูลทั่วไป -->
+      <h2 class="section-title">ข้อมูลทั่วไป</h2>
+
+      <div class="section-grid">
+        <!-- ชื่อ-นามสกุล -->
+        <div class="form-field">
+          <label class="form-label"
+            >ชื่อ-นามสกุล <span class="req" *ngIf="!isViewMode">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            formControlName="fullName"
+            placeholder="ระบุชื่อ-นามสกุล"
+          />
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('fullName')?.touched && form.get('fullName')?.invalid
+            "
+          >
+            กรุณาระบุชื่อ-นามสกุล
+          </div>
+        </div>
+
+        <!-- อีเมล (Auto username) -->
+        <div class="form-field">
+          <label class="form-label"
+            >อีเมล <span class="req" *ngIf="!isViewMode">*</span></label
+          >
+          <input
+            class="form-control"
+            type="email"
+            formControlName="email"
+            placeholder="ระบุอีเมล"
+            (input)="onEmailInput($event)"
+          />
+          <div
+            class="text-danger"
+            *ngIf="form.get('email')?.touched && form.get('email')?.invalid"
+          >
+            <span *ngIf="form.get('email')?.hasError('required')"
+              >กรุณาระบุอีเมล</span
+            >
+            <span *ngIf="form.get('email')?.hasError('email')"
+              >รูปแบบอีเมลไม่ถูกต้อง</span
+            >
+          </div>
+        </div>
+
+        <!-- สาขา -->
+        <div class="form-field" *ngIf="!isSystemAdminRole">
+          <label class="form-label"
+            >สาขา <span class="req" *ngIf="!isViewMode">*</span></label
+          >
+          <div class="custom-dropdown" [class.disabled]="isViewMode">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="toggleDropdown('branchId')"
+              [class.active]="opened['branchId']"
+              [disabled]="isViewMode"
+            >
+              <span [class.placeholder]="!form.get('branchId')?.value">{{
+                getBranchLabel()
+              }}</span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['branchId']">
+              <button
+                type="button"
+                class="dropdown-option"
+                *ngFor="let branch of branches"
+                (click)="selectBranch(branch.branchId)"
+              >
+                {{ branch.branchCode }} - {{ branch.branchNameTh }}
+              </button>
+            </div>
+          </div>
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('branchId')?.touched && form.get('branchId')?.invalid
+            "
+          >
+            กรุณาเลือกสาขา
+          </div>
+        </div>
+
+        <!-- เบอร์โทรศัพท์ -->
+        <div class="form-field">
+          <label class="form-label">เบอร์โทรศัพท์</label>
+          <input
+            class="form-control"
+            type="text"
+            formControlName="phoneNumber"
+            placeholder="ระบุเบอร์โทรศัพท์"
+          />
+        </div>
+      </div>
+
+      <!-- Section 2: ข้อมูลบัญชีผู้ใช้ -->
+      <h2 class="section-title">ข้อมูลบัญชีผู้ใช้</h2>
+
+      <div class="section-grid">
+        <!-- ชื่อผู้ใช้ (Username) - Disabled/Readonly -->
+        <div class="form-field">
+          <label class="form-label"
+            >ชื่อผู้ใช้ (Username)
+            <span class="req" *ngIf="isEditMode">*</span></label
+          >
+          <input
+            class="form-control"
+            type="text"
+            formControlName="username"
+            placeholder="สร้างอัตโนมัติจากอีเมล"
+            [readonly]="true"
+            style="background-color: #f3f4f6; color: #6b7280"
+          />
+        </div>
+
+        <!-- รหัสผ่าน (Show on Create and Edit) -->
+        <div
+          class="form-field"
+          *ngIf="data.mode === 'create' || data.mode === 'edit'"
+        >
+          <label class="form-label"
+            >รหัสผ่าน
+            <span class="req" *ngIf="data.mode === 'create'">*</span></label
+          >
+          <div style="display: flex; gap: 12px; align-items: flex-start">
+            <div class="password-input" style="flex: 1">
+              <input
+                [type]="hidePassword ? 'password' : 'text'"
+                class="form-control"
+                formControlName="password"
+                [placeholder]="
+                  data.mode === 'create'
+                    ? 'ระบุรหัสผ่าน'
+                    : 'ระบุรหัสผ่านใหม่ (เว้นว่างถ้าไม่ต้องการเปลี่ยน)'
+                "
+              />
+              <i
+                class="ti"
+                [class.ti-eye]="hidePassword"
+                [class.ti-eye-off]="!hidePassword"
+                (click)="hidePassword = !hidePassword"
+              ></i>
+            </div>
+            <button
+              *ngIf="data.mode === 'edit'"
+              type="button"
+              class="reset-password-btn"
+              (click)="onResetPassword()"
+            >
+              <i class="ti ti-refresh"></i>
+              รีเซ็ต
+            </button>
+          </div>
+          <div
+            class="text-danger"
+            *ngIf="
+              form.get('password')?.touched && form.get('password')?.invalid
+            "
+          >
+            กรุณาระบุรหัสผ่าน
+          </div>
+        </div>
+
+        <!-- รหัสผ่าน (View Mode - Show reset button) -->
+        <div class="form-field" *ngIf="data.mode === 'view'">
+          <label class="form-label">รหัสผ่าน</label>
+          <div style="display: flex; gap: 12px; align-items: center">
+            <div class="form-control-readonly" style="flex: 1">••••••••</div>
+            <button
+              type="button"
+              class="reset-password-btn"
+              (click)="onResetPassword()"
+            >
+              <i class="ti ti-refresh"></i>
+              รีเซ็ตรหัสผ่าน
+            </button>
+          </div>
+        </div>
+
+        <!-- บทบาท -->
+        <div class="form-field">
+          <label class="form-label"
+            >บทบาทและสิทธิ์การเข้าถึง
+            <span class="req" *ngIf="!isViewMode">*</span></label
+          >
+          <div class="custom-dropdown" [class.disabled]="isViewMode">
+            <button
+              type="button"
+              class="dropdown-trigger"
+              (click)="toggleDropdown('roleId')"
+              [class.active]="opened['roleId']"
+              [disabled]="isViewMode"
+            >
+              <span [class.placeholder]="!form.get('roleId')?.value">{{
+                getRoleLabel()
+              }}</span>
+              <mat-icon class="dropdown-arrow">expand_more</mat-icon>
+            </button>
+            <div class="dropdown-panel" [class.open]="opened['roleId']">
+              <button
+                type="button"
+                class="dropdown-option"
+                *ngFor="let role of roles"
+                (click)="selectRole(role.roleId, role.roleCode)"
+              >
+                {{ role.roleName }}
+              </button>
+            </div>
+          </div>
+          <div
+            class="text-danger"
+            *ngIf="form.get('roleId')?.touched && form.get('roleId')?.invalid"
+          >
+            กรุณาเลือกบทบาท
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: สถานะ -->
+      <div class="status-group">
+        <label class="form-label">สถานะ</label>
+
+        <!-- Use MatRadio -->
+        <mat-radio-group
+          formControlName="enableFlag"
+          color="primary"
+          style="display: flex; gap: 16px; padding-top: 8px; flex-wrap: wrap"
+          [disabled]="isViewMode"
+        >
+          <mat-radio-button value="Y">เปิดการใช้งาน</mat-radio-button>
+          <mat-radio-button value="N">ปิดการใช้งาน</mat-radio-button>
+          <mat-radio-button value="X">ยกเลิก</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <!-- Section 4: ข้อมูลการบันทึก (Visible only in View Mode) -->
+      <div *ngIf="isViewMode && currentUser">
+        <h2 class="section-title">ข้อมูลการบันทึก</h2>
+        <div class="section-grid">
+          <div class="form-field">
+            <label class="form-label">สร้างโดย</label>
+            <div class="form-control-readonly">
+              {{ currentUser.createBy || "-" }}
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">วันที่สร้าง</label>
+            <div class="form-control-readonly">
+              {{ currentUser.createDate | date : "dd/MM/yyyy HH:mm" }}
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">แก้ไขล่าสุด</label>
+            <div class="form-control-readonly">
+              {{
+                currentUser.updateDate
+                  ? (currentUser.updateDate | date : "dd/MM/yyyy HH:mm")
+                  : "-"
+              }}
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">แก้ไขโดย</label>
+            <div class="form-control-readonly">
+              {{ currentUser.updateBy || "-" }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-actions" *ngIf="!isViewMode">
+      <!-- Use standard buttons styled like ProductDialog (mat-raised-button equivalent) -->
+      <button
+        type="submit"
+        class="form-control"
+        [disabled]="form.invalid"
+        style="
+          width: auto;
+          background-color: #facc15;
+          border: none;
+          font-weight: 500;
+          cursor: pointer;
+          padding: 0 24px;
+        "
+      >
+        บันทึก
+      </button>
+    </div>
+  </form>
+</div>

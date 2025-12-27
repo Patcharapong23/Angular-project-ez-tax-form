@@ -1,0 +1,333 @@
+<div class="dialog-container" (click)="closeDropdowns()">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2>{{ getTitle() }}</h2>
+    <button class="close-btn" (click)="onCancel()">
+      <i class="ti ti-x"></i>
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="dialog-content">
+    <form [formGroup]="roleForm">
+      <!-- Row 1: Role Code & Role Name -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>รหัสบทบาท <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="roleCode"
+            placeholder="กรอกรหัสบทบาท"
+          />
+        </div>
+        <div class="form-group">
+          <label>ชื่อบทบาท <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="roleName"
+            placeholder="กรอกชื่อบทบาท"
+          />
+        </div>
+      </div>
+
+      <!-- Row 2: Role Level & Menu Access -->
+      <div class="form-row">
+        <!-- Role Level -->
+        <div class="form-group">
+          <label>ระดับของบทบาท <span class="required">*</span></label>
+          <div
+            class="custom-dropdown"
+            (click)="toggleRoleLevelDropdown(); $event.stopPropagation()"
+          >
+            <div class="dropdown-display">
+              <span [class.placeholder]="!selectedRoleLevelLabel">
+                {{ selectedRoleLevelLabel || "เลือกระดับบทบาท" }}
+              </span>
+              <i
+                class="ti ti-chevron-down dropdown-arrow"
+                [class.open]="roleLevelDropdownOpen"
+              ></i>
+            </div>
+
+            <div
+              class="dropdown-menu"
+              *ngIf="roleLevelDropdownOpen"
+              (click)="$event.stopPropagation()"
+            >
+              <div
+                class="dropdown-item"
+                *ngFor="let level of availableRoleLevels"
+                [class.selected]="
+                  roleForm.get('roleLevel')?.value === level.value
+                "
+                (click)="selectRoleLevel(level)"
+              >
+                <span
+                  class="dropdown-checkbox"
+                  [class.checked]="
+                    roleForm.get('roleLevel')?.value === level.value
+                  "
+                >
+                  <i
+                    class="ti ti-check"
+                    *ngIf="roleForm.get('roleLevel')?.value === level.value"
+                  ></i>
+                </span>
+                {{ level.label }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Access -->
+        <div class="form-group">
+          <label>การเข้าถึงเมนู <span class="required">*</span></label>
+          <div
+            class="multi-select"
+            (click)="toggleMenuDropdown(); $event.stopPropagation()"
+          >
+            <div class="selected-chips">
+              <span class="chip" *ngFor="let menu of selectedMenus">
+                {{ menu.label }}
+                <i
+                  class="ti ti-x chip-remove"
+                  (click)="removeMenu(menu, $event)"
+                ></i>
+              </span>
+              <span class="placeholder" *ngIf="selectedMenus.length === 0"
+                >เลือกการเข้าถึงเมนู</span
+              >
+            </div>
+            <i
+              class="ti ti-chevron-down dropdown-arrow"
+              [class.open]="menuDropdownOpen"
+            ></i>
+
+            <!-- Dropdown with checkboxes -->
+            <div
+              class="dropdown-menu menu-dropdown"
+              *ngIf="menuDropdownOpen"
+              (click)="$event.stopPropagation()"
+            >
+              <div
+                class="dropdown-item"
+                *ngFor="let menu of selectableMenus"
+                [class.selected]="menu.selected"
+                (click)="toggleMenu(menu)"
+              >
+                <span class="dropdown-checkbox" [class.checked]="menu.selected">
+                  <i class="ti ti-check" *ngIf="menu.selected"></i>
+                </span>
+                {{ menu.label }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Status (at the end) -->
+      <div class="form-group status-group">
+        <label>สถานะ</label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" formControlName="enableFlag" value="Y" />
+            <span class="radio-circle"></span>
+            <span class="radio-label">เปิดการใช้งาน</span>
+          </label>
+          <label class="radio-item">
+            <input type="radio" formControlName="enableFlag" value="N" />
+            <span class="radio-circle"></span>
+            <span class="radio-label">ปิดการใช้งาน</span>
+          </label>
+        </div>
+      </div>
+    </form>
+
+    <!-- Permissions Section - Only show when menus are selected -->
+    <div class="permissions-section" *ngIf="selectedMenus.length > 0">
+      <h3>การอนุญาตบนหน้าเพจ (Page Permissions)</h3>
+      <div class="table-wrapper">
+        <table class="permissions-table">
+          <thead>
+            <tr>
+              <th class="perm-name">เมนู / Menu</th>
+              <th class="perm-check">
+                <label class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [checked]="headerChecks.ADD"
+                    (change)="onHeaderCheckChange('ADD', $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+                <span>เพิ่ม</span>
+              </th>
+              <th class="perm-check">
+                <label class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [checked]="headerChecks.DUP"
+                    (change)="onHeaderCheckChange('DUP', $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+                <span>ทำซ้ำ</span>
+              </th>
+              <th class="perm-check">
+                <label class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [checked]="headerChecks.EDIT"
+                    (change)="onHeaderCheckChange('EDIT', $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+                <span>แก้ไข</span>
+              </th>
+              <th class="perm-check">
+                <label class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [checked]="headerChecks.CANCEL"
+                    (change)="onHeaderCheckChange('CANCEL', $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+                <span>ยกเลิก</span>
+              </th>
+              <th class="perm-check">
+                <label class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [checked]="headerChecks.DELETE"
+                    (change)="onHeaderCheckChange('DELETE', $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+                <span>ลบ</span>
+              </th>
+              <th class="perm-check">
+                <label class="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    [checked]="headerChecks.VIEW"
+                    (change)="onHeaderCheckChange('VIEW', $event)"
+                  />
+                  <span class="checkbox-box"></span>
+                </label>
+                <span>ดู</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let menu of permissionTableMenus">
+              <!-- Parent Row -->
+              <tr *ngIf="menu.isParent" class="parent-row">
+                <td class="perm-name parent-label" colspan="7">
+                  {{ menu.label }}
+                  <span class="label-en">({{ menu.labelEn }})</span>
+                </td>
+              </tr>
+              <!-- Child Row -->
+              <tr *ngIf="!menu.isParent" [class.child-row]="menu.parentCode">
+                <td class="perm-name" [class.indented]="menu.parentCode">
+                  <span>{{ menu.label }}</span>
+                  <span class="label-en">({{ menu.labelEn }})</span>
+                </td>
+                <td class="perm-check">
+                  <label class="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="menu.permissions.ADD"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        isViewMode || !isActionAllowed(menu.code, 'ADD')
+                      "
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+                <td class="perm-check">
+                  <label class="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="menu.permissions.DUP"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        isViewMode || !isActionAllowed(menu.code, 'DUP')
+                      "
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+                <td class="perm-check">
+                  <label class="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="menu.permissions.EDIT"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        isViewMode || !isActionAllowed(menu.code, 'EDIT')
+                      "
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+                <td class="perm-check">
+                  <label class="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="menu.permissions.CANCEL"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        isViewMode || !isActionAllowed(menu.code, 'CANCEL')
+                      "
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+                <td class="perm-check">
+                  <label class="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="menu.permissions.DELETE"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        isViewMode || !isActionAllowed(menu.code, 'DELETE')
+                      "
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+                <td class="perm-check">
+                  <label class="checkbox-cell">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="menu.permissions.VIEW"
+                      [ngModelOptions]="{ standalone: true }"
+                      [disabled]="
+                        isViewMode || !isActionAllowed(menu.code, 'VIEW')
+                      "
+                    />
+                    <span class="checkbox-box"></span>
+                  </label>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer" *ngIf="!isViewMode">
+    <button
+      class="btn-save"
+      (click)="onSave()"
+      [disabled]="roleForm.invalid || selectedMenus.length === 0 || isSaving"
+    >
+      {{ isSaving ? "กำลังบันทึก..." : "บันทึก" }}
+    </button>
+  </div>
+</div>

@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Buyer, BuyerService } from '../../../../shared/services/buyer.service';
+import { ActivityService } from '../../../../shared/services/activity.service';
 
 @Component({
   selector: 'app-buyer-dialog',
@@ -23,7 +24,8 @@ export class BuyerDialogComponent implements OnInit {
     private fb: FormBuilder,
     private buyerService: BuyerService,
     public dialogRef: MatDialogRef<BuyerDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any // Use 'any' to allow extra fields for now
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private activityService: ActivityService
   ) {
     this.form = this.fb.group({
       taxpayerType: [data?.taxpayerType || 'JURISTIC', Validators.required],
@@ -119,10 +121,14 @@ export class BuyerDialogComponent implements OnInit {
       
       if (this.data.id) {
         this.buyerService.updateBuyer(this.data.id, buyerData).subscribe(() => {
+          // Log activity
+          this.activityService.logCustomerUpdate(buyerData.name || buyerData.code, this.data.id);
           this.dialogRef.close(true);
         });
       } else {
-        this.buyerService.createBuyer(buyerData).subscribe(() => {
+        this.buyerService.createBuyer(buyerData).subscribe((res: any) => {
+          // Log activity
+          this.activityService.logCustomerCreate(buyerData.name || buyerData.code, res?.id || '');
           this.dialogRef.close(true);
         });
       }

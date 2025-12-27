@@ -22,177 +22,51 @@
 
   <nav class="sidebar-nav">
     <ul>
-      <!-- แดชบอร์ด -->
-      <li>
-        <a
-          class="nav-item"
-          routerLink="/dashboard"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: true }"
-          (click)="setActive('dashboard')"
-          [class.selected]="currentMain === 'dashboard'"
-        >
-          <i class="ti ti-layout-dashboard nav-icon"></i>
-          <span class="nav-label">แดชบอร์ด</span>
-        </a>
-      </li>
+      <ng-container *ngFor="let item of filteredMenu">
+        <!-- Single menu item (no children) -->
+        <li *ngIf="!item.children || item.children.length === 0">
+          <a
+            class="nav-item"
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.key === 'dashboard' }"
+            (click)="setActive(item.key)"
+            [class.selected]="currentMain === item.key"
+          >
+            <i class="ti {{ item.icon }} nav-icon"></i>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        </li>
 
-      <!-- จัดการข้อมูล (มี dropdown) -->
-      <li>
-        <div
-          class="nav-item"
-          (click)="toggleSubMenu('dataManagement')"
-          [class.opened]="openSubMenu === 'dataManagement'"
-          [class.selected]="currentMain === 'dataManagement'"
-        >
-          <i class="ti ti-database nav-icon"></i>
-          <span class="nav-label">จัดการข้อมูล</span>
-          <i
-            class="ti ti-chevron-right sub-arrow"
-            [class.rotate]="openSubMenu === 'dataManagement'"
-          ></i>
-        </div>
+        <!-- Menu with children (dropdown) -->
+        <li *ngIf="item.children && item.children.length > 0">
+          <div
+            class="nav-item"
+            (click)="toggleSubMenu(item.key)"
+            [class.opened]="openSubMenu === item.key"
+            [class.selected]="currentMain === item.key"
+          >
+            <i class="ti {{ item.icon }} nav-icon"></i>
+            <span class="nav-label">{{ item.label }}</span>
+            <i
+              class="ti ti-chevron-right sub-arrow"
+              [class.rotate]="openSubMenu === item.key"
+            ></i>
+          </div>
 
-        <ul class="sub-menu" [class.open]="openSubMenu === 'dataManagement'">
-          <li>
-            <a
-              routerLink="/company"
-              routerLinkActive="active-sub"
-              (click)="selectSub('dataManagement', 'company')"
-            >
-              ข้อมูลบริษัท
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/branches"
-              routerLinkActive="active-sub"
-              (click)="selectSub('dataManagement', 'branches')"
-            >
-              ข้อมูลสาขา
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/general"
-              routerLinkActive="active-sub"
-              (click)="selectSub('dataManagement', 'general')"
-            >
-              ข้อมูลทั่วไป
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/buyers"
-              routerLinkActive="active-sub"
-              (click)="selectSub('dataManagement', 'customers')"
-            >
-              ข้อมูลลูกค้า
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/products"
-              routerLinkActive="active-sub"
-              (click)="selectSub('dataManagement', 'products')"
-            >
-              ข้อมูลสินค้า
-            </a>
-          </li>
-        </ul>
-      </li>
-
-      <!-- จัดการเอกสาร (มี dropdown) -->
-      <li>
-        <div
-          class="nav-item"
-          (click)="toggleSubMenu('documentManagement')"
-          [class.opened]="openSubMenu === 'documentManagement'"
-          [class.selected]="currentMain === 'documentManagement'"
-        >
-          <i class="ti ti-file-text nav-icon"></i>
-          <span class="nav-label">จัดการเอกสาร</span>
-          <i
-            class="ti ti-chevron-right sub-arrow"
-            [class.rotate]="openSubMenu === 'documentManagement'"
-          ></i>
-        </div>
-
-        <ul
-          class="sub-menu"
-          [class.open]="openSubMenu === 'documentManagement'"
-        >
-          <li>
-            <a
-              routerLink="/import"
-              routerLinkActive="active-sub"
-              (click)="selectSub('documentManagement', 'import')"
-            >
-              นำเข้าข้อมูล
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/documentsall"
-              routerLinkActive="active-sub"
-              (click)="selectSub('documentManagement', 'documentsall')"
-            >
-              รายการเอกสารทั้งหมด
-            </a>
-          </li>
-          <li>
-            <a
-              routerLink="/templates"
-              routerLinkActive="active-sub"
-              (click)="selectSub('documentManagement', 'templates')"
-            >
-              จัดการแม่แบบข้อมูล
-            </a>
-          </li>
-        </ul>
-      </li>
-
-      <!-- จัดการผู้ใช้และสิทธิ์ -->
-      <li>
-        <a
-          class="nav-item"
-          routerLink="/users"
-          routerLinkActive="active"
-          (click)="setActive('users')"
-          [class.selected]="currentMain === 'users'"
-        >
-          <i class="ti ti-user nav-icon"></i>
-          <span class="nav-label">จัดการผู้ใช้และสิทธิ์</span>
-        </a>
-      </li>
-
-      <!-- ประวัติการทำรายการ -->
-      <li>
-        <a
-          class="nav-item"
-          routerLink="/history"
-          routerLinkActive="active"
-          (click)="setActive('history')"
-          [class.selected]="currentMain === 'history'"
-        >
-          <i class="ti ti-history nav-icon"></i>
-          <span class="nav-label">ประวัติการทำรายการ</span>
-        </a>
-      </li>
-
-      <!-- ตั้งค่า API -->
-      <li>
-        <a
-          class="nav-item"
-          routerLink="/api-settings"
-          routerLinkActive="active"
-          (click)="setActive('api')"
-          [class.selected]="currentMain === 'api'"
-        >
-          <i class="ti ti-settings nav-icon"></i>
-          <span class="nav-label">ตั้งค่า API</span>
-        </a>
-      </li>
+          <ul class="sub-menu" [class.open]="openSubMenu === item.key">
+            <li *ngFor="let child of item.children">
+              <a
+                [routerLink]="child.route"
+                routerLinkActive="active-sub"
+                (click)="selectSub(item.key, child.key)"
+              >
+                {{ child.label }}
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ng-container>
     </ul>
   </nav>
 

@@ -17,4 +17,8 @@ export class BankService {
   getBranches(bankCode: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${bankCode}/branches`);
   }
+
+  createBranch(bankCode: string, branchName: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${bankCode}/branches`, { branchName });
+  }
 }

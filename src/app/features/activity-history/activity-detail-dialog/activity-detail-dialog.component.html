@@ -1,0 +1,202 @@
+<div class="dialog-container">
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2>{{ dialogTitle }}</h2>
+    <button class="close-btn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <!-- Transaction ID (SYSTEM_ADMIN: full, HQ_ADMIN: full read-only, BRANCH_ADMIN: short) -->
+    <div class="transaction-id" *ngIf="canSeeTransactionId">
+      <ng-container *ngIf="data.viewerRole === 'SYSTEM_ADMIN'">
+        <span class="label">Trace ID:</span>
+        <span class="value full-id">{{ data.activity.id }}</span>
+        <button
+          class="copy-btn"
+          (click)="copyTransactionId()"
+          [class.copied]="copySuccess"
+          title="Copy Trace ID"
+        >
+          <mat-icon>{{ copySuccess ? "check" : "content_copy" }}</mat-icon>
+        </button>
+      </ng-container>
+      <ng-container *ngIf="data.viewerRole === 'HQ_ADMIN'">
+        <span class="label">รหัสอ้างอิง:</span>
+        <span class="value">{{ data.activity.id }}</span>
+      </ng-container>
+      <ng-container *ngIf="data.viewerRole === 'BRANCH_ADMIN'">
+        <span class="label">รหัส:</span>
+        <span class="value short-id">{{ shortTransactionId }}</span>
+      </ng-container>
+    </div>
+
+    <div class="chips">
+      <!-- Status Chip -->
+      <span class="chip" [ngClass]="getStatusClass(data.activity.status)">
+        {{ getStatusLabel(data.activity.status) }}
+      </span>
+
+      <!-- Event Type Chip (not for STAFF) -->
+      <span class="chip chip-category" *ngIf="canSeeEventType">
+        {{ getCategoryLabel(data.activity.activityCategory) }}
+      </span>
+    </div>
+
+    <!-- Timestamp -->
+    <div class="timestamp">
+      <mat-icon>schedule</mat-icon>
+      <span>{{ formatDate(data.activity.createdAt) }}</span>
+    </div>
+  </div>
+
+  <!-- STAFF Info Message -->
+  <div class="staff-info" *ngIf="data.viewerRole === 'STAFF'">
+    <mat-icon>info</mat-icon>
+    <span>{{ staffInfoMessage }}</span>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dialog-content">
+    <h3>ข้อมูลกิจกรรม</h3>
+
+    <div class="info-grid">
+      <!-- ผู้ใช้งาน (not for STAFF) -->
+      <div class="info-row" *ngIf="canSeeUserName">
+        <span class="info-label">ผู้ใช้งาน</span>
+        <span class="info-value">{{ data.activity.userName || "-" }}</span>
+      </div>
+
+      <!-- Role (SYSTEM_ADMIN only) -->
+      <div class="info-row" *ngIf="canSeeRole">
+        <span class="info-label">Role</span>
+        <span class="info-value">{{ data.activity.userRole || "-" }}</span>
+      </div>
+
+      <!-- บริษัท (SYSTEM_ADMIN only) -->
+      <div class="info-row" *ngIf="canSeeSeller">
+        <span class="info-label">บริษัท</span>
+        <span class="info-value">{{ data.activity.sellerName || "-" }}</span>
+      </div>
+
+      <!-- สาขา (SYSTEM_ADMIN & HQ_ADMIN) -->
+      <div class="info-row" *ngIf="canSeeBranch">
+        <span class="info-label">สาขา</span>
+        <span class="info-value">{{ data.activity.branchName || "-" }}</span>
+      </div>
+
+      <!-- หน้าเพจ (all roles) -->
+      <div class="info-row">
+        <span class="info-label">หน้าเพจ</span>
+        <span class="info-value">{{
+          getEntityTypeLabel(data.activity.entityType)
+        }}</span>
+      </div>
+
+      <!-- กิจกรรม (all roles) -->
+      <div class="info-row">
+        <span class="info-label">กิจกรรม</span>
+        <span class="info-value">{{
+          getActionLabel(data.activity.action)
+        }}</span>
+      </div>
+
+      <!-- Target Object (all roles) -->
+      <div class="info-row" *ngIf="data.activity.entityName">
+        <span class="info-label">รายละเอียด</span>
+        <span class="info-value">{{ data.activity.entityName }}</span>
+      </div>
+
+      <!-- Error Description for STAFF (friendly text) -->
+      <div
+        class="info-row error-row"
+        *ngIf="data.viewerRole === 'STAFF' && data.activity.status === 'FAILED'"
+      >
+        <span class="info-label">หมายเหตุ</span>
+        <span class="info-value error-text"
+          >บันทึกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Section (SYSTEM_ADMIN only) - Prominently Displayed -->
+  <div class="technical-section" *ngIf="canSeeTechnicalSection">
+    <button class="technical-toggle" (click)="toggleTechnicalSection()">
+      <mat-icon>{{
+        showTechnicalSection ? "expand_less" : "expand_more"
+      }}</mat-icon>
+      <span>ข้อมูลทางเทคนิค (ขั้นสูง)</span>
+      <span class="admin-badge">สำหรับผู้ดูแลระบบ</span>
+    </button>
+
+    <div class="technical-content" *ngIf="showTechnicalSection">
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Action Type</span>
+          <span class="info-value action-type">{{ data.activity.action }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">HTTP Status</span>
+          <span
+            class="info-value"
+            [ngClass]="getHttpStatusClass(data.activity.httpStatus)"
+          >
+            {{ data.activity.httpStatus || "200" }}
+          </span>
+        </div>
+
+        <div class="info-row" *ngIf="data.activity.errorCode">
+          <span class="info-label">Error Code</span>
+          <span class="info-value error-code">{{
+            data.activity.errorCode
+          }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="data.activity.errorMessage">
+          <span class="info-label">Error Message</span>
+          <span class="info-value error-text">{{
+            data.activity.errorMessage
+          }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">IP Address</span>
+          <span class="info-value mono">{{
+            data.activity.ipAddress || "(ไม่มีข้อมูล)"
+          }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Device / Browser</span>
+          <span class="info-value">{{
+            data.activity.device || "(ไม่มีข้อมูล)"
+          }}</span>
+        </div>
+
+        <div class="info-row" *ngIf="data.activity.userAgent">
+          <span class="info-label">User Agent</span>
+          <span class="info-value user-agent">{{
+            data.activity.userAgent
+          }}</span>
+        </div>
+      </div>
+
+      <!-- Copy Trace ID Button (big button for SYSTEM_ADMIN) -->
+      <div class="copy-trace-section">
+        <button class="copy-trace-btn" (click)="copyTransactionId()">
+          <mat-icon>content_copy</mat-icon>
+          <span>{{ copySuccess ? "Copied!" : "Copy Trace ID" }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="dialog-footer">
+    <button class="btn-close" (click)="close()">ปิด</button>
+  </div>
+</div>

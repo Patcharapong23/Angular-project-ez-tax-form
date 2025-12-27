@@ -1,0 +1,134 @@
+.page-container {
+  padding: 24px 0px 0px 0px;
+}
+
+.page-title h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.page-title h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  position: relative;
+  gap: 48px;
+  margin-bottom: 24px;
+}
+
+/* Edit Button */
+.edit-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  color: #f59e0b; /* Yellow/Orange */
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: #fffbeb;
+}
+
+.edit-btn i {
+  font-size: 20px;
+}
+
+/* Card 1: Company Logo */
+.logo-container {
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.company-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Card 1: Company Details */
+.company-details {
+  flex: 1;
+}
+
+.company-name-th {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 14px;
+}
+
+.company-name-en {
+  font-size: 16px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.divider {
+  border-bottom: 1px solid #e2e8f0;
+  margin: 16px 0;
+}
+
+/* Card 2: Branch Info */
+.branch-icon {
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fcd34d; /* Yellow */
+}
+
+.branch-icon svg,
+.branch-icon i {
+  font-size: 100px; /* Big icon */
+  color: #fcd34d;
+}
+
+.branch-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.branch-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.branch-stat {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 6px;
+}

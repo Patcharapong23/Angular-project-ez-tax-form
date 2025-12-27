@@ -3,12 +3,14 @@ import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { NewDocumentDialogComponent } from '../dialogs/new-document-dialog/new-document-dialog.component';
 import { DocumentService } from '../documents/document.service';
+import { DocumentStoreService } from '../../shared/services/document-store.service';
 import { DocumentListItem, DocumentSearchParams, Page } from '../../shared/models/document.models';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { ExportDialogComponent } from '../dialogs/export-dialog/export-dialog.component';
 import { CancelDialogComponent } from '../dialogs/cancel-dialog/cancel-dialog.component';
 import { SwalService } from '../../shared/services/swal.service';
+import { AuthService } from '../../shared/auth.service';
 
 @Component({
   selector: 'app-documentsall',
@@ -35,7 +37,7 @@ export class DocumentsallComponent implements OnInit {
   statusOptions = [
     { value: '', name: 'ทั้งหมด' },
     { value: 'NEW', name: 'เอกสารใหม่' },
-    { value: 'UPDATED', name: 'อัพเดตล่าสุด' },
+    { value: 'UPDATED', name: 'อัปเดตล่าสุด' },
     { value: 'CANCELLED', name: 'ยกเลิกเอกสาร' },
   ];
 
@@ -44,23 +46,24 @@ export class DocumentsallComponent implements OnInit {
     status: false
   };
 
-  // Download modal properties
-  // Download modal properties removed
-  // showDownloadModal = false;
-  // selectedDownloadType: string | null = null;
-  // currentDocUuid: string | null = null;
+  // Sort properties
+  sortBy = 'createdAt';
+  sortDir = 'desc';
 
   private allDocuments: DocumentListItem[] = [];
   rows: DocumentListItem[] = [];
+  selectAll: boolean = false;
 
   constructor(
     private documentService: DocumentService,
+    private documentStoreService: DocumentStoreService, // Injected Store
     private router: Router,
-    public dialog: MatDialog, // Inject MatDialog ที่นี่
+    public dialog: MatDialog, 
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private eRef: ElementRef,
-    private swalService: SwalService
+    private swalService: SwalService,
+    private authService: AuthService
   ) {
     this.searchForm = this.fb.group({
       docNo: [''],
@@ -79,7 +82,6 @@ export class DocumentsallComponent implements OnInit {
   }
 
   toggleDropdown(type: string) {
-    // Close other dropdowns
     Object.keys(this.opened).forEach(key => {
       if (key !== type) this.opened[key] = false;
     });
@@ -92,20 +94,6 @@ export class DocumentsallComponent implements OnInit {
       this.opened['docType'] = false;
       this.opened['status'] = false;
     } else {
-      // If click is inside, we need to check if it's NOT on a dropdown trigger or panel
-      // But since we use stopPropagation on triggers, this listener might not catch clicks on triggers if they bubble up to document?
-      // Actually, stopPropagation stops it from reaching document. So this listener only fires for clicks that DID propagate.
-      // If we click inside the component but NOT on a button that stops propagation, we might want to close?
-      // No, usually we only close if clicking OUTSIDE the component OR outside the dropdown.
-      
-      // Simplified: If we click anywhere on document that is NOT the dropdown, close it.
-      // But we have multiple dropdowns.
-      // Let's rely on the fact that triggers have stopPropagation.
-      // So if this event fires, it means we clicked somewhere else.
-      // BUT, if we click inside the component (e.g. on a label), we might want to close dropdowns too?
-      // Standard behavior: click outside the dropdown closes it.
-      
-      // Let's check if the click target is inside a .custom-dropdown
       const target = event.target as HTMLElement;
       if (!target.closest('.custom-dropdown')) {
          this.opened['docType'] = false;
@@ -135,6 +123,16 @@ export class DocumentsallComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const savedSort = localStorage.getItem('invoice_sort');
+    if (savedSort) {
+      try {
+        const { sortBy, sortDir } = JSON.parse(savedSort);
+        this.sortBy = sortBy;
+        this.sortDir = sortDir;
+      } catch (e) {
+      }
+    }
+
     this.loadDocuments();
 
     this.searchForm.get('issueDateRange')?.valueChanges.subscribe(val => {
@@ -166,16 +164,85 @@ export class DocumentsallComponent implements OnInit {
   pages: number[] = [];
 
   loadDocuments(params?: DocumentSearchParams): void {
-    this.documentService.list(params).subscribe((response: any) => {
-      // Handle both array and Page object responses
-      const documents = Array.isArray(response) ? response : (response.content || []);
-      this.allDocuments = documents;
-      this.rows = documents;
-      this.updatePagination();
+     // Check for search filters (not just sort)
+     const hasSearchFilter = params?.docNo || params?.buyerTaxId || params?.docType || params?.status || params?.issueDateFrom || params?.createdFrom;
+
+     if (hasSearchFilter) {
+        // Use Service for filtered search (server-side)
+        const effectiveParams: DocumentSearchParams = {
+          ...(params || {}),
+          sortBy: this.sortBy,
+          sortDir: this.sortDir
+        };
+
+        this.documentService.list(effectiveParams).subscribe((response: any) => {
+          const documents = Array.isArray(response) ? response : (response.content || []);
+          this.allDocuments = documents;
+          this.rows = this.sortDocuments(documents);
+          this.updatePagination();
+        });
+     } else {
+        // Use Store for default view (with caching)
+        this.documentStoreService.getDocuments$().subscribe((docs) => {
+           if (docs) {
+             this.allDocuments = docs;
+             this.rows = this.sortDocuments(docs);
+             this.updatePagination();
+           }
+        });
+     }
+  }
+
+  private sortDocuments(docs: DocumentListItem[]): DocumentListItem[] {
+    if (!docs || docs.length === 0) return docs;
+
+    return [...docs].sort((a: any, b: any) => {
+      let valA = a[this.sortBy];
+      let valB = b[this.sortBy];
+
+      // Handle date fields
+      if (this.sortBy === 'createdAt' || this.sortBy === 'issueDate') {
+        valA = valA ? new Date(valA).getTime() : 0;
+        valB = valB ? new Date(valB).getTime() : 0;
+      }
+
+      // Handle string fields
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+
+      if (valA < valB) return this.sortDir === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDir === 'asc' ? 1 : -1;
+      return 0;
     });
   }
 
-  // Pagination methods
+  onSort(column: string) {
+    if (this.sortBy === column) {
+      if (this.sortDir === 'desc') {
+        this.sortDir = 'asc';
+      } else if (this.sortDir === 'asc') {
+        this.sortBy = 'createdAt';
+        this.sortDir = 'desc';
+      }
+    } else {
+      this.sortBy = column;
+      this.sortDir = 'desc';
+    }
+
+    localStorage.setItem('invoice_sort', JSON.stringify({
+      sortBy: this.sortBy,
+      sortDir: this.sortDir
+    }));
+
+    this.currentPage = 1;
+    this.search();
+  }
+
+  getSortIcon(column: string): string {
+    if (this.sortBy !== column) return ''; 
+    return this.sortDir === 'asc' ? 'ti ti-arrow-up' : 'ti ti-arrow-down';
+  }
+
   updatePagination(): void {
     this.totalPages = Math.ceil(this.rows.length / this.itemsPerPage);
     this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
@@ -222,6 +289,13 @@ export class DocumentsallComponent implements OnInit {
     this.loadDocuments(searchParams);
   }
 
+  toggleAll(): void {
+    this.selectAll = !this.selectAll;
+    this.rows.forEach((row) => {
+      row.selected = this.selectAll;
+    });
+  }
+
   clear(): void {
     this.searchForm.reset({
       docNo: '',
@@ -233,19 +307,24 @@ export class DocumentsallComponent implements OnInit {
     });
     this.issueDateRangeText = '';
     this.createdDateRangeText = '';
-    this.loadDocuments(); // Load all documents (first page)
+    
+    // Reset sort to default
+    this.sortBy = 'createdAt';
+    this.sortDir = 'desc';
+    
+    this.loadDocuments(); 
   }
 
   getStatusClass(status: string | undefined): string {
-    if (status === 'NEW') return 'badge-blue';
-    if (status === 'UPDATED') return 'badge-yellow';
-    if (status === 'CANCELLED') return 'badge-red';
-    return 'badge-gray';
+    if (status === 'NEW') return 'status-new';
+    if (status === 'UPDATED') return 'status-updated';
+    if (status === 'CANCELLED') return 'status-cancelled';
+    return 'status-unknown';
   }
 
   getStatusText(status: string | undefined): string {
     if (status === 'NEW') return 'เอกสารใหม่';
-    if (status === 'UPDATED') return 'อัพเดตล่าสุด';
+    if (status === 'UPDATED') return 'อัปเดตล่าสุด';
     if (status === 'CANCELLED') return 'ยกเลิกเอกสาร';
     return status ?? '-';
   }
@@ -260,10 +339,9 @@ export class DocumentsallComponent implements OnInit {
     const dialogRef = this.dialog.open(NewDocumentDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
-      panelClass: 'newdoc-dialog', // <-- คลาสหลักของ dialog
+      panelClass: 'newdoc-dialog', 
       backdropClass: 'newdoc-backdrop',
       autoFocus: false,
-      // panelClass: 'custom-dialog-container',
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -286,8 +364,6 @@ export class DocumentsallComponent implements OnInit {
     this.router.navigate(['/documents/edit', docUuid]);
   }
 
-  // Download Modal Methods
-  // Download Modal Methods
   openDownloadModal(docUuid: string, docNo: string): void {
     const dialogRef = this.dialog.open(ExportDialogComponent, {
       data: { docUuid, docNo },
@@ -303,15 +379,22 @@ export class DocumentsallComponent implements OnInit {
   cancelInvoice(docUuid: string): void {
     const dialogRef = this.dialog.open(CancelDialogComponent, {
       width: 'auto',
-      // panelClass: 'custom-dialog' // If needed
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // result.reason is available but currently unused by backend
-        this.documentService.cancel(docUuid).subscribe({
+        let cancelledBy = 'unknown';
+        this.authService.user$.subscribe(user => {
+            if (user) {
+                cancelledBy = user.fullName || user.userName || 'unknown';
+            }
+        }).unsubscribe(); 
+
+        this.documentService.cancel(docUuid, result.reason || '', cancelledBy).subscribe({
           next: () => {
             this.swalService.success('ยกเลิกเอกสารสำเร็จ', 'เอกสารของคุณถูกยกเลิกแล้ว');
+            // Invalidate Cache
+            this.documentStoreService.invalidate();
             this.loadDocuments();
           },
           error: (err) => {
@@ -332,6 +415,8 @@ export class DocumentsallComponent implements OnInit {
         this.documentService.delete(docUuid).subscribe({
           next: () => {
             this.swalService.success('ลบเอกสารสำเร็จ');
+            // Invalidate Cache
+            this.documentStoreService.invalidate();
             this.loadDocuments();
           },
           error: (err) => {

@@ -1,0 +1,217 @@
+<section class="page">
+  <!-- Header with Time Filter Buttons -->
+  <div class="dashboard-header">
+    <h1 class="page-title">แดชบอร์ด System Admin</h1>
+    <div class="time-filter-buttons">
+      <button
+        class="time-btn"
+        [class.active]="selectedTimeFilter === 'daily'"
+        (click)="setTimeFilter('daily')"
+      >
+        รายวัน
+      </button>
+      <button
+        class="time-btn"
+        [class.active]="selectedTimeFilter === 'weekly'"
+        (click)="setTimeFilter('weekly')"
+      >
+        รายสัปดาห์
+      </button>
+      <button
+        class="time-btn"
+        [class.active]="selectedTimeFilter === 'monthly'"
+        (click)="setTimeFilter('monthly')"
+      >
+        รายเดือน
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-cards">
+    <!-- Total Documents -->
+    <div class="stat-card total">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-description"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardStats?.totalDocuments || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารทั้งหมด</div>
+    </div>
+
+    <!-- E-TAX Submitted -->
+    <div class="stat-card revenue">
+      <div class="stat-header">
+        <div class="stat-icon" style="color: #10b981; background: #ecfdf5">
+          <i class="ti ti-cloud-upload"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardStats?.submittedToEtax || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารที่ถูกส่ง E-TAX แล้ว</div>
+    </div>
+
+    <!-- Pending Documents -->
+    <div class="stat-card new">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-plus"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardStats?.pendingSubmission || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารที่ยังไม่ส่ง</div>
+    </div>
+
+    <!-- Cancelled Documents -->
+    <div class="stat-card cancelled">
+      <div class="stat-header">
+        <div class="stat-icon">
+          <i class="ti ti-file-off"></i>
+        </div>
+        <div class="stat-number">
+          {{ dashboardStats?.cancelledDocuments || 0 | number }}
+        </div>
+      </div>
+      <div class="stat-label">เอกสารที่ถูกยกเลิก</div>
+    </div>
+  </div>
+
+  <!-- Dashboard Grid Layout -->
+  <div class="dashboard-layout">
+    <!-- Left: Document Type Breakdown (ECharts Pie) -->
+    <div class="chart-section">
+      <h2 class="section-title">สัดส่วนเอกสารตามประเภท</h2>
+
+      <!-- Filters: Company and Branch -->
+      <div class="filter-row">
+        <div class="form-field">
+          <label class="form-label">บริษัท</label>
+          <select
+            class="form-control"
+            [(ngModel)]="selectedTenantId"
+            (change)="onTenantChange()"
+          >
+            <option value="">-- ทุกบริษัท --</option>
+            <option *ngFor="let tenant of tenants" [value]="tenant.sellerId">
+              {{ tenant.companyName }} ({{ tenant.sellerTaxId }})
+            </option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">สาขา</label>
+          <select
+            class="form-control"
+            [(ngModel)]="selectedBranchId"
+            (change)="onBranchChange()"
+            [disabled]="!selectedTenantId"
+          >
+            <option value="">-- ทุกสาขา --</option>
+            <option *ngFor="let branch of branches" [value]="branch.branchId">
+              {{ branch.branchCode }} - {{ branch.branchName }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- ECharts Pie Chart -->
+      <div class="chart-container">
+        <div class="echarts-wrapper">
+          <div echarts [options]="chartOptions" class="echarts-chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Company E-TAX Ranking (Bar Race) -->
+    <div class="chart-section">
+      <div class="section-header">
+        <h2 class="section-title">อันดับบริษัทที่ส่ง E-TAX แล้ว</h2>
+      </div>
+      <div class="chart-container">
+        <!-- Show chart only when there's data -->
+        <div
+          *ngIf="hasBarData; else noBarData"
+          echarts
+          [options]="barRaceOptions"
+          class="echarts-chart"
+        ></div>
+        <ng-template #noBarData>
+          <div class="empty-chart-state">
+            <i
+              class="ti ti-chart-bar"
+              style="font-size: 48px; color: #cbd5e1; margin-bottom: 12px"
+            ></i>
+            <p>ไม่มีข้อมูลอันดับบริษัท</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Summary Section -->
+  <div class="platform-summary-card">
+    <div class="summary-header">
+      <h2 class="section-title" style="color: #1e293b; margin-bottom: 0">
+        <i class="ti ti-server" style="margin-right: 8px; color: #7e73f1"></i>
+        ภาพรวมแพลตฟอร์ม
+      </h2>
+    </div>
+
+    <div class="platform-stats-grid" *ngIf="!loading">
+      <div class="platform-stat-item">
+        <div class="platform-icon" style="background: #eae8fd; color: #7e73f1">
+          <i class="ti ti-building"></i>
+        </div>
+        <div class="platform-stat-content">
+          <span class="platform-stat-value">{{
+            stats.totalTenants | number
+          }}</span>
+          <span class="platform-stat-label">บริษัททั้งหมด</span>
+        </div>
+      </div>
+      <div class="platform-stat-item">
+        <div class="platform-icon" style="background: #e0f2fe; color: #0ea5e9">
+          <i class="ti ti-users"></i>
+        </div>
+        <div class="platform-stat-content">
+          <span class="platform-stat-value">{{
+            stats.totalUsers | number
+          }}</span>
+          <span class="platform-stat-label">ผู้ใช้ทั้งหมด</span>
+        </div>
+      </div>
+      <div class="platform-stat-item">
+        <div class="platform-icon" style="background: #d1fae5; color: #10b981">
+          <i class="ti ti-home"></i>
+        </div>
+        <div class="platform-stat-content">
+          <span class="platform-stat-value">{{
+            stats.totalBranches | number
+          }}</span>
+          <span class="platform-stat-label">สาขาทั้งหมด</span>
+        </div>
+      </div>
+      <div class="platform-stat-item">
+        <div class="platform-icon" style="background: #fdfbe8; color: #ffc107">
+          <i class="ti ti-user-check"></i>
+        </div>
+        <div class="platform-stat-content">
+          <span class="platform-stat-value">{{
+            stats.activeUsers | number
+          }}</span>
+          <span class="platform-stat-label">ผู้ใช้ที่ใช้งานได้</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <span>กำลังโหลดข้อมูล...</span>
+    </div>
+  </div>
+</section>
